@@ -27,7 +27,7 @@ export default function ForgotPassword() {
 
       if (!showOtpField) {
         // Step 1: Generate OTP
-        const response = await fetch('https://backend-nine-azure-80.vercel.app/api/forgot-password', {
+        const response = await fetch('http://localhost:5000/api/forgot-password', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email }),

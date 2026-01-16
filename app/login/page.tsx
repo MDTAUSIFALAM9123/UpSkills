@@ -1,0 +1,148 @@
+'use client';
+
+import { useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
+import { X } from 'lucide-react';
+
+export default function Login() {
+  const router = useRouter();
+
+  const [loginData, setLoginData] = useState({
+    email: '',
+    password: '',
+  });
+
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setLoginData(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const { email, password } = loginData;
+
+    if (!email || !password) {
+      return toast.error('All fields are required');
+    }
+
+    setLoading(true);
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(loginData),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        toast.success(data.message || 'Login successful!');
+        window.location.href = '/';
+      } else {
+        toast.error(data.message || 'Invalid credentials');
+      }
+    } catch (error) {
+      toast.error('Something went wrong');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gray-100">
+      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-md">
+        {/* Close Button */}
+        <div className="flex justify-end">
+          <X onClick={() => router.push('/')} />
+        </div>
+
+        <form className="space-y-4 p-4" onSubmit={handleSubmit}>
+          <h2 className="text-center text-3xl font-bold">Sign In</h2>
+
+          {/* Email */}
+          <div>
+            <label className="block font-semibold">Email</label>
+            <input
+              type="email"
+              name="email"
+              value={loginData.email}
+              onChange={handleChange}
+              placeholder="Enter your email"
+              className="w-full rounded-md border px-3 py-2 focus:ring-2 focus:ring-purple-500"
+              required
+            />
+          </div>
+
+          {/* Password */}
+          <div>
+            <label className="block font-semibold">Password</label>
+            <input
+              type="password"
+              name="password"
+              value={loginData.password}
+              onChange={handleChange}
+              minLength={6}
+              maxLength={15}
+              placeholder="********"
+              className="w-full rounded-md border px-3 py-2 focus:ring-2 focus:ring-purple-500"
+              required
+            />
+          </div>
+
+          {/* Remember + Forgot */}
+          <div className="flex items-center justify-between text-sm">
+            <label className="flex items-center gap-2">
+              <input type="checkbox" className="accent-purple-600" />
+              Remember me
+            </label>
+
+            <Link href="/forgotpassword" className="text-purple-600 hover:underline">
+              Forgot Password?
+            </Link>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-md bg-purple-600 py-2 text-white transition hover:scale-105 hover:bg-purple-700 disabled:opacity-60"
+          >
+            {loading ? 'Logging in...' : 'Login'}
+          </button>
+
+          <p className="text-center text-sm">
+            Don&apos;t have an account?
+            <Link href="/register" className="ml-1 text-purple-600 hover:underline">
+              Sign Up
+            </Link>
+          </p>
+        </form>
+
+        {/* Social Login */}
+        <div className="mt-4 flex justify-center space-x-4">
+          <Link href="https://www.facebook.com/" target="_blank">
+            <img src="/facebook.png" className="w-[40px] rounded-md border p-1" />
+          </Link>
+          <Link href="https://www.twitter.com/" target="_blank">
+            <img src="/twitter.png" className="w-[40px] rounded-md border p-2" />
+          </Link>
+          <Link href="https://www.linkedin.com/" target="_blank">
+            <img src="/linkedin.png" className="w-[40px] rounded-md border p-2" />
+          </Link>
+          <Link href="https://www.github.com/" target="_blank">
+            <img src="/github.png" className="w-[40px] rounded-md border p-2" />
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}

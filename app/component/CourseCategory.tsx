@@ -1,0 +1,116 @@
+import { Brain, Code, Monitor, Cpu, Palette, Cloud, Target, Shield } from 'lucide-react';
+
+export default function CourseCategory() {
+  const categories = [
+    {
+      icon: <Brain className="h-12 w-12 text-blue-600" />,
+      title: 'Data Science',
+      courses: '10 Courses',
+      bgColor: 'bg-blue-50',
+      hoverColor: 'hover:bg-blue-100',
+    },
+    {
+      icon: <Code className="h-12 w-12 text-green-600" />,
+      title: 'Programming',
+      courses: '23 Courses',
+      bgColor: 'bg-green-50',
+      hoverColor: 'hover:bg-green-100',
+    },
+    {
+      icon: <Monitor className="h-12 w-12 text-purple-600" />,
+      title: 'Web Development',
+      courses: '21 Courses',
+      bgColor: 'bg-purple-50',
+      hoverColor: 'hover:bg-purple-100',
+    },
+    {
+      icon: <Cpu className="h-12 w-12 text-orange-600" />,
+      title: 'Artificial Intelligence',
+      courses: '8 Courses',
+      bgColor: 'bg-orange-50',
+      hoverColor: 'hover:bg-orange-100',
+    },
+    {
+      icon: <Palette className="h-12 w-12 text-pink-600" />,
+      title: 'UI / UX Design',
+      courses: '21 Courses',
+      bgColor: 'bg-pink-50',
+      hoverColor: 'hover:bg-pink-100',
+    },
+    {
+      icon: <Cloud className="h-12 w-12 text-cyan-600" />,
+      title: 'Cloud Computing',
+      courses: '18 Courses',
+      bgColor: 'bg-cyan-50',
+      hoverColor: 'hover:bg-cyan-100',
+    },
+    {
+      icon: <Target className="h-12 w-12 text-indigo-600" />,
+      title: 'Business',
+      courses: '28 Courses',
+      bgColor: 'bg-indigo-50',
+      hoverColor: 'hover:bg-indigo-100',
+    },
+    {
+      icon: <Shield className="h-12 w-12 text-red-600" />,
+      title: 'Cyber Security',
+      courses: '7 Courses',
+      bgColor: 'bg-red-50',
+      hoverColor: 'hover:bg-red-100',
+    },
+  ];
+
+  return (
+    <div className="bg-gray-50 py-6">
+      <div className="mx-auto max-w-7xl px-6">
+        <div className="min-h-xl bg-gray-50 px-4 py-16">
+          <div className="mx-auto max-w-7xl">
+            {/* Header Section */}
+            <div className="mb-12 text-center">
+              <h1 className="mb-4 text-4xl font-bold text-gray-900">Explore Courses Categories</h1>
+              <p className="mx-auto max-w-2xl text-lg text-gray-600">
+                Discover a world of knowledge through our diverse range of courses.
+              </p>
+            </div>
+
+            {/* Categories Grid */}
+            <div className="mb-12 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+              {categories.map((category, index) => (
+                <div
+                  key={index}
+                  className={`${category.bgColor} ${category.hoverColor} cursor-pointer rounded-2xl border border-gray-100 p-8 text-center transition-all duration-300 hover:scale-105 hover:shadow-lg`}
+                >
+                  {/* Icon */}
+                  <div className="mb-6 flex justify-center">
+                    <div className="rounded-full bg-white p-4 shadow-sm">{category.icon}</div>
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="mb-2 text-xl font-semibold text-gray-900">{category.title}</h3>
+
+                  {/* Course Count */}
+                  <p className="font-medium text-gray-600">{category.courses}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Show All Button */}
+            <div className="text-center">
+              <button className="inline-flex items-center rounded-lg border-2 border-purple-600 px-8 py-3 font-semibold text-purple-600 transition-all duration-300 hover:bg-purple-600 hover:text-white">
+                Show All Category
+                <svg className="ml-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 8l4 4m0 0l-4 4m4-4H3"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
-import { Role } from '@prisma/client';
 import { generateToken } from '@/lib/auth';
 
 export async function POST(req: Request) {
@@ -40,7 +39,7 @@ export async function POST(req: Request) {
     }
 
     // Instructor approval check
-    if (user.role === Role.INSTRUCTOR && !user.isApproved) {
+    if (user.role === 'INSTRUCTOR' && !user.isApproved) {
       return NextResponse.json(
         { message: 'Instructor account pending admin approval' },
         { status: 403 }

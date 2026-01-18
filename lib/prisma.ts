@@ -1,5 +1,6 @@
 import * as PrismaPkg from '@prisma/client';
-const PrismaClient: any = (PrismaPkg as any).PrismaClient ?? (PrismaPkg as any).default ?? PrismaPkg;
+const PrismaClient: any =
+  (PrismaPkg as any).PrismaClient ?? (PrismaPkg as any).default ?? PrismaPkg;
 
 import { PrismaPg } from '@prisma/adapter-pg';
 

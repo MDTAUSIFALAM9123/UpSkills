@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
-import { Role } from '@prisma/client';
 
 export async function POST(req: Request) {
   try {
@@ -31,7 +30,7 @@ export async function POST(req: Request) {
     }
 
     // Block admin registration
-    if (role === Role.ADMIN) {
+    if (role === 'ADMIN') {
       return NextResponse.json(
         { success: false, error: true, message: 'Admin registration not allowed' },
         { status: 403 }
@@ -65,7 +64,7 @@ export async function POST(req: Request) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const isApproved = role === Role.INSTRUCTOR ? false : true;
+    const isApproved = role === 'INSTRUCTOR' ? false : true;
 
     const user = await prisma.user.create({
       data: {
@@ -73,7 +72,7 @@ export async function POST(req: Request) {
         email,
         password: hashedPassword,
         phone: phone ?? null,
-        role: role ?? Role.STUDENT,
+        role: role ?? 'STUDENT',
         isApproved,
       },
     });
@@ -83,7 +82,7 @@ export async function POST(req: Request) {
         success: true,
         error: false,
         message:
-          role === Role.INSTRUCTOR
+          role === 'INSTRUCTOR'
             ? 'Instructor registered. Waiting for admin approval.'
             : 'Registration successful',
         user: {

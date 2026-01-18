@@ -1,16 +1,15 @@
-// lib/prisma.ts
-import { PrismaClient } from '@prisma/client';
+import * as PrismaPkg from '@prisma/client';
+const PrismaClient: any = (PrismaPkg as any).PrismaClient ?? (PrismaPkg as any).default ?? PrismaPkg;
+
 import { PrismaPg } from '@prisma/adapter-pg';
 
 // Create the PostgreSQL adapter with your DATABASE_URL
 const pool = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 
-// Singleton for Next.js dev mode
-const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
+const globalForPrisma = globalThis as unknown as { prisma?: any };
 
 const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter: pool });
 
-// Assign in dev to avoid multiple instances
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 
 export { prisma };

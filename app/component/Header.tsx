@@ -7,17 +7,15 @@ import { ChevronDown } from 'lucide-react';
 
 export default function Header() {
   const router = useRouter();
-
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [showDropdown, setShowDropdown] = useState(false);
-
+  const [user, setUser] = useState<{ name?: string; phone?: string } | null>(null);
   const lastFetchRef = useRef<number>(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const checkLoginStatus = useCallback(async () => {
     const now = Date.now();
     if (now - lastFetchRef.current < 2000) return;
-
     lastFetchRef.current = now;
 
     try {
@@ -27,8 +25,10 @@ export default function Header() {
 
       const data = await res.json();
       setIsLoggedIn(Boolean(data?.loggedIn));
+      setUser(data);
     } catch {
       setIsLoggedIn(false);
+      setUser(null);
     }
   }, []);
 
@@ -119,20 +119,21 @@ export default function Header() {
                   {/* Header */}
                   <div className="mb-1 border-b border-gray-300 px-4 pb-1">
                     <p className="font-bold text-gray-700">My Account</p>
+                    <p className="text-sm text-gray-600">{user?.name}</p>
                   </div>
 
                   {/* Items */}
                   <div className="flex flex-col">
                     <Link
                       href="/account/course"
-                      className="block rounded-md px-4 py-2 text-gray-700 hover:bg-gray-50"
+                      className="block rounded-md px-4 py-2 text-gray-600 hover:bg-gray-50"
                     >
                       My Profile
                     </Link>
 
                     <Link
                       href="/orders"
-                      className="block rounded-md px-4 py-2 text-gray-700 hover:bg-gray-50"
+                      className="block rounded-md px-4 py-2 text-gray-600 hover:bg-gray-50"
                     >
                       My Courses
                     </Link>

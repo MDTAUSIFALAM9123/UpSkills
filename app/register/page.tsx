@@ -4,9 +4,12 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import { Loader, LoaderCircle } from 'lucide-react';
+import { FaFacebookF, FaLinkedinIn, FaInstagram, FaTwitter } from 'react-icons/fa';
 
 export default function Register() {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
   const [signUpData, setSignUpData] = useState({
     name: '',
@@ -31,7 +34,7 @@ export default function Register() {
     if (!name || !email || !password || !phone) {
       return toast.error('All fields are required');
     }
-
+    setLoading(true);
     try {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
@@ -52,25 +55,27 @@ export default function Register() {
       }
     } catch (error) {
       toast.error('Something went wrong');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 py-1">
-      <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
+      <div className="w-full max-w-md rounded-xl bg-white px-8 py-6 shadow-md">
         <div className="flex justify-end">
           <img
             src="https://uploads.onecompiler.io/42zhuec4k/43n7479rc/close.png"
             alt="Close"
             className="w-[14px] cursor-pointer"
-            onClick={() => router.back()}
+            onClick={() => router.push('/')}
           />
         </div>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           <h2 className="text-center text-3xl font-bold">Sign up</h2>
 
-          <p className="text-center text-sm">
+          <p className="mb-3 text-center text-sm">
             Already have an account?
             <Link href="/login" className="ml-1 text-purple-600 hover:underline">
               Sign In
@@ -147,24 +152,46 @@ export default function Register() {
 
           <button
             type="submit"
-            className="w-full rounded-md bg-purple-600 py-2 text-white transition hover:scale-105 hover:bg-purple-700"
+            disabled={loading}
+            className={`w-full rounded-md bg-purple-600 py-2 text-white transition ${loading ? 'cursor-not-allowed opacity-70' : 'hover:scale-102 hover:bg-purple-700'} `}
           >
-            Create Account
+            {loading ? (
+              <div className="flex items-center justify-center">
+                <LoaderCircle className="h-5 w-5 animate-spin" />
+              </div>
+            ) : (
+              'Create Account'
+            )}
           </button>
         </form>
 
         <div className="mt-6 flex justify-center space-x-4">
           <Link href="https://www.facebook.com/" target="_blank">
-            <img src="/facebook.png" className="w-[40px] rounded-md border p-1" />
+            <FaFacebookF
+              size={34}
+              className="cursor-pointer rounded-md border border-gray-700 p-1 text-gray-700"
+            />
           </Link>
-          <Link href="https://www.twitter.com/" target="_blank">
-            <img src="/twitter.png" className="w-[40px] rounded-md border p-2" />
+
+          <Link href="https://www.linkedin.com" target="_blank">
+            <FaLinkedinIn
+              size={34}
+              className="cursor-pointer rounded-md border border-gray-700 p-1 text-gray-700"
+            />
           </Link>
-          <Link href="https://www.linkedin.com/" target="_blank">
-            <img src="/linkedin.png" className="w-[40px] rounded-md border p-2" />
+
+          <Link href="https://www.instagram.com" target="_blank">
+            <FaInstagram
+              size={34}
+              className="cursor-pointer rounded-md border border-gray-700 p-1 text-gray-700"
+            />
           </Link>
-          <Link href="https://www.github.com/" target="_blank">
-            <img src="/github.png" className="w-[40px] rounded-md border p-2" />
+
+          <Link href="https://www.twitter.com" target="_blank">
+            <FaTwitter
+              size={34}
+              className="cursor-pointer rounded-md border border-gray-700 p-1 text-gray-700"
+            />
           </Link>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { jwtDecode } from 'jwt-decode';
+import { prisma } from '@/lib/prisma';
 
 interface TokenPayload {
   id: string;
@@ -20,17 +21,23 @@ export async function GET(req: NextRequest) {
   try {
     const payload = jwtDecode<TokenPayload>(token);
 
-    return NextResponse.json(
-      {
-        loggedIn: true,
-        id: payload.id,
-        name: payload.name,
-        email: payload.email,
-        phoneNumber: payload.phoneNumber || '',
-        role: payload.role,
+    const user = await prisma.user.findUnique({
+      where: { id: payload.id },
+      select: {
+        name: true,
+        phone: true,
+        role: true,
       },
-      { status: 200 }
-    );
+    });
+
+    if (!user) {
+      return NextResponse.json({ loggedIn: false }, { status: 401 });
+    }
+
+    return NextResponse.json({
+      loggedIn: true,
+      ...user,
+    });
   } catch (err) {
     console.error('❌ Invalid token:', err);
     return NextResponse.json({ loggedIn: false }, { status: 401 });

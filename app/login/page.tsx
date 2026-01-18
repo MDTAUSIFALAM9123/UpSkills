@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { X } from 'lucide-react';
+import { FaFacebookF, FaLinkedinIn, FaInstagram, FaTwitter } from 'react-icons/fa';
 
 export default function Login() {
   const router = useRouter();
@@ -60,7 +61,7 @@ export default function Login() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-md">
+      <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-md">
         {/* Close Button */}
         <div className="flex justify-end">
           <X onClick={() => router.push('/')} />
@@ -114,9 +115,9 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-md bg-purple-600 py-2 text-white transition hover:scale-105 hover:bg-purple-700 disabled:opacity-60"
+            className="w-full rounded-md bg-purple-600 py-2 text-white transition hover:scale-102 hover:bg-purple-700 disabled:opacity-60"
           >
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? 'Verifing....' : 'Login'}
           </button>
 
           <p className="text-center text-sm">
@@ -128,18 +129,33 @@ export default function Login() {
         </form>
 
         {/* Social Login */}
-        <div className="mt-4 flex justify-center space-x-4">
+        <div className="mt-2 flex justify-center space-x-4">
           <Link href="https://www.facebook.com/" target="_blank">
-            <img src="/facebook.png" className="w-[40px] rounded-md border p-1" />
+            <FaFacebookF
+              size={34}
+              className="cursor-pointer rounded-md border border-gray-700 p-1 text-gray-700"
+            />
           </Link>
-          <Link href="https://www.twitter.com/" target="_blank">
-            <img src="/twitter.png" className="w-[40px] rounded-md border p-2" />
+
+          <Link href="https://www.linkedin.com" target="_blank">
+            <FaLinkedinIn
+              size={34}
+              className="cursor-pointer rounded-md border border-gray-700 p-1 text-gray-700"
+            />
           </Link>
-          <Link href="https://www.linkedin.com/" target="_blank">
-            <img src="/linkedin.png" className="w-[40px] rounded-md border p-2" />
+
+          <Link href="https://www.instagram.com" target="_blank">
+            <FaInstagram
+              size={34}
+              className="cursor-pointer rounded-md border border-gray-700 p-1 text-gray-700"
+            />
           </Link>
-          <Link href="https://www.github.com/" target="_blank">
-            <img src="/github.png" className="w-[40px] rounded-md border p-2" />
+
+          <Link href="https://www.twitter.com" target="_blank">
+            <FaTwitter
+              size={34}
+              className="cursor-pointer rounded-md border border-gray-700 p-1 text-gray-700"
+            />
           </Link>
         </div>
       </div>

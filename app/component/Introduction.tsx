@@ -91,7 +91,7 @@ export default function Introduction() {
 
         {/* Stats Section - This will appear below hero section */}
         <div className="bg-white py-16">
-          <div className="mx-auto max-w-7xl px-6">
+          <div className="mx-auto max-w-7xl px-10">
             <h2 className="mb-12 text-center text-2xl font-semibold text-gray-800 md:text-3xl">
               Our Journey in Numbers
             </h2>

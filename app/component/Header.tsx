@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Shield } from 'lucide-react';
 
 export default function Header() {
   const router = useRouter();
@@ -12,6 +12,7 @@ export default function Header() {
   const [user, setUser] = useState<{ name?: string; phone?: string } | null>(null);
   const lastFetchRef = useRef<number>(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const checkLoginStatus = useCallback(async () => {
     const now = Date.now();
@@ -25,6 +26,7 @@ export default function Header() {
 
       const data = await res.json();
       setIsLoggedIn(Boolean(data?.loggedIn));
+      setIsAdmin(data.role?.toUpperCase() === 'ADMIN');
       setUser(data);
     } catch {
       setIsLoggedIn(false);
@@ -93,10 +95,7 @@ export default function Header() {
                 Sign In
               </Link>
 
-              <Link
-                href="/register"
-                className="rounded-md bg-purple-600 px-4 py-2 text-white hover:bg-purple-700"
-              >
+              <Link href="/register" className="rounded-md bg-purple-600 px-4 py-2 text-white">
                 Sign Up
               </Link>
             </>
@@ -107,7 +106,7 @@ export default function Header() {
                 onClick={() => setShowDropdown(prev => !prev)}
                 className="flex cursor-pointer items-center gap-2 rounded-full font-medium text-purple-700"
               >
-                <div className="text-md rounded-full bg-purple-600 p-2 text-white">MD</div>
+                <div className="text-md bg-background1 rounded-full p-2 text-white">MD</div>
                 <ChevronDown
                   className={`h-5 w-5 transition-transform ${showDropdown ? 'rotate-180' : ''}`}
                 />
@@ -124,26 +123,47 @@ export default function Header() {
 
                   {/* Items */}
                   <div className="flex flex-col">
-                    <Link
-                      href="/account/course"
-                      className="block rounded-md px-4 py-2 text-gray-600 hover:bg-gray-50"
-                    >
-                      My Profile
-                    </Link>
+                    {isAdmin ? (
+                      <>
+                        <Link
+                          href="/admin"
+                          className="flex items-center gap-2 px-4 py-2 font-medium text-red-600 hover:bg-gray-50"
+                        >
+                          <Shield className="h-4 w-4" />
+                          Admin Panel
+                        </Link>
 
-                    <Link
-                      href="/orders"
-                      className="block rounded-md px-4 py-2 text-gray-600 hover:bg-gray-50"
-                    >
-                      My Courses
-                    </Link>
+                        <button
+                          onClick={handleLogout}
+                          className="w-full rounded-md px-4 py-2 text-left text-red-600 hover:bg-gray-50"
+                        >
+                          Log Out
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <Link
+                          href="/account/profile"
+                          className="block rounded-md px-4 py-2 text-gray-600 hover:bg-gray-50"
+                        >
+                          My Profile
+                        </Link>
 
-                    <button
-                      onClick={handleLogout}
-                      className="w-full rounded-md px-4 py-2 text-left text-red-600 hover:bg-gray-50"
-                    >
-                      Log Out
-                    </button>
+                        <Link
+                          href="/account/course"
+                          className="block rounded-md px-4 py-2 text-gray-600 hover:bg-gray-50"
+                        >
+                          My Courses
+                        </Link>
+
+                        <button
+                          onClick={handleLogout}
+                          className="w-full rounded-md px-4 py-2 text-left text-red-600 hover:bg-gray-50"
+                        >
+                          Log Out
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               )}

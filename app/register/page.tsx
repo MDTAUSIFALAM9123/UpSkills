@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
-import { Loader, LoaderCircle } from 'lucide-react';
+import { LoaderCircle } from 'lucide-react';
 import { FaFacebookF, FaLinkedinIn, FaInstagram, FaTwitter } from 'react-icons/fa';
 
 export default function Register() {
@@ -16,6 +16,7 @@ export default function Register() {
     email: '',
     password: '',
     phone: '',
+    role: 'STUDENT',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -29,9 +30,9 @@ export default function Register() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const { name, email, password, phone } = signUpData;
+    const { name, email, password, phone, role } = signUpData;
 
-    if (!name || !email || !password || !phone) {
+    if (!name || !email || !password || !phone || !role) {
       return toast.error('All fields are required');
     }
     setLoading(true);
@@ -77,25 +78,52 @@ export default function Register() {
 
           <p className="mb-3 text-center text-sm">
             Already have an account?
-            <Link href="/login" className="ml-1 text-purple-600 hover:underline">
+            <Link href="/login" className="text-primaryColor ml-1 hover:underline">
               Sign In
             </Link>
           </p>
 
-          <div>
-            <label className="block font-semibold">User Name</label>
+          {/* Role Selection */}
+          <div className="my-2 flex justify-center">
+            <button
+              type="button"
+              onClick={() => setSignUpData(prev => ({ ...prev, role: 'STUDENT' }))}
+              className={`rounded-l-md border px-2 py-1 font-medium transition ${
+                signUpData.role === 'STUDENT'
+                  ? 'border-primaryColor bg-primaryColor text-white'
+                  : 'border-gray-300 bg-white text-gray-700 hover:border-purple-500'
+              }`}
+            >
+              Student
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setSignUpData(prev => ({ ...prev, role: 'INSTRUCTOR' }))}
+              className={`rounded-r-md border px-2 py-1 font-medium transition ${
+                signUpData.role === 'INSTRUCTOR'
+                  ? 'border-primaryColor bg-primaryColor text-white'
+                  : 'border-gray-300 bg-white text-gray-700 hover:border-purple-500'
+              }`}
+            >
+              Instructor
+            </button>
+          </div>
+
+          <div className="mb-4">
+            <label className="block font-semibold">Full Name</label>
             <input
               type="text"
               name="name"
               value={signUpData.name}
               onChange={handleChange}
-              placeholder="Enter your name"
-              className="w-full rounded-md border px-3 py-2 focus:ring-2 focus:ring-purple-500"
+              placeholder="Enter your full name"
+              className="w-full rounded-md border border-gray-600 px-3 py-1.5"
               required
             />
           </div>
 
-          <div>
+          <div className="mb-4">
             <label className="block font-semibold">Email</label>
             <input
               type="email"
@@ -103,12 +131,12 @@ export default function Register() {
               value={signUpData.email}
               onChange={handleChange}
               placeholder="Enter your email"
-              className="w-full rounded-md border px-3 py-2 focus:ring-2 focus:ring-purple-500"
+              className="w-full rounded-md border border-gray-600 px-3 py-1.5"
               required
             />
           </div>
 
-          <div>
+          <div className="mb-4">
             <label className="block font-semibold">Phone</label>
             <input
               type="tel"
@@ -118,12 +146,12 @@ export default function Register() {
               pattern="[0-9]{10}"
               inputMode="numeric"
               placeholder="Enter your phone number"
-              className="w-full rounded-md border px-3 py-2 focus:ring-2 focus:ring-purple-500"
+              className="w-full rounded-md border border-gray-600 px-3 py-1.5"
               required
             />
           </div>
 
-          <div>
+          <div className="mb-4">
             <label className="block font-semibold">Password</label>
             <input
               type="password"
@@ -131,7 +159,7 @@ export default function Register() {
               value={signUpData.password}
               onChange={handleChange}
               placeholder="********"
-              className="w-full rounded-md border px-3 py-2 focus:ring-2 focus:ring-purple-500"
+              className="w-full rounded-md border border-gray-600 px-3 py-1.5"
               required
             />
           </div>
@@ -140,11 +168,11 @@ export default function Register() {
             <input type="checkbox" className="accent-purple-600" required />
             <p className="text-sm">
               I agree to the{' '}
-              <Link href="#" className="text-purple-600 hover:underline">
+              <Link href="#" className="text-primaryColor hover:underline">
                 Terms
               </Link>{' '}
               and{' '}
-              <Link href="#" className="text-purple-600 hover:underline">
+              <Link href="#" className="text-primaryColor hover:underline">
                 Privacy Policy
               </Link>
             </p>
@@ -153,7 +181,7 @@ export default function Register() {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full rounded-md bg-purple-600 py-2 text-white transition ${loading ? 'cursor-not-allowed opacity-70' : 'hover:scale-102 hover:bg-purple-700'} `}
+            className={`bg-primaryColor w-full rounded-md py-2 text-white transition ${loading ? 'cursor-not-allowed opacity-70' : 'hover:scale-102'} `}
           >
             {loading ? (
               <div className="flex items-center justify-center">

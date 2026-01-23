@@ -24,3 +24,46 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+:root {
+  --primaryColor: #7540cd;
+  --secondaryColor: #e93e40;
+}
+
+@theme inline {
+  --color-primaryColor: var(--primaryColor);
+  --color-secondaryColor: var(--secondaryColor);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primaryColor: #7540cd;
+    --secondaryColor: #e93e40;
+  }
+}
+
+.bg-background1 {
+  background-color: var(--primaryColor);
+}
+
+.bg-background2 {
+  background-color: var(--secondaryColor);
+}
+
+.text-primaryColor {
+  color: var(--primaryColor);
+}
+
+.text-secondaryColor {
+  color: var(--secondaryColor);
+}

@@ -34,7 +34,7 @@ export default function Introduction() {
         {/* Hero Section with Text and Image */}
         <div className="flex flex-col items-center justify-center lg:flex-row">
           {/* Left Side - Text Content */}
-          <div className="items center mt-12 ml-16 max-w-3xl flex-1 lg:mt-24">
+          <div className="items center ml-16 max-w-3xl flex-1 lg:mt-24">
             {/* Main Heading */}
             <div className="mb-8">
               <h1 className="mb-4 flex flex-wrap items-baseline text-2xl font-bold text-gray-800 md:text-3xl">
@@ -68,10 +68,10 @@ export default function Introduction() {
 
             {/* Buttons */}
             <div className="mb-12 flex flex-col gap-4 sm:flex-row">
-              <button className="easy-in-out min-w-40 rounded-lg border-2 border-gray-300 px-8 py-3 text-gray-700 transition transition-colors duration-200 hover:scale-105 hover:border-gray-400">
+              <button className="easy-in-out min-w-40 rounded-lg border-2 border-gray-300 px-8 py-3 text-gray-700 transition-all duration-200 hover:scale-105 hover:border-gray-400">
                 Start for Free
               </button>
-              <button className="easy-in-out min-w-40 rounded-lg bg-indigo-600 px-8 py-3 text-white transition transition-colors duration-200 hover:scale-105 hover:bg-indigo-700">
+              <button className="easy-in-out bg-primaryColor min-w-40 rounded-lg px-8 py-3 text-white transition-all duration-300 hover:scale-105">
                 Explore Plus
               </button>
             </div>
@@ -96,7 +96,7 @@ export default function Introduction() {
               Our Journey in Numbers
             </h2>
 
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-6 md:grid-cols-2 lg:grid-cols-4">
               <div className="rounded-lg bg-gray-50 p-6 text-center">
                 <div className="mb-2 text-3xl font-bold text-blue-600">12+</div>
                 <div className="text-gray-600">Qualified Instructors</div>

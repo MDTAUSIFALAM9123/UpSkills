@@ -107,7 +107,7 @@ export default function Login() {
               Remember me
             </label>
 
-            <Link href="/forgotpassword" className="text-purple-600 hover:underline">
+            <Link href="/forgotpassword" className="text-primaryColor hover:underline">
               Forgot Password?
             </Link>
           </div>
@@ -115,14 +115,14 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-md bg-purple-600 py-2 text-white transition hover:scale-102 hover:bg-purple-700 disabled:opacity-60"
+            className="bg-primaryColor w-full rounded-md py-2 text-white transition hover:scale-102 disabled:opacity-60"
           >
             {loading ? 'Verifing....' : 'Login'}
           </button>
 
           <p className="text-center text-sm">
             Don&apos;t have an account?
-            <Link href="/register" className="ml-1 text-purple-600 hover:underline">
+            <Link href="/register" className="text-primaryColor ml-1 hover:underline">
               Sign Up
             </Link>
           </p>

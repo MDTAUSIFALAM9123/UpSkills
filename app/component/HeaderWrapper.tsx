@@ -7,7 +7,10 @@ import Footer from './Footer';
 export function HeaderWrapper() {
   const pathname = usePathname();
 
-  const isAuth = pathname.startsWith('/register') || pathname.startsWith('/login');
+  const isAuth =
+    pathname.startsWith('/register') ||
+    pathname.startsWith('/login') ||
+    pathname.startsWith('/admin');
 
   return (
     <>

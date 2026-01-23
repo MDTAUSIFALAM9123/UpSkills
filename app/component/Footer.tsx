@@ -23,13 +23,13 @@ export default function Footer() {
             </p>
             <div className="flex gap-4 pt-10">
               <Link href={'https://www.facebook.com'} target="_blank">
-                <FaFacebook size={24} className="cursor-pointer text-purple-700" />
+                <FaFacebook size={24} className="cursor-pointer text-[#7540CD]" />
               </Link>
               <Link href={'https://www.twitter.com'} target="_blank">
-                <FaTwitter size={24} className="cursor-pointer text-purple-700" />
+                <FaTwitter size={24} className="cursor-pointer text-[#7540CD]" />
               </Link>
               <Link href={'https://www.linkedin.com'} target="_blank">
-                <FaLinkedin size={24} className="cursor-pointer text-purple-700" />
+                <FaLinkedin size={24} className="cursor-pointer text-[#7540CD]" />
               </Link>
             </div>
           </div>

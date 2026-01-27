@@ -9,7 +9,7 @@ export async function POST(req: Request) {
 
     if (!email || !password) {
       return NextResponse.json(
-        { success: false, error: true, message: 'Email and password are required' },
+        { success: false, error: true, message: 'Email and password are required.' },
         { status: 400 }
       );
     }
@@ -23,7 +23,7 @@ export async function POST(req: Request) {
         {
           success: false,
           error: true,
-          message: 'Invalid email or password',
+          message: 'Invalid email. Try again.',
         },
         { status: 401 }
       );
@@ -33,7 +33,7 @@ export async function POST(req: Request) {
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return NextResponse.json(
-        { success: false, error: true, message: 'Invalid email or password' },
+        { success: false, error: true, message: 'Invalid password. Try again.' },
         { status: 401 }
       );
     }
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
     // Instructor approval check
     if (user.role === 'INSTRUCTOR' && !user.isApproved) {
       return NextResponse.json(
-        { message: 'Instructor account pending admin approval' },
+        { message: 'Instructor account pending admin approval.' },
         { status: 403 }
       );
     }

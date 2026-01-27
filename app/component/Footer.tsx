@@ -4,7 +4,7 @@ import { FaFacebook, FaLinkedin, FaTwitter } from 'react-icons/fa';
 
 export default function Footer() {
   return (
-    <footer className="items-center bg-gray-100 px-20 py-8">
+    <footer className="items-center bg-gray-100 px-8 py-8 sm:px-20">
       <div className="min-h-xl flex justify-center">
         <div className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-8 py-4 md:grid-cols-4">
           <div>
@@ -18,8 +18,8 @@ export default function Footer() {
               />
             </Link>
             <p className="mt-4 text-gray-600">
-              Geek is feature-rich components and beautifully Bootstrap UIKit for developers, built
-              with bootstrap responsive framework.
+              Upskills is a powerful and feature-packed learning platform with a clean, modern
+              interface, designed to deliver seamless learning experiences across all devices.
             </p>
             <div className="flex gap-4 pt-10">
               <Link href={'https://www.facebook.com'} target="_blank">

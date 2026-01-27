@@ -9,12 +9,8 @@ import { FaFacebookF, FaLinkedinIn, FaInstagram, FaTwitter } from 'react-icons/f
 
 export default function Login() {
   const router = useRouter();
-
-  const [loginData, setLoginData] = useState({
-    email: '',
-    password: '',
-  });
-
+  const [errorMessage, setErrorMessage] = useState('');
+  const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -27,11 +23,14 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage('');
 
     const { email, password } = loginData;
 
     if (!email || !password) {
-      return toast.error('All fields are required');
+      setErrorMessage('All fields are required');
+
+      return;
     }
 
     setLoading(true);
@@ -50,10 +49,10 @@ export default function Login() {
         toast.success(data.message || 'Login successful!');
         window.location.href = '/';
       } else {
-        toast.error(data.message || 'Invalid credentials');
+        setErrorMessage(data.message || 'Invalid credentials');
       }
     } catch (error) {
-      toast.error('Something went wrong');
+      setErrorMessage('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -69,7 +68,7 @@ export default function Login() {
 
         <form className="space-y-4 p-4" onSubmit={handleSubmit}>
           <h2 className="text-center text-3xl font-bold">Sign In</h2>
-
+          {errorMessage && <p className="mb-1 text-center text-sm text-red-500">{errorMessage}</p>}
           {/* Email */}
           <div>
             <label className="block font-semibold">Email</label>

@@ -8,7 +8,7 @@ export async function POST(req: Request) {
 
     if (!name || !email || !password) {
       return NextResponse.json(
-        { success: false, error: true, message: 'Name, email and password are required' },
+        { success: false, error: true, message: 'Name, email and password are required.' },
         { status: 400 }
       );
     }
@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     // Email validation
     if (!/^\S+@\S+\.\S+$/.test(email)) {
       return NextResponse.json(
-        { success: false, error: true, message: 'Invalid email' },
+        { success: false, error: true, message: 'Invalid email.' },
         { status: 400 }
       );
     }
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
     // Block admin registration
     if (role === 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: true, message: 'Admin registration not allowed' },
+        { success: false, error: true, message: 'Admin registration not allowed.' },
         { status: 403 }
       );
     }
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
 
     if (emailExists) {
       return NextResponse.json(
-        { success: false, error: true, message: 'Email already registered' },
+        { success: false, error: true, message: 'Email already registered.' },
         { status: 409 }
       );
     }
@@ -56,7 +56,7 @@ export async function POST(req: Request) {
 
       if (phoneExists) {
         return NextResponse.json(
-          { success: false, error: true, message: 'Phone number already registered' },
+          { success: false, error: true, message: 'Phone number already registered.' },
           { status: 409 }
         );
       }

@@ -34,7 +34,7 @@ export default function Introduction() {
         {/* Hero Section with Text and Image */}
         <div className="flex flex-col items-center justify-center lg:flex-row">
           {/* Left Side - Text Content */}
-          <div className="items center ml-16 max-w-3xl flex-1 lg:mt-24">
+          <div className="items center mt-6 max-w-3xl flex-1 px-6 sm:px-16 lg:mt-24">
             {/* Main Heading */}
             <div className="mb-8">
               <h1 className="mb-4 flex flex-wrap items-baseline text-2xl font-bold text-gray-800 md:text-3xl">

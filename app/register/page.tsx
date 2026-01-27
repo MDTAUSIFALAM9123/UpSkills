@@ -10,6 +10,7 @@ import { FaFacebookF, FaLinkedinIn, FaInstagram, FaTwitter } from 'react-icons/f
 export default function Register() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const [signUpData, setSignUpData] = useState({
     name: '',
@@ -29,11 +30,12 @@ export default function Register() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    setErrorMessage('');
     const { name, email, password, phone, role } = signUpData;
 
     if (!name || !email || !password || !phone || !role) {
-      return toast.error('All fields are required');
+      setErrorMessage('All fields are required');
+      return;
     }
     setLoading(true);
     try {
@@ -52,10 +54,10 @@ export default function Register() {
         toast.success(data.message || 'Register successfully!');
         router.push('/login');
       } else {
-        toast.error(data.message || 'Registration failed!');
+        setErrorMessage(data.message || 'Registration failed');
       }
     } catch (error) {
-      toast.error('Something went wrong');
+      setErrorMessage('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -109,6 +111,7 @@ export default function Register() {
               Instructor
             </button>
           </div>
+          {errorMessage && <p className="mb-1 text-center text-sm text-red-500">{errorMessage}</p>}
 
           <div className="mb-4">
             <label className="block font-semibold">Full Name</label>

@@ -58,8 +58,8 @@ const courses = [
 export default function CoursesSlide() {
   return (
     <div className="bg-white py-16">
-      <div className="mx-auto max-w-7xl px-10">
-        <h2 className="mb-4 text-center text-4xl font-semibold text-gray-900">
+      <div className="mx-auto max-w-7xl px-4 sm:px-10">
+        <h2 className="mb-4 text-center text-3xl font-semibold text-gray-900 sm:text-4xl">
           Most Popular Courses
         </h2>
         <p className="mb-12 text-center text-lg text-gray-600">
@@ -70,12 +70,12 @@ export default function CoursesSlide() {
           {courses.map(course => (
             <div
               key={course.id}
-              className="min-w-[226px] rounded-xl border border-gray-300 bg-white shadow-sm transition hover:shadow-md"
+              className="min-w-[185px] rounded-xl border border-gray-300 bg-white shadow-sm transition hover:shadow-md sm:min-w-[226px]"
             >
               <img
                 src={course.image}
                 alt={course.title}
-                className="h-48 w-full rounded-t-xl object-cover"
+                className="h-30 w-full rounded-t-xl object-cover sm:h-48"
               />
 
               <div className="p-4">

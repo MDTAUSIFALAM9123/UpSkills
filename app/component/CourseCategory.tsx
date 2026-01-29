@@ -76,7 +76,7 @@ export default function CourseCategory() {
             </div>
 
             {/* Categories Grid */}
-            <div className="mb-12 grid grid-cols-2 gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <div className="mb-12 grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
               {categories.map((category, index) => (
                 <div
                   key={index}
@@ -90,7 +90,9 @@ export default function CourseCategory() {
                   </div>
 
                   {/* Title */}
-                  <h3 className="mb-2 text-xl font-semibold text-gray-900">{category.title}</h3>
+                  <h3 className="text-md mb-2 font-semibold text-gray-900 sm:text-xl">
+                    {category.title}
+                  </h3>
 
                   {/* Course Count */}
                   <p className="font-medium text-gray-600">{category.courses}</p>
@@ -100,7 +102,7 @@ export default function CourseCategory() {
 
             {/* Show All Button */}
             <div className="text-center">
-              <button className="border-primaryColor hover:bg-primaryColor inline-flex items-center rounded-lg border-2 px-8 py-3 font-semibold text-purple-600 transition-all duration-300 hover:text-white">
+              <button className="border-primaryColor hover:bg-primaryColor inline-flex items-center rounded-lg border-2 px-4 py-2 font-semibold text-purple-600 transition-all duration-300 hover:text-white sm:px-8 sm:py-3">
                 Show All Category
                 <svg className="ml-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path

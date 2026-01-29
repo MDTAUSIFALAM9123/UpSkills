@@ -66,7 +66,7 @@ export default function ReviewsSection() {
             {reviews.map((review, index) => (
               <div
                 key={index}
-                className="w-[250px] flex-shrink-0 rounded-xl bg-white p-4 text-center shadow-md transition-all duration-300 hover:scale-102"
+                className="w-[250px] flex-shrink-0 rounded-xl bg-white p-6 text-center shadow-md transition-all duration-300 hover:scale-102"
               >
                 <div className="mb-4 flex justify-center">
                   <img
@@ -84,6 +84,7 @@ export default function ReviewsSection() {
             ))}
           </div>
 
+          {/* Mobile View */}
           <div className="flex w-max gap-3 py-1 sm:hidden">
             {reviews.map((review, index) => (
               <div

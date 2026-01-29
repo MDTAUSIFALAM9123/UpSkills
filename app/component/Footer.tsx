@@ -108,14 +108,8 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="mt-4 border-t pt-5 text-center text-sm text-gray-500">
+      <div className="text-md mt-4 border-t pt-5 text-center text-gray-500">
         <p>&copy; 2025 UpSkills</p>
-        <div className="mt-2 flex justify-center space-x-4">
-          <Link href="#">Privacy Policy</Link>
-          <Link href="#">Cookie Notice</Link>
-          <Link href="#">Do Not Sell My Personal Info</Link>
-          <Link href="#">Terms of Use</Link>
-        </div>
       </div>
     </footer>
   );

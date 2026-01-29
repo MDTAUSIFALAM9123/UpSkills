@@ -6,6 +6,94 @@ datasource db {
   provider = "postgresql"
 }
 
+model User {
+  id          String       @id @default(cuid())
+  name        String
+  email       String       @unique
+  phone       String?      @unique
+  password    String
+  role        Role         @default(STUDENT)
+  isApproved  Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  courses     Course[]     @relation("InstructorCourses")
+  enrollments Enrollment[]
+  progress    Progress[]
+  reviews     Review[]
+}
+
+model Course {
+  id           String       @id @default(cuid())
+  title        String
+  description  String
+  thumbnail    String?
+  price        Float        @default(0)
+  isPublished  Boolean      @default(false)
+  instructorId String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  instructor   User         @relation("InstructorCourses", fields: [instructorId], references: [id])
+  enrollments  Enrollment[]
+  reviews      Review[]
+  sections     Section[]
+}
+
+model Section {
+  id       String   @id @default(cuid())
+  title    String
+  order    Int
+  courseId String
+  lessons  Lesson[]
+  course   Course   @relation(fields: [courseId], references: [id])
+}
+
+model Lesson {
+  id        String     @id @default(cuid())
+  title     String
+  type      LessonType
+  videoUrl  String?
+  content   String?
+  order     Int
+  sectionId String
+  section   Section    @relation(fields: [sectionId], references: [id])
+  progress  Progress[]
+}
+
+model Enrollment {
+  id        String   @id @default(cuid())
+  userId    String
+  courseId  String
+  createdAt DateTime @default(now())
+  course    Course   @relation(fields: [courseId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, courseId])
+}
+
+model Progress {
+  id        String  @id @default(cuid())
+  userId    String
+  lessonId  String
+  completed Boolean @default(false)
+  lesson    Lesson  @relation(fields: [lessonId], references: [id])
+  user      User    @relation(fields: [userId], references: [id])
+
+  @@unique([userId, lessonId])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int
+  comment   String?
+  userId    String
+  courseId  String
+  createdAt DateTime @default(now())
+  course    Course   @relation(fields: [courseId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, courseId])
+}
+
 enum Role {
   STUDENT
   INSTRUCTOR
@@ -16,106 +104,4 @@ enum LessonType {
   VIDEO
   ARTICLE
   QUIZ
-}
-
-model User {
-  id          String       @id @default(cuid())
-  name        String
-  email       String       @unique
-  phone       String?       @unique
-  password    String
-  role        Role         @default(STUDENT)
-  isApproved  Boolean      @default(true)
-  courses     Course[]     @relation("InstructorCourses")
-  enrollments Enrollment[]
-  progress    Progress[]
-  reviews     Review[]
-
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-}
-
-model Course {
-  id           String      @id @default(cuid())
-  title        String
-  description  String
-  thumbnail    String?
-  price        Float       @default(0)
-  isPublished  Boolean     @default(false)
-
-  instructorId String
-  instructor   User        @relation("InstructorCourses", fields: [instructorId], references: [id])
-
-  sections     Section[]
-  enrollments  Enrollment[]
-  reviews      Review[]
-
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-}
-
-model Section {
-  id        String   @id @default(cuid())
-  title     String
-  order     Int
-
-  courseId  String
-  course    Course  @relation(fields: [courseId], references: [id])
-
-  lessons   Lesson[]
-}
-
-model Lesson {
-  id          String      @id @default(cuid())
-  title       String
-  type        LessonType
-  videoUrl    String?
-  content     String?
-  order       Int
-
-  sectionId  String
-  section    Section     @relation(fields: [sectionId], references: [id])
-
-  progress   Progress[]
-}
-
-model Enrollment {
-  id        String   @id @default(cuid())
-  userId    String
-  courseId  String
-
-  user      User     @relation(fields: [userId], references: [id])
-  course    Course   @relation(fields: [courseId], references: [id])
-
-  createdAt DateTime @default(now())
-
-  @@unique([userId, courseId])
-}
-
-model Progress {
-  id        String   @id @default(cuid())
-  userId    String
-  lessonId  String
-  completed Boolean  @default(false)
-
-  user      User     @relation(fields: [userId], references: [id])
-  lesson    Lesson   @relation(fields: [lessonId], references: [id])
-
-  @@unique([userId, lessonId])
-}
-
-model Review {
-  id        String   @id @default(cuid())
-  rating    Int
-  comment   String?
-
-  userId    String
-  courseId  String
-
-  user      User     @relation(fields: [userId], references: [id])
-  course    Course   @relation(fields: [courseId], references: [id])
-
-  createdAt DateTime @default(now())
-
-  @@unique([userId, courseId])
 }

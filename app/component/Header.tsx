@@ -41,7 +41,6 @@ export default function Header() {
     checkLoginStatus();
   }, [checkLoginStatus]);
 
-  // ❌ Close dropdown on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (!dropdownRef.current?.contains(e.target as Node)) {
@@ -52,7 +51,6 @@ export default function Header() {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  // 🚪 Logout
   const handleLogout = async () => {
     try {
       await fetch('/api/account/logout', {
@@ -72,7 +70,7 @@ export default function Header() {
   return (
     <>
       {/* NAVBAR */}
-      <nav className="bg-white py-2 shadow-md">
+      <nav className="border-b border-gray-200 bg-white py-2 shadow-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6">
           {/* Logo */}
           <Link href="/">
@@ -84,7 +82,7 @@ export default function Header() {
             <Link href="/" className="hover:text-purple-600">
               Home
             </Link>
-            <Link href="#" className="hover:text-purple-600">
+            <Link href="/courses" className="hover:text-purple-600">
               Courses
             </Link>
             <Link href="#" className="hover:text-purple-600">
@@ -176,7 +174,7 @@ export default function Header() {
             <Link href="/" onClick={() => setMobileMenuOpen(false)}>
               Home
             </Link>
-            <Link href="#" onClick={() => setMobileMenuOpen(false)}>
+            <Link href="/courses" onClick={() => setMobileMenuOpen(false)}>
               Courses
             </Link>
             <Link href="#" onClick={() => setMobileMenuOpen(false)}>

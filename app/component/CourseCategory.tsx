@@ -1,4 +1,14 @@
-import { Brain, Code, Monitor, Cpu, Palette, Cloud, Target, Shield } from 'lucide-react';
+import {
+  Brain,
+  Code,
+  Monitor,
+  Cpu,
+  Palette,
+  Cloud,
+  Target,
+  Shield,
+  ArrowRight,
+} from 'lucide-react';
 
 export default function CourseCategory() {
   const categories = [
@@ -61,7 +71,7 @@ export default function CourseCategory() {
   ];
 
   return (
-    <div className="bg-gray-50 py-6">
+    <div className="bg-gray-50 py-10">
       <div className="mx-auto max-w-7xl px-4 sm:px-8">
         <div className="min-h-xl bg-gray-50 md:p-4">
           <div className="mx-auto max-w-7xl">
@@ -83,7 +93,7 @@ export default function CourseCategory() {
                   className={`${category.bgColor} ${category.hoverColor} cursor-pointer rounded-2xl border border-gray-100 p-4 text-center transition-all duration-300 hover:scale-105 hover:shadow-lg sm:p-8`}
                 >
                   {/* Icon */}
-                  <div className="mb-6 flex justify-center">
+                  <div className="mb-4 flex justify-center sm:mb-6">
                     <div className="rounded-full bg-white p-2 shadow-sm sm:p-4">
                       {category.icon}
                     </div>
@@ -104,14 +114,7 @@ export default function CourseCategory() {
             <div className="text-center">
               <button className="border-primaryColor hover:bg-primaryColor inline-flex items-center rounded-lg border-2 px-4 py-2 font-semibold text-purple-600 transition-all duration-300 hover:text-white sm:px-8 sm:py-3">
                 Show All Category
-                <svg className="ml-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 8l4 4m0 0l-4 4m4-4H3"
-                  />
-                </svg>
+                <ArrowRight className="ml-2 h-5 w-5" />
               </button>
             </div>
           </div>

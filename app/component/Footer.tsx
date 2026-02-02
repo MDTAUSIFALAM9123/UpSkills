@@ -45,9 +45,6 @@ export default function Footer() {
                   <Link href="#">Pricing</Link>
                 </li>
                 <li>
-                  <Link href="#">Blog</Link>
-                </li>
-                <li>
                   <Link href="#">Careers</Link>
                 </li>
                 <li>
@@ -66,9 +63,7 @@ export default function Footer() {
               <li>
                 <Link href="#">Become Instructor</Link>
               </li>
-              <li>
-                <Link href="#">Get the App</Link>
-              </li>
+
               <li>
                 <Link href="#">FAQs</Link>
               </li>

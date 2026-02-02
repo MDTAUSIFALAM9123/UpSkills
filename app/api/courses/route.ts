@@ -1,12 +1,16 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const { searchParams } = new URL(req.url);
+    const limit = Number(searchParams.get('limit')) || 10; // default 10
+
     const courses = await prisma.course.findMany({
       where: {
         isPublished: true,
       },
+      take: limit, // 👈 LIMIT ADDED
       include: {
         instructor: {
           select: {

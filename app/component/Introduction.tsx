@@ -116,10 +116,6 @@ export default function Introduction() {
             </div>
           </div>
         </div>
-
-        <div className="bg-gray-50 py-4 sm:py-6">
-          <div className="mx-auto max-w-7xl px-6"></div>
-        </div>
       </div>
     </section>
   );

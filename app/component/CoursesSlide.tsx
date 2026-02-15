@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useCourses } from '@/hooks/useCourse';
-import { ArrowRight, Router } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function CoursesSlide() {
@@ -13,6 +13,10 @@ export default function CoursesSlide() {
 
   const handleCourse = () => {
     router.push('/courses');
+  };
+
+  const handleCourseById = (courseId: string) => {
+    router.push(`/courses/${courseId}`);
   };
   return (
     <div className="bg-white py-16">
@@ -84,7 +88,10 @@ export default function CoursesSlide() {
                     <div className="mt-3 flex items-center justify-between">
                       <p className="text-lg font-bold text-gray-900">₹{course.price}</p>
 
-                      <button className="bg-background1 sm:text-md rounded-md px-2 py-1 text-sm text-white sm:px-3">
+                      <button
+                        onClick={() => handleCourseById(course.id)}
+                        className="bg-background1 sm:text-md rounded-md px-2 py-1 text-sm text-white sm:px-3"
+                      >
                         Get Enroll
                       </button>
                     </div>

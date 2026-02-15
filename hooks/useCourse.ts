@@ -20,7 +20,7 @@ interface UseCoursesOptions {
 }
 
 const CACHE_KEY = 'courses_cache';
-const CACHE_TTL = 5 * 60 * 1000;
+const CACHE_TTL = 5 * 60 * 1000; // 5 min
 
 export function useCourses(options?: UseCoursesOptions) {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -32,19 +32,29 @@ export function useCourses(options?: UseCoursesOptions) {
       try {
         setLoading(true);
 
-        /* 🔹 CHECK CACHE */
-        const cached = sessionStorage.getItem(CACHE_KEY);
-        if (cached) {
-          const { data, timestamp } = JSON.parse(cached);
+        /* 🔹 DETECT PAGE REFRESH */
+        const navigation = performance.getEntriesByType(
+          'navigation'
+        )[0] as PerformanceNavigationTiming;
 
-          if (Date.now() - timestamp < CACHE_TTL) {
-            setCourses(data);
-            setLoading(false);
-            return; // ✅ cache se hi return
+        const isReload = navigation?.type === 'reload';
+
+        /* 🔹 USE CACHE ONLY IF NOT REFRESH */
+        if (!isReload) {
+          const cached = sessionStorage.getItem(CACHE_KEY);
+
+          if (cached) {
+            const { data, timestamp } = JSON.parse(cached);
+
+            if (Date.now() - timestamp < CACHE_TTL) {
+              setCourses(data);
+              setLoading(false);
+              return;
+            }
           }
         }
 
-        /* 🔹 FETCH FROM API */
+        /* 🔹 FETCH LATEST DATA */
         const queryParams = new URLSearchParams();
         if (options?.limit) {
           queryParams.append('limit', options.limit.toString());
@@ -61,7 +71,7 @@ export function useCourses(options?: UseCoursesOptions) {
         const data = await res.json();
         setCourses(data);
 
-        /* 🔹 SAVE TO CACHE */
+        /* 🔹 SAVE CACHE */
         sessionStorage.setItem(
           CACHE_KEY,
           JSON.stringify({

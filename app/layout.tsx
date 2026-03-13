@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Karla } from 'next/font/google';
 import './globals.css';
 import { Toaster } from 'react-hot-toast';
-import { FooterWrapper, HeaderWrapper } from './component/HeaderWrapper';
+import { FooterWrapper, HeaderWrapper } from './components/HeaderWrapper';
 
 const karla = Karla({
   weight: '400',

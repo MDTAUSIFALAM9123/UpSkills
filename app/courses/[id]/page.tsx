@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Navroute from '@/app/component/Navroute';
+import Navroute from '@/app/components/Navroute';
 
 interface Course {
   id: string;

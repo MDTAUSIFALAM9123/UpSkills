@@ -4,14 +4,14 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
-import { LoaderCircle } from 'lucide-react';
+import { Eye, EyeOff, LoaderCircle } from 'lucide-react';
 import { FaFacebookF, FaLinkedinIn, FaInstagram, FaTwitter } from 'react-icons/fa';
 
 export default function Register() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-
+  const [showPassword, setShowPassword] = useState(false);
   const [signUpData, setSignUpData] = useState({
     name: '',
     email: '',
@@ -156,15 +156,25 @@ export default function Register() {
 
           <div className="mb-4">
             <label className="block font-semibold">Password</label>
-            <input
-              type="password"
-              name="password"
-              value={signUpData.password}
-              onChange={handleChange}
-              placeholder="********"
-              className="w-full rounded-md border border-gray-600 px-3 py-1.5"
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                value={signUpData.password}
+                onChange={handleChange}
+                placeholder="********"
+                className="w-full rounded-md border border-gray-600 px-3 py-1.5 pr-10"
+                required
+              />
+
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="hover:text-primaryColor absolute top-1/2 right-2 -translate-y-1/2 text-gray-500"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
 
           <div className="flex items-center gap-2">

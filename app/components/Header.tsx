@@ -13,7 +13,7 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  const [user, setUser] = useState<{ name?: string; phone?: string } | null>(null);
+  const [user, setUser] = useState<{ id?: string; name?: string; phone?: string } | null>(null);
 
   const lastFetchRef = useRef(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -67,6 +67,9 @@ export default function Header() {
     }
   };
 
+  const handleProfile = () => {
+    router.push(`/account/profile/${user?.id}`);
+  };
   return (
     <>
       {/* NAVBAR */}
@@ -143,9 +146,12 @@ export default function Header() {
                         </Link>
                       ) : (
                         <>
-                          <Link href="/account/profile" className="px-4 py-2 hover:bg-gray-50">
+                          <button
+                            onClick={handleProfile}
+                            className="px-4 py-2 text-left hover:bg-gray-50"
+                          >
                             My Profile
-                          </Link>
+                          </button>
                           <Link href="/account/course" className="px-4 py-2 hover:bg-gray-50">
                             My Courses
                           </Link>

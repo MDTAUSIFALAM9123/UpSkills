@@ -1,7 +1,7 @@
-import CourseCategory from './component/CourseCategory';
-import CoursesSlide from './component/CoursesSlide';
-import Introduction from './component/Introduction';
-import ReviewsSection from './component/Reviews';
+import CourseCategory from './components/CourseCategory';
+import CoursesSlide from './components/CoursesSlide';
+import Introduction from './components/Introduction';
+import ReviewsSection from './components/Reviews';
 
 export default function Home() {
   return (

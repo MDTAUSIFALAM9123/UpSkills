@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { useCourses } from '@/hooks/useCourse';
-import Navroute from '../component/Navroute';
+import Navroute from '../components/Navroute';
 import { IoChevronDown } from 'react-icons/io5';
-import CourseCard from '../component/CourseCard';
+import CourseCard from '../components/CourseCard';
 
 const categories = [
   'Technology & Development',

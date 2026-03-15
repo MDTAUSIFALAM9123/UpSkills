@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Check, Edit, Eye, EyeOff, User, User2Icon } from 'lucide-react';
-import { useParams } from 'next/navigation';
+import { Check, ChevronLeft, Edit, Eye, EyeOff, User, User2Icon } from 'lucide-react';
+import { useParams, useRouter } from 'next/navigation';
 import Navroute from '@/app/components/Navroute';
+import toast from 'react-hot-toast';
 
 interface User {
   id: string;
@@ -20,6 +21,7 @@ export default function Profile() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState<User | null>(null);
+  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!form) return;
@@ -62,7 +64,11 @@ export default function Profile() {
         body: JSON.stringify(form),
       });
 
-      if (!res.ok) throw new Error('Update failed');
+      if (!res.ok) {
+        console.error('Update failed');
+      } else {
+        toast.success('Profile updated!');
+      }
 
       const data = await res.json();
       setForm(data);
@@ -77,11 +83,21 @@ export default function Profile() {
       <Navroute />
       {/* HEADER */}
       <div className="border-t border-white bg-purple-600 py-2 text-white sm:py-4">
-        <div className="mx-auto max-w-4xl px-6 sm:px-4">
-          <h1 className="text-2xl font-bold md:text-3xl">
-            My <span className="text-yellow-300">Profile</span>
-          </h1>
-          <p className="text-purple-100">Manage your account information.</p>
+        <div className="mx-auto max-w-5xl px-6 sm:px-4">
+          <div className="flex items-start gap-6">
+            <div
+              className="ml-0.5 hidden cursor-pointer items-center rounded-full bg-purple-500 p-0.5 md:flex"
+              onClick={() => router.back()}
+            >
+              <ChevronLeft size={32} />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold md:text-3xl">
+                My <span className="text-yellow-300">Profile</span>
+              </h1>
+              <p className="text-purple-100">Manage your account information.</p>
+            </div>
+          </div>
         </div>
       </div>
       {loading ? (

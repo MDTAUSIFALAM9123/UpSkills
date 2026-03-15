@@ -10,7 +10,10 @@ export function HeaderWrapper() {
   const isAuth =
     pathname.startsWith('/register') ||
     pathname.startsWith('/login') ||
-    pathname.startsWith('/admin');
+    pathname.startsWith('/payment') ||
+    pathname.startsWith('/admin') ||
+    pathname.startsWith('/instructor') ||
+    pathname.startsWith('/learn');
 
   return (
     <>
@@ -34,7 +37,13 @@ export function HeaderWrapper() {
 export function FooterWrapper() {
   const pathname = usePathname();
 
-  const isAuth = pathname.startsWith('/register') || pathname.startsWith('/login');
+  const isAuth =
+    pathname.startsWith('/register') ||
+    pathname.startsWith('/payment') ||
+    pathname.startsWith('/login') ||
+    pathname.startsWith('/admin') ||
+    pathname.startsWith('/instructor') ||
+    pathname.startsWith('/learn');
 
   if (isAuth) return null;
 

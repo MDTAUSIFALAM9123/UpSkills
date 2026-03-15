@@ -12,8 +12,14 @@ export default function Header() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isInstructor, setIsInstructor] = useState(false);
 
-  const [user, setUser] = useState<{ id?: string; name?: string; phone?: string } | null>(null);
+  const [user, setUser] = useState<{
+    id?: string;
+    name?: string;
+    phone?: string;
+    role?: string;
+  } | null>(null);
 
   const lastFetchRef = useRef(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -30,6 +36,7 @@ export default function Header() {
 
       setIsLoggedIn(Boolean(data?.loggedIn));
       setIsAdmin(data?.role?.toUpperCase() === 'ADMIN');
+      setIsInstructor(data?.role?.toUpperCase() === 'INSTRUCTOR');
       setUser(data);
     } catch {
       setIsLoggedIn(false);
@@ -67,9 +74,6 @@ export default function Header() {
     }
   };
 
-  const handleProfile = () => {
-    router.push(`/account/profile/${user?.id}`);
-  };
   return (
     <>
       {/* NAVBAR */}
@@ -144,15 +148,27 @@ export default function Header() {
                           <Shield className="h-4 w-4" />
                           Admin Panel
                         </Link>
-                      ) : (
+                      ) : isInstructor ? (
                         <>
-                          <button
-                            onClick={handleProfile}
-                            className="px-4 py-2 text-left hover:bg-gray-50"
+                          <Link
+                            href={`/account/profile/${user?.id}`}
+                            className="px-4 py-2 hover:bg-gray-50"
                           >
                             My Profile
-                          </button>
-                          <Link href="/account/course" className="px-4 py-2 hover:bg-gray-50">
+                          </Link>
+                          <Link href="/instructor" className="block px-4 py-2 hover:bg-gray-50">
+                            Instructor Dashboard
+                          </Link>
+                        </>
+                      ) : (
+                        <>
+                          <Link
+                            href={`/account/profile/${user?.id}`}
+                            className="px-4 py-2 hover:bg-gray-50"
+                          >
+                            My Profile
+                          </Link>
+                          <Link href="/account/course" className="block px-4 py-2 hover:bg-gray-50">
                             My Courses
                           </Link>
                         </>
@@ -219,9 +235,18 @@ export default function Header() {
                   </Link>
                 )}
 
-                {!isAdmin && (
+                {isInstructor && (
+                  <Link href="/instructor" onClick={() => setMobileMenuOpen(false)}>
+                    Instructor Dashboard
+                  </Link>
+                )}
+
+                {!isAdmin && !isInstructor && (
                   <>
-                    <Link href="/account/profile" onClick={() => setMobileMenuOpen(false)}>
+                    <Link
+                      href={`/account/profile/${user?.id}`}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
                       My Profile
                     </Link>
                     <Link href="/account/course" onClick={() => setMobileMenuOpen(false)}>

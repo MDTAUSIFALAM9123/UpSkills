@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 import { Karla } from 'next/font/google';
 import './globals.css';
-import { Toaster } from 'react-hot-toast';
+
 import { FooterWrapper, HeaderWrapper } from './components/HeaderWrapper';
+import ToastProvider from './components/ToastProvider';
 
 const karla = Karla({
   weight: '400',
@@ -22,7 +23,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${karla.className} antialiased`}>
-        <Toaster position="top-right" toastOptions={{ duration: 2000 }} />
+        <ToastProvider />
         <HeaderWrapper />
         <main>{children}</main>
         <FooterWrapper />

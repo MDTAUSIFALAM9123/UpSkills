@@ -117,7 +117,7 @@ export default function InstructorDashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* TOP BAR */}
-      <div className="border-t-2 border-white bg-purple-700 py-5 text-white">
+      <div className="bg-purple-700 py-5 text-white">
         <div className="mx-auto max-w-6xl px-4">
           <div className="flex items-center justify-start gap-4">
             <div

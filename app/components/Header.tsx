@@ -209,14 +209,14 @@ export default function Header() {
               <>
                 <Link
                   href="/register"
-                  className="rounded-md bg-purple-600 px-4 py-2 text-center text-white"
+                  className="bg-primaryColor rounded-md px-4 py-2 text-center text-white"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Sign Up
                 </Link>
                 <Link
                   href="/login"
-                  className="rounded-md bg-purple-600 px-4 py-2 text-center text-white"
+                  className="bg-primaryColor rounded-md px-4 py-2 text-center text-white"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Sign In

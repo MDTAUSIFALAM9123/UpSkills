@@ -54,7 +54,7 @@ export default function MyCoursesPage() {
   return (
     <>
       <Navroute />
-      <div className="border-t-2 border-white bg-purple-600 py-3 text-white">
+      <div className="bg-primaryColor border-t-2 border-white py-3 text-white">
         <div className="mx-auto max-w-6xl px-4">
           <div className="flex items-start gap-6">
             <div

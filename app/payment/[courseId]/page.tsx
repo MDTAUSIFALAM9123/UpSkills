@@ -40,17 +40,46 @@ export default function PaymentPage() {
 
   useEffect(() => {
     const load = async () => {
-      const res = await fetch(`/api/courses/${courseId}`, { credentials: 'include' });
+      const res = await fetch(`/api/account/me`, { credentials: 'include' });
+
       if (!res.ok) {
+        router.push('/login');
+        return;
+      }
+
+      const data = await res.json();
+
+      // Admin block
+      if (data?.role?.toLowerCase() === 'admin') {
+        router.push('/admin');
+        return;
+      }
+
+      // Not logged in (extra safety)
+      if (!data.loggedIn) {
+        router.push('/login');
+        return;
+      }
+
+      // Course fetch
+      const res1 = await fetch(`/api/courses/${courseId}`, {
+        credentials: 'include',
+      });
+
+      if (!res1.ok) {
         router.push('/courses');
         return;
       }
-      const data = await res.json();
-      if (data.isEnrolled) {
+
+      const data1 = await res1.json();
+
+      // Already enrolled
+      if (data?.isEnrolled) {
         router.push(`/courses/${courseId}`);
         return;
       }
-      setCourse(data);
+
+      setCourse(data1);
       setLoading(false);
     };
     load();
@@ -167,12 +196,12 @@ export default function PaymentPage() {
 
   return (
     <>
-      <div className="border-t border-white bg-purple-600 py-4 text-white">
+      <div className="bg-primaryColor border-t border-white py-4 text-white">
         <div className="mx-auto flex max-w-5xl items-center justify-start gap-4 px-4">
           <div className="flex items-center">
             <button
               onClick={() => router.back()}
-              className="ml-0.5 hidden w-full cursor-pointer rounded-full bg-purple-500 p-0.5 text-center text-sm text-white transition md:flex"
+              className="bg-primaryColor ml-0.5 w-full cursor-pointer rounded-full p-0.5 text-center text-sm text-white transition"
             >
               <ChevronLeft size={28} />
             </button>
@@ -216,12 +245,12 @@ export default function PaymentPage() {
                   <div className="mt-4 border-t pt-4">
                     {course.price > 0 ? (
                       <div className="flex items-baseline justify-between">
-                        <span className="text-sm text-gray-500">Total</span>
+                        <span className="text-md text-gray-500">Total</span>
                         <div>
-                          <span className="text-2xl font-bold text-purple-700">
+                          <span className="text-primaryColor text-2xl font-bold">
                             ₹{course.price}
                           </span>
-                          <span className="ml-2 text-sm text-gray-400 line-through">
+                          <span className="text-md ml-2 text-gray-400 line-through">
                             ₹{Math.round(course.price * 1.3)}
                           </span>
                         </div>
@@ -237,7 +266,7 @@ export default function PaymentPage() {
                 <div className="mb-2 flex items-center gap-2 font-semibold">
                   <ShieldCheck size={16} /> This course includes
                 </div>
-                <ul className="space-y-1 text-purple-700">
+                <ul className="text-primaryColor space-y-1">
                   <li>✓ {totalLessons} lessons with lifetime access</li>
                   <li>✓ {course.sections.length} structured sections</li>
                   <li>✓ Progress tracking</li>
@@ -277,7 +306,7 @@ export default function PaymentPage() {
                         onClick={() => setForm(p => ({ ...p, method: m }))}
                         className={`flex-1 rounded-lg py-2 text-xs font-semibold capitalize transition ${
                           form.method === m
-                            ? 'bg-purple-700 text-white shadow'
+                            ? 'bg-primaryColor text-white shadow'
                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}
                       >
@@ -380,7 +409,7 @@ export default function PaymentPage() {
                   <button
                     onClick={handlePay}
                     disabled={processing}
-                    className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-purple-700 py-3 text-base font-bold text-white transition hover:bg-purple-800 disabled:opacity-60"
+                    className="bg-primaryColor mt-6 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-base font-bold text-white transition hover:bg-purple-800 disabled:opacity-60"
                   >
                     {processing ? (
                       <>

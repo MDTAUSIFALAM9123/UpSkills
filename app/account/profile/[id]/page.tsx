@@ -82,7 +82,7 @@ export default function Profile() {
     <>
       <Navroute />
       {/* HEADER */}
-      <div className="border-t border-white bg-purple-600 py-2 text-white sm:py-4">
+      <div className="bg-primaryColor border-t border-white py-2 text-white sm:py-4">
         <div className="mx-auto max-w-5xl px-6 sm:px-4">
           <div className="flex items-start gap-6">
             <div
@@ -185,7 +185,7 @@ export default function Profile() {
                     setIsEdit(true);
                   }
                 }}
-                className="rounded-xl bg-purple-600 px-2 py-2 text-center text-white hover:bg-purple-700 sm:rounded-lg sm:px-4"
+                className="bg-primaryColor rounded-xl px-2 py-2 text-center text-white hover:bg-purple-700 sm:rounded-lg sm:px-4"
               >
                 {isEdit ? (
                   <div className="flex items-center justify-center gap-1">
@@ -278,7 +278,6 @@ export default function Profile() {
 
               <ul className="text-md mt-2 space-y-1 text-gray-700">
                 <li>Courses Enrolled: 2</li>
-                <li>Certificates: 1</li>
                 <li>Completed Courses: 1</li>
               </ul>
             </div>

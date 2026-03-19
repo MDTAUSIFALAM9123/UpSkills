@@ -46,7 +46,7 @@ export default function ReviewsSection() {
             <h2 className="mt-4 text-2xl font-bold text-gray-900 sm:text-4xl">
               What our customers say
             </h2>
-            <button className="tex-sm sm:text-md mt-6 rounded-lg bg-purple-600 px-2 py-2 font-semibold text-white transition hover:scale-105 hover:bg-purple-700 sm:px-6">
+            <button className="tex-sm sm:text-md bg-primaryColor mt-6 rounded-lg px-2 py-2 font-semibold text-white transition hover:scale-105 hover:bg-purple-700 sm:px-6">
               View reviews
             </button>
           </div>

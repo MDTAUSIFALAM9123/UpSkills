@@ -4,7 +4,7 @@ import { FaFacebook, FaLinkedin, FaTwitter } from 'react-icons/fa';
 
 export default function Footer() {
   return (
-    <footer className="items-center bg-gray-100 px-8 py-8 sm:px-20">
+    <footer className="items-center bg-gray-100 p-6 sm:px-18">
       <div className="min-h-xl flex justify-center">
         <div className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-8 py-4 md:grid-cols-4">
           <div>
@@ -103,7 +103,7 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="text-md mt-4 border-t pt-5 text-center text-gray-500">
+      <div className="text-md mt-2 border-t pt-3 text-center text-gray-500 sm:mt-4 sm:pt-5">
         <p>&copy; 2025 UpSkills</p>
       </div>
     </footer>

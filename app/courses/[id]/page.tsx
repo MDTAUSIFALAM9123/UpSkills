@@ -118,6 +118,16 @@ export default function CourseDetailsPage() {
       router.push('/login');
       return;
     }
+
+    const data = await res.json();
+
+    // Admin block
+    if (data.role === 'ADMIN') {
+      toast.error('Admins cannot enroll in courses.');
+      return;
+    }
+
+    // Student allowed
     router.push(`/payment/${courseId}`);
   };
 

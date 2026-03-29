@@ -16,6 +16,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
         email: true,
         phone: true,
         createdAt: true,
+        _count: { select: { enrollments: true, courses: true } },
       },
     });
 

@@ -12,6 +12,7 @@ interface User {
   phone: string;
   email: string;
   password?: string;
+  _count: { enrollments: number; courses: number };
 }
 
 export default function Profile() {
@@ -277,8 +278,8 @@ export default function Profile() {
               <h4 className="text-lg font-semibold text-gray-800">Account Stats</h4>
 
               <ul className="text-md mt-2 space-y-1 text-gray-700">
-                <li>Courses Enrolled: 2</li>
-                <li>Completed Courses: 1</li>
+                <li>Courses Enrolled: {form._count?.enrollments ?? 0}</li>
+                <li>Completed Courses: {form._count?.courses ?? 0}</li>
               </ul>
             </div>
           </div>

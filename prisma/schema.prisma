@@ -16,6 +16,9 @@ model User {
   isApproved  Boolean      @default(true)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+  otp         String?
+  otpExpiry   DateTime?
+  isOtpVerified   Boolean @default(false)
   courses     Course[]     @relation("InstructorCourses")
   enrollments Enrollment[]
   progress    Progress[]

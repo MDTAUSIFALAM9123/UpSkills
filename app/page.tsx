@@ -10,7 +10,6 @@ export default function Home() {
       <CourseCategory />
       <CoursesSlide />
       <ReviewsSection />
-      <div className="bg-white py-8"></div>
     </>
   );
 }

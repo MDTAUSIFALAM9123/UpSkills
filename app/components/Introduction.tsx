@@ -1,8 +1,47 @@
 'use client';
 
-import { ArrowRight, Award, Search, SlidersHorizontal, Star } from 'lucide-react';
+import {
+  ArrowRight,
+  Award,
+  Users,
+  Briefcase,
+  GraduationCap,
+  Search,
+  SlidersHorizontal,
+  Star,
+} from 'lucide-react';
 import { useEffect, useState } from 'react';
 
+const stats = [
+  {
+    value: '200+',
+    title: 'Students',
+    subtitle: 'Learning with us',
+    icon: Users,
+    iconClass: 'bg-blue-100 text-blue-600',
+  },
+  {
+    value: '50+',
+    title: 'Courses',
+    subtitle: 'Industry focused',
+    icon: GraduationCap,
+    iconClass: 'bg-purple-100 text-purple-600',
+  },
+  {
+    value: '100+',
+    title: 'Online videos',
+    subtitle: 'HANDS-ON LEARNING',
+    icon: Briefcase,
+    iconClass: 'bg-green-100 text-green-600',
+  },
+  {
+    value: '4.9/5',
+    title: 'Student Rating',
+    subtitle: 'Trusted by learners',
+    icon: Award,
+    iconClass: 'bg-orange-100 text-orange-600',
+  },
+];
 export default function Introduction() {
   const [currentText, setCurrentText] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
@@ -68,6 +107,7 @@ export default function Introduction() {
             </button>
           </div>
         </div>
+
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-700 via-purple-700 to-indigo-600 p-4 shadow-lg">
           {/* Top Badges */}
           <div className="mb-5 flex items-center justify-between gap-2">
@@ -115,15 +155,15 @@ export default function Introduction() {
             <img
               src="/image.png"
               alt="Learning"
-              className="mx-auto h-[180px] w-full object-contain object-bottom"
+              className="mx-auto h-[250px] w-full object-contain object-bottom"
             />
 
-            <div className="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1 text-[10px] font-semibold text-slate-800 shadow">
+            <div className="animate-float-slow absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1 text-[10px] font-semibold text-slate-800 shadow">
               <span className="h-2 w-2 rounded-full bg-emerald-400" />
               Live Mentorship
             </div>
 
-            <div className="absolute right-3 bottom-3 flex items-center gap-1 rounded-md bg-white px-2.5 py-1.5 text-[10px] font-semibold text-slate-700 shadow">
+            <div className="animate-float-slow absolute right-3 bottom-3 flex items-center gap-1 rounded-md bg-white px-2.5 py-1.5 text-[10px] font-semibold text-slate-700 shadow">
               <span className="text-emerald-500">↗</span>
               98% Transition Rate
             </div>
@@ -149,12 +189,11 @@ export default function Introduction() {
           </div>
         </div>
       </div>
-
       {/* ================= DESKTOP HERO ================= */}
-      <div className="min-h-xl hidden bg-gradient-to-tr from-purple-200/50 via-violet-100/40 to-teal-100/30 sm:block">
+      <div className="min-h-xl hidden bg-gradient-to-tr from-purple-200/50 via-violet-100/40 to-teal-100/30 py-2 sm:block">
         <div className="flex flex-col items-center justify-center lg:flex-row">
           {/* Left */}
-          <div className="mt-12 max-w-3xl flex-1 px-16">
+          <div className="mt-12 max-w-3xl flex-1 px-4 sm:px-16">
             <div className="mb-4">
               <div className="mb-6 flex flex-wrap items-center gap-3">
                 <span className="inline-flex items-center gap-2 rounded-full bg-amber-500/15 px-4 py-2 text-[11px] font-bold tracking-wider text-orange-700 uppercase">
@@ -217,45 +256,77 @@ export default function Introduction() {
           </div>
 
           {/* Right Image */}
-          <div className="flex justify-center lg:justify-end">
+          <div className="relative flex justify-center lg:justify-end">
+            {/* Decorative Line */}
+            <div className="animate-float-slow absolute top-5 left-4 z-10 text-3xl text-cyan-300">
+              ⎯
+            </div>
+
+            {/* Pink Circle */}
+            <div className="animate-float absolute top-4 right-4 z-10 h-10 w-10 rounded-full bg-pink-300 opacity-90" />
+
+            {/* Image */}
             <div className="w-full max-w-lg px-4 sm:px-0">
               <img
-                className="h-auto w-full rounded-2xl"
                 src="/image.png"
                 alt="Learning illustration"
+                className="h-auto w-full rounded-2xl object-cover"
               />
+            </div>
+
+            {/* Live Mentorship Badge */}
+            <div className="animate-float-slow text-md absolute top-3 left-3 z-20 inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1 font-semibold text-gray-700 shadow-md">
+              <span className="h-3 w-3 rounded-full bg-emerald-400" />
+              Live Mentorship
+            </div>
+
+            {/* Transition Rate Badge */}
+            <div className="animate-float-slow text-md absolute right-3 bottom-3 z-20 flex items-center gap-1 rounded-md bg-white px-2.5 py-1.5 font-semibold text-gray-700 shadow-md">
+              <span className="text-emerald-500">↗</span>
+              98% Transition Rate
             </div>
           </div>
         </div>
       </div>
 
       {/* ================= STATS ================= */}
-      <div className="bg-white py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-12">
-          <h2 className="mb-12 text-center text-2xl font-semibold text-gray-800 md:text-3xl">
-            Our Journey in Numbers
-          </h2>
+      <div className="w-full bg-white py-10 shadow-[0_1px_4px_rgba(0,0,0,0.03)]">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-6 text-center">
+            <h2 className="text-2xl font-bold text-slate-900">Our Journey in Numbers</h2>
 
-          <div className="grid grid-cols-2 gap-6 lg:grid-cols-4">
-            <div className="rounded-lg bg-gray-50 p-6 text-center">
-              <div className="mb-2 text-3xl font-bold text-blue-600">12+</div>
-              <div className="text-gray-600">Qualified Instructors</div>
-            </div>
+            <p className="mt-1 text-sm text-slate-400">
+              Accelerating careers across high-growth technology industries
+            </p>
+          </div>
 
-            <div className="rounded-lg bg-gray-50 p-6 text-center">
-              <div className="mb-2 text-3xl font-bold text-orange-600">2000</div>
-              <div className="text-gray-600">Course Enrollments</div>
-            </div>
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:gap-6">
+            {stats.map(stat => {
+              const Icon = stat.icon;
 
-            <div className="rounded-lg bg-gray-50 p-6 text-center">
-              <div className="mb-2 text-3xl font-bold text-purple-600">500</div>
-              <div className="text-gray-600">Courses in 2 Languages</div>
-            </div>
+              return (
+                <div
+                  key={stat.title}
+                  className="flex flex-col items-center rounded-xl bg-[#faf8ff] p-4 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+                >
+                  <div
+                    className={`mb-2 flex h-11 w-11 items-center justify-center rounded-full ${stat.iconClass}`}
+                  >
+                    <Icon size={22} strokeWidth={2} />
+                  </div>
 
-            <div className="rounded-lg bg-gray-50 p-6 text-center">
-              <div className="mb-2 text-3xl font-bold text-green-600">100+</div>
-              <div className="text-gray-600">Online Videos</div>
-            </div>
+                  <p className="text-3xl leading-tight font-extrabold text-slate-900 sm:text-4xl">
+                    {stat.value}
+                  </p>
+
+                  <p className="mt-1 text-sm font-semibold text-slate-600">{stat.title}</p>
+
+                  <span className="mt-1 text-[11px] font-bold tracking-wider text-slate-400 uppercase">
+                    {stat.subtitle}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

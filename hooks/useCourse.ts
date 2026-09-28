@@ -5,6 +5,7 @@ interface Review {
 }
 
 interface Course {
+  description: string;
   id: string;
   title: string;
   price: number;

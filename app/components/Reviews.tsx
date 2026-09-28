@@ -163,7 +163,7 @@ export default function ReviewsSection() {
         </div>
       </div>
 
-      <div className="block px-4 py-10 sm:hidden">
+      <div className="block px-4 py-0 sm:hidden sm:py-10">
         <div className="mx-auto w-full overflow-hidden rounded-2xl bg-gradient-to-br from-violet-700 to-purple-800 px-5 py-5 text-center shadow-lg">
           {/* Rocket Icon */}
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-purple-600/70">

@@ -222,27 +222,50 @@ export default function LearnPage() {
         {/* CONTENT */}
         <div className="flex-1 p-4 md:p-8">
           <div className="mx-auto max-w-3xl">
-            {lesson.type === 'VIDEO' && lesson.videoUrl ? (
-              <div className="mb-6 overflow-hidden rounded-xl shadow-lg">
-                <div className="aspect-video w-full bg-black">
-                  {lesson.videoUrl.includes('youtube') || lesson.videoUrl.includes('youtu.be') ? (
-                    <iframe
-                      src={lesson.videoUrl
-                        .replace('watch?v=', 'embed/')
-                        .replace('youtu.be/', 'www.youtube.com/embed/')}
-                      className="h-full w-full"
-                      allowFullScreen
-                    />
-                  ) : (
-                    <video src={lesson.videoUrl} controls className="h-full w-full" />
-                  )}
-                </div>
-              </div>
-            ) : lesson.type === 'VIDEO' ? (
-              <div className="mb-6 flex aspect-video items-center justify-center rounded-xl bg-gray-200">
-                <p className="text-gray-500">No video URL provided</p>
-              </div>
-            ) : null}
+            
+{lesson.type === 'VIDEO' && lesson.videoUrl ? (
+  <div className="mb-6 overflow-hidden rounded-xl shadow-lg">
+    <div className="aspect-video w-full bg-black">
+      {lesson.videoUrl.includes('youtube.com') ||
+      lesson.videoUrl.includes('youtu.be') ? (
+        <iframe
+          src={lesson.videoUrl
+            .replace('watch?v=', 'embed/')
+            .replace('youtu.be/', 'www.youtube.com/embed/')}
+          title="Lesson Video"
+          className="h-full w-full"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+        />
+      ) : lesson.videoUrl.includes('loom.com') ? (
+        <iframe
+          src={lesson.videoUrl
+            .replace('/share/', '/embed/')
+            .split('?')[0]}
+          title="Loom Lesson Video"
+          className="h-full w-full"
+          allow="autoplay; fullscreen; picture-in-picture"
+          allowFullScreen
+          loading="lazy"
+          style={{ border: 0 }}
+        />
+      ) : (
+        <video
+          src={lesson.videoUrl}
+          controls
+          playsInline
+          className="h-full w-full"
+        >
+          Your browser does not support video playback.
+        </video>
+      )}
+    </div>
+  </div>
+) : lesson.type === 'VIDEO' ? (
+  <div className="mb-6 flex aspect-video items-center justify-center rounded-xl bg-gray-200">
+    <p className="text-gray-500">No video URL provided</p>
+  </div>
+) : null}
 
             <h2 className="mb-4 text-xl font-bold text-gray-800 md:text-2xl">{lesson.title}</h2>
 

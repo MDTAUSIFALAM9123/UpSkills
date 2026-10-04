@@ -166,11 +166,20 @@ export default function CourseDetailsPage() {
     }
   };
 
-  const totalLessons = course?.sections.reduce((s, sec) => s + sec.lessons.length, 0) ?? 0;
+  // Calculate accurate course progress
+  const allLessonIds =
+    course?.sections.flatMap(section => section.lessons.map(lesson => lesson.id)) ?? [];
 
-  const completedCount = course?.progress.length ?? 0;
+  const totalLessons = allLessonIds.length;
 
-  const progressPct = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
+  // Count only unique completed lessons belonging to this course
+  const completedLessonIds = new Set(course?.progress ?? []);
+
+  const completedCount = allLessonIds.filter(lessonId => completedLessonIds.has(lessonId)).length;
+
+  // Progress must always stay between 0% and 100%
+  const progressPct =
+    totalLessons > 0 ? Math.min(100, Math.round((completedCount / totalLessons) * 100)) : 0;
 
   if (loading) {
     return (

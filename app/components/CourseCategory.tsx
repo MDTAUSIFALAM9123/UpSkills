@@ -7,7 +7,6 @@ import {
   Cloud,
   Target,
   Shield,
-  ArrowRight,
 } from 'lucide-react';
 
 export default function CourseCategory() {
@@ -108,14 +107,6 @@ export default function CourseCategory() {
                   <p className="font-medium text-gray-600">{category.courses}</p>
                 </div>
               ))}
-            </div>
-
-            {/* Show All Button */}
-            <div className="text-center">
-              <button className="border-primaryColor hover:bg-primaryColor inline-flex items-center rounded-lg border-2 px-4 py-2 font-semibold text-purple-600 transition-all duration-300 hover:text-white sm:px-8 sm:py-3">
-                Show All Category
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </button>
             </div>
           </div>
         </div>

@@ -17,61 +17,67 @@ const categories = [
 ];
 
 export default function Courses() {
-  const { courses, loading } = useCourses({ limit: 16 });
+  const { courses, loading } = useCourses({
+    limit: 16,
+  });
+
   const [showCategory, setShowCategory] = useState(false);
 
   return (
     <>
       <Navroute />
+
       <div className="min-h-screen bg-white py-10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-14">
-          {/* 🔹 MOBILE CATEGORY */}
-          <div className="mb-4 md:hidden">
-            <button
-              onClick={() => setShowCategory(!showCategory)}
-              className="flex items-center justify-between rounded-xl border border-gray-400 px-4 py-2 font-medium"
-            >
-              Categories
-              <IoChevronDown className={`transition ${showCategory ? 'rotate-180' : ''}`} />
-            </button>
-
-            {showCategory && (
-              <div className="mt-2 space-y-2 rounded-lg border border-gray-300 p-3">
-                {categories.map(cat => (
-                  <button
-                    key={cat}
-                    className="w-full rounded-md px-3 py-2 text-left text-sm hover:bg-purple-50 hover:text-purple-600"
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
+        <div className="mx-auto max-w-7xl px-4 sm:px-8 lg:px-14">
+          {/* ================= MAIN GRID ================= */}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
-            {/* 🔹 DESKTOP SIDEBAR */}
+            {/* ================= DESKTOP SIDEBAR ================= */}
             <aside className="hidden space-y-3 md:block">
-              {categories.map(cat => (
+              {categories.map(category => (
                 <button
-                  key={cat}
-                  className="w-full rounded-lg border border-gray-400 bg-white px-4 py-2 text-left text-sm font-medium text-gray-700 hover:bg-purple-50 hover:text-purple-600"
+                  key={category}
+                  type="button"
+                  className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-left text-sm font-medium text-gray-700 transition hover:border-purple-300 hover:bg-purple-50 hover:text-purple-600"
                 >
-                  {cat}
+                  {category}
                 </button>
               ))}
             </aside>
 
-            {/* 🔹 COURSES */}
+            {/* ================= COURSES ================= */}
             <section className="md:col-span-3">
               {loading ? (
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
-                  {[...Array(8)].map((_, i) => (
-                    <div key={i} className="h-60 animate-pulse rounded-lg bg-gray-200" />
+                /* ================= LOADING ================= */
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                  {[...Array(9)].map((_, index) => (
+                    <div
+                      key={index}
+                      className="w-full animate-pulse overflow-hidden rounded-xl border border-gray-200 bg-white"
+                    >
+                      {/* Image */}
+                      <div className="h-48 w-full bg-gray-200" />
+
+                      {/* Content */}
+                      <div className="space-y-3 p-4">
+                        <div className="h-4 w-3/4 rounded bg-gray-200" />
+
+                        <div className="h-4 w-1/2 rounded bg-gray-200" />
+
+                        <div className="h-10 w-full rounded bg-gray-200" />
+
+                        <div className="h-8 rounded bg-gray-200" />
+                      </div>
+                    </div>
                   ))}
                 </div>
+              ) : courses.length === 0 ? (
+                /* ================= EMPTY ================= */
+                <div className="rounded-xl border border-gray-200 py-12 text-center text-gray-500">
+                  No courses available.
+                </div>
               ) : (
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+                /* ================= COURSE CARDS ================= */
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
                   {courses.map(course => (
                     <CourseCard key={course.id} course={course} />
                   ))}

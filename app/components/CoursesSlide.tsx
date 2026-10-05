@@ -193,8 +193,6 @@ export default function CoursesSlide() {
                         <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
 
                         <span className="font-semibold text-gray-800">4.5</span>
-
-                        <span className="text-gray-400">(940)</span>
                       </div>
                     </div>
 
@@ -207,7 +205,8 @@ export default function CoursesSlide() {
                     <p className="mt-2 line-clamp-2 text-sm leading-5 text-gray-500">
                       {course.description}
                     </p>
-
+                    {/* Divider */}
+                    <div className="my-4 border-t border-gray-200" />
                     {/* Bottom */}
                     <div className="mt-4 flex items-center justify-between gap-2">
                       <p className="text-lg font-bold text-gray-900">₹{course.price}</p>

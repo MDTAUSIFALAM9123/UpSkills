@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronDown, Shield, Menu, X, SlidersHorizontal, Search } from 'lucide-react';
+import { ChevronDown, Shield, Menu, X, SlidersHorizontal, Search, Bell } from 'lucide-react';
 
 export default function Header() {
   const router = useRouter();
@@ -78,7 +78,7 @@ export default function Header() {
     <>
       {/* NAVBAR */}
       <nav className="border-b border-gray-200 bg-white">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-10 px-4 sm:px-6">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-10 px-4 sm:px-6 md:gap-4">
           {/* Logo */}
           <Link href="/" className="shrink-0">
             <img src="/Logo.png" alt="Logo" className="w-32 cursor-pointer sm:w-36" />
@@ -134,14 +134,40 @@ export default function Header() {
 
           {/* Right Section */}
           <div className="relative ml-4 flex items-center gap-3 sm:ml-6 sm:gap-4" ref={dropdownRef}>
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setMobileMenuOpen(prev => !prev)}
-              className="rounded-lg p-2 text-slate-700 transition hover:bg-slate-100 lg:hidden"
-              aria-label="Toggle menu"
-            >
-              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
+            <div className="flex items-center gap-2 lg:hidden">
+              {' '}
+              {!isLoggedIn ? (
+                <>
+                  {' '}
+                  {/* Bell */}
+                  <button
+                    type="button"
+                    aria-label="Notifications"
+                    className="rounded-lg p-2 text-slate-700 transition hover:bg-slate-100"
+                  >
+                    {' '}
+                    <Bell className="h-5 w-5" />{' '}
+                  </button>{' '}
+                  {/* Start Free */}{' '}
+                  <Link
+                    href="/register"
+                    className="rounded-lg bg-purple-600 px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-purple-700"
+                  >
+                    {' '}
+                    Start Free{' '}
+                  </Link>{' '}
+                </>
+              ) : (
+                /* Hamburger only when logged in */ <button
+                  onClick={() => setMobileMenuOpen(prev => !prev)}
+                  className="rounded-lg p-2 text-slate-700 transition hover:bg-slate-100"
+                  aria-label="Toggle menu"
+                >
+                  {' '}
+                  {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}{' '}
+                </button>
+              )}{' '}
+            </div>
 
             {/* Desktop Auth */}
             {!isLoggedIn ? (

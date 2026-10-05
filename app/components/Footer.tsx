@@ -80,7 +80,7 @@ export default function Footer() {
               Emai: <Link href="mailto:upskill854@gmail.com"> upskill854@gmail.com</Link>
             </p>
             <p className="mt-2 text-gray-600">
-              Phone: <strong>(000) 123 456 789</strong>
+              Phone: <strong>(+91) 8340593996</strong>
             </p>
             <div className="mt-4 flex space-x-2">
               <a href="">

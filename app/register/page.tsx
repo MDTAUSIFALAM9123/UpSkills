@@ -227,7 +227,7 @@ export default function Register() {
                   Create your account
                 </h2>
 
-                <p className="text-xs text-gray-500">
+                <p className="text-sm text-gray-500">
                   Already have an account?{' '}
                   <Link href="/login" className="font-semibold text-purple-700 hover:underline">
                     Sign In

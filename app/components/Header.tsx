@@ -161,7 +161,7 @@ export default function Header() {
                 </Link>
               </div>
             ) : (
-              <div className="hidden md:block">
+              <div className="hidden lg:block">
                 <button
                   onClick={() => setShowDropdown(prev => !prev)}
                   className="flex items-center gap-2 font-medium text-purple-700"

@@ -66,7 +66,7 @@ function AnalyticsView({
         />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1.4fr_0.6fr]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.4fr_0.6fr]">
         <section className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm sm:p-6">
           <SectionHeader
             title="Top Performing Courses"

@@ -723,7 +723,7 @@ function DashboardView({
           <button
             type="button"
             onClick={onCreate}
-            className="group flex shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-extrabold text-violet-700 shadow-xl transition-all duration-200 hover:-translate-y-1 hover:shadow-2xl active:translate-y-0"
+            className="group flex shrink-0 items-center justify-center gap-2 rounded-xl bg-violet-700 px-5 py-3 text-sm font-extrabold text-white transition-all duration-200 hover:-translate-y-1 hover:shadow-2xl active:translate-y-0"
           >
             <Plus size={18} className="transition-transform duration-200 group-hover:rotate-90" />
             Create New Course
@@ -765,7 +765,7 @@ function DashboardView({
         />
       </section>
 
-      <div className="grid gap-6 xl:grid-cols-[1.4fr_0.6fr]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.4fr_0.6fr]">
         <section className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm sm:p-6">
           <SectionHeader
             title="Course Performance"
@@ -858,7 +858,7 @@ function DashboardView({
         </section>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         <section className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm sm:p-6">
           <SectionHeader
             title="Recent Courses"

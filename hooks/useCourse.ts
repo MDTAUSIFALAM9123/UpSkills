@@ -37,7 +37,7 @@ export function useCourses(options?: UseCoursesOptions) {
         }
 
         const res = await fetch(`/api/courses?${queryParams}`, {
-          cache: 'no-store',
+          cache: 'force-cache',
         });
 
         if (!res.ok) {

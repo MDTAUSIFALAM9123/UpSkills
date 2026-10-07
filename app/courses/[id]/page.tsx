@@ -73,6 +73,7 @@ export default function CourseDetailsPage() {
       try {
         const res = await fetch(`/api/courses/${courseId}`, {
           credentials: 'include',
+          cache: 'force-cache',
         });
 
         if (!res.ok) {

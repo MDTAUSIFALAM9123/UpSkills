@@ -1,13 +1,4 @@
-import {
-  Brain,
-  Code,
-  Monitor,
-  Cpu,
-  Palette,
-  Cloud,
-  Target,
-  Shield,
-} from 'lucide-react';
+import { Brain, Code, Monitor, Cpu, Palette, Cloud, Target, Shield } from 'lucide-react';
 
 export default function CourseCategory() {
   const categories = [

@@ -364,7 +364,7 @@ export default function InstructorDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f7f7fb] text-slate-900">
+    <div className="min-h-screen bg-[#f7f8fc] text-slate-900">
       {sidebarOpen && (
         <button
           type="button"

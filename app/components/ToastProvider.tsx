@@ -21,5 +21,15 @@ export default function ToastProvider() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  return <Toaster position={position} toastOptions={{ duration: 2000 }} />;
+  return (
+    <Toaster
+      position={position}
+      toastOptions={{
+        duration: 2000,
+        style: {
+          borderRadius: '22px', // Yahan se corners round honge
+        },
+      }}
+    />
+  );
 }

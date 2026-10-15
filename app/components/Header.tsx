@@ -236,17 +236,10 @@ export default function Header() {
                       ) : (
                         <>
                           <Link
-                            href={`/account/profile/${user?.id}`}
+                            href="/account/dashboard"
                             className="px-4 py-2.5 transition hover:bg-slate-50"
                           >
-                            My Profile
-                          </Link>
-
-                          <Link
-                            href="/account/course"
-                            className="px-4 py-2.5 transition hover:bg-slate-50"
-                          >
-                            My Courses
+                            Dashboard
                           </Link>
                         </>
                       )}
@@ -320,14 +313,8 @@ export default function Header() {
 
                 {!isAdmin && !isInstructor && (
                   <>
-                    <Link
-                      href={`/account/profile/${user?.id}`}
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      My Profile
-                    </Link>
-                    <Link href="/account/course" onClick={() => setMobileMenuOpen(false)}>
-                      My Courses
+                    <Link href="/account/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                      Dashboard
                     </Link>
                   </>
                 )}

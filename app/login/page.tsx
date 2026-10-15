@@ -136,7 +136,7 @@ export default function Login() {
 
               <FeatureCard
                 icon={<CheckCircle2 size={18} />}
-                title="2,000+ Placements"
+                title="1,000+ Placements"
                 description="Graduates hired across leading global innovators."
               />
             </div>
@@ -217,7 +217,7 @@ export default function Login() {
 
               {/* Email */}
               <div className="mb-5">
-                <label className="mb-2 block text-xs font-bold text-gray-700">Email</label>
+                <label className="mb-2 block text-sm font-bold text-gray-700">Email</label>
 
                 <div className="relative">
                   <Mail
@@ -231,7 +231,7 @@ export default function Login() {
                     value={loginData.email}
                     onChange={handleChange}
                     placeholder="name@example.com"
-                    className="h-12 w-full rounded-xl border border-transparent bg-gray-100 pr-4 pl-11 text-sm text-gray-800 transition outline-none placeholder:text-gray-400 focus:border-purple-400 focus:bg-white focus:ring-4 focus:ring-purple-100"
+                    className="text-md h-12 w-full rounded-xl border border-transparent bg-gray-100 pr-4 pl-11 text-gray-800 transition outline-none placeholder:text-gray-400 focus:border-purple-400 focus:bg-white focus:ring-4 focus:ring-purple-100"
                     required
                   />
                 </div>
@@ -239,7 +239,7 @@ export default function Login() {
 
               {/* Password */}
               <div className="mb-4">
-                <label className="mb-2 block text-xs font-bold text-gray-700">Password</label>
+                <label className="mb-2 block text-sm font-bold text-gray-700">Password</label>
 
                 <div className="relative">
                   <LockKeyhole
@@ -255,7 +255,7 @@ export default function Login() {
                     minLength={6}
                     maxLength={15}
                     placeholder="••••••••••••"
-                    className="h-12 w-full rounded-xl border border-transparent bg-gray-100 px-11 pr-12 text-sm text-gray-800 transition outline-none placeholder:text-gray-400 focus:border-purple-400 focus:bg-white focus:ring-4 focus:ring-purple-100"
+                    className="text-md h-12 w-full rounded-xl border border-transparent bg-gray-100 px-11 pr-12 text-gray-800 transition outline-none placeholder:text-gray-400 focus:border-purple-400 focus:bg-white focus:ring-4 focus:ring-purple-100"
                     required
                   />
 

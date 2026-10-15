@@ -27,7 +27,7 @@ export default function ToastProvider() {
       toastOptions={{
         duration: 2000,
         style: {
-          borderRadius: '22px', // Yahan se corners round honge
+          borderRadius: '18px', // Yahan se corners round honge
         },
       }}
     />

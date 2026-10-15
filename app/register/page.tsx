@@ -324,12 +324,12 @@ export default function Register() {
 
               {/* Phone */}
               <div className="mb-4">
-                <label className="mb-2 block text-xs font-semibold text-gray-700">
+                <label className="mb-2 block text-sm font-semibold text-gray-700">
                   Phone Number
                 </label>
 
                 <div className="flex gap-2">
-                  <div className="flex h-11 items-center gap-1 rounded-xl bg-gray-100 px-3 text-xs font-semibold text-gray-600">
+                  <div className="flex h-11 items-center gap-1 rounded-xl bg-gray-100 px-3 text-sm font-semibold text-gray-600">
                     IN
                     <span>+91</span>
                   </div>
@@ -349,7 +349,7 @@ export default function Register() {
                       inputMode="numeric"
                       maxLength={10}
                       placeholder="98765 43210"
-                      className="h-11 w-full rounded-xl border border-transparent bg-gray-100 pr-4 pl-10 text-sm text-gray-800 transition outline-none placeholder:text-gray-400 focus:border-purple-400 focus:bg-white focus:ring-4 focus:ring-purple-100"
+                      className="text-md h-11 w-full rounded-xl border border-transparent bg-gray-100 pr-4 pl-10 text-gray-800 transition outline-none placeholder:text-gray-400 focus:border-purple-400 focus:bg-white focus:ring-4 focus:ring-purple-100"
                       required
                     />
                   </div>
@@ -359,9 +359,9 @@ export default function Register() {
               {/* Password */}
               <div className="mb-3">
                 <div className="mb-2 flex items-center justify-between">
-                  <label className="text-xs font-semibold text-gray-700">Password</label>
+                  <label className="text-sm font-semibold text-gray-700">Password</label>
 
-                  <span className="text-[10px] font-medium text-gray-400">Min 8 characters</span>
+                  <span className="text-sm font-medium text-gray-400">Min 8 characters</span>
                 </div>
 
                 <div className="relative">
@@ -371,7 +371,7 @@ export default function Register() {
                     value={signUpData.password}
                     onChange={handleChange}
                     placeholder="••••••••••••"
-                    className="h-11 w-full rounded-xl border border-transparent bg-gray-100 px-4 pr-11 text-sm transition outline-none placeholder:text-gray-400 focus:border-purple-400 focus:bg-white focus:ring-4 focus:ring-purple-100"
+                    className="text-md h-11 w-full rounded-xl border border-transparent bg-gray-100 px-4 pr-11 transition outline-none placeholder:text-gray-400 focus:border-purple-400 focus:bg-white focus:ring-4 focus:ring-purple-100"
                     required
                   />
 
@@ -401,7 +401,7 @@ export default function Register() {
               <label className="mb-5 flex cursor-pointer items-start gap-2">
                 <input type="checkbox" className="mt-0.5 h-4 w-4 accent-purple-600" required />
 
-                <span className="text-xs leading-5 text-gray-500">
+                <span className="text-sm leading-5 text-gray-500">
                   I agree to the{' '}
                   <Link href="#" className="font-medium text-purple-700 hover:underline">
                     Terms of Service
@@ -509,7 +509,7 @@ function InputField({
 }) {
   return (
     <div className="mb-4">
-      <label className="mb-2 block text-xs font-semibold text-gray-700">{label}</label>
+      <label className="mb-2 block text-sm font-semibold text-gray-700">{label}</label>
 
       <div className="relative">
         <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400">{icon}</span>
@@ -520,7 +520,7 @@ function InputField({
           value={value}
           onChange={onChange}
           placeholder={placeholder}
-          className="h-11 w-full rounded-xl border border-transparent bg-gray-100 pr-4 pl-10 text-sm text-gray-800 transition outline-none placeholder:text-gray-400 focus:border-purple-400 focus:bg-white focus:ring-4 focus:ring-purple-100"
+          className="text-md h-11 w-full rounded-xl border border-transparent bg-gray-100 pr-4 pl-10 text-gray-800 transition outline-none placeholder:text-gray-400 focus:border-purple-400 focus:bg-white focus:ring-4 focus:ring-purple-100"
           required
         />
       </div>

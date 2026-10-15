@@ -12,6 +12,7 @@ export function HeaderWrapper() {
     pathname.startsWith('/login') ||
     pathname.startsWith('/payment') ||
     pathname.startsWith('/admin') ||
+    pathname.startsWith('/account/dashboard') ||
     pathname.startsWith('/instructor') ||
     pathname.startsWith('/forgot-password') ||
     pathname.startsWith('/learn');
@@ -43,6 +44,7 @@ export function FooterWrapper() {
     pathname.startsWith('/payment') ||
     pathname.startsWith('/login') ||
     pathname.startsWith('/admin') ||
+    pathname.startsWith('/account/dashboard') ||
     pathname.startsWith('/instructor') ||
     pathname.startsWith('/forgot-password') ||
     pathname.startsWith('/learn');

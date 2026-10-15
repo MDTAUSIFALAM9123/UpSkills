@@ -249,6 +249,21 @@ export default function PaymentPage() {
     }
   }, [course, processing, router]);
 
+  useEffect(() => {
+    if (window.Razorpay) {
+      setRazorpayLoaded(true);
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      if (!window.Razorpay) {
+        setRazorpayLoaded(false);
+      }
+    }, 10000);
+
+    return () => window.clearTimeout(timeout);
+  }, []);
+
   const handlePay = useCallback(async () => {
     if (!course || processing) return;
 
@@ -329,7 +344,9 @@ export default function PaymentPage() {
             setPaid(true);
             toast.success('Payment successful! You are enrolled.');
 
-            router.push(`/courses/${course.id}`);
+            setTimeout(() => {
+              router.push(`/courses/${course.id}`);
+            }, 3000);
           } catch (error) {
             console.error('Payment verification error:', error);
             toast.error(error instanceof Error ? error.message : 'Unable to verify payment.');
@@ -373,6 +390,96 @@ export default function PaymentPage() {
   }
 
   if (!course) return null;
+
+  if (paid) {
+    return (
+      <main className="flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-green-50 via-white to-emerald-50 px-4">
+        <div className="w-full max-w-md text-center">
+          {/* Animated success icon */}
+          <div className="relative mx-auto mb-7 flex h-28 w-28 items-center justify-center">
+            <div className="absolute inset-0 animate-ping rounded-full bg-green-200 opacity-30" />
+
+            <div className="relative flex h-24 w-24 animate-[successPop_0.5s_ease-out] items-center justify-center rounded-full bg-green-100 shadow-lg shadow-green-100">
+              <CheckCircle
+                size={64}
+                strokeWidth={1.8}
+                className="animate-[successPop_0.6s_ease-out] text-green-600"
+              />
+            </div>
+          </div>
+
+          {/* Success message */}
+          <p className="mb-3 text-sm font-bold tracking-[0.2em] text-green-600 uppercase">
+            Payment Confirmed
+          </p>
+
+          <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+            Payment Successful!
+          </h1>
+
+          <p className="mx-auto mt-4 max-w-sm text-base leading-7 text-gray-600">
+            Congratulations! You are now successfully enrolled in
+            <span className="font-semibold text-gray-900"> {course.title}</span>.
+          </p>
+
+          {/* Enrollment confirmation */}
+          <div className="mt-8 rounded-2xl border border-green-200 bg-white p-5 text-left shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-green-100">
+                <BookOpen size={25} className="text-green-700" />
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-medium tracking-wider text-gray-500 uppercase">
+                  Enrollment confirmed
+                </p>
+                <p className="mt-1 truncate font-bold text-gray-900">{course.title}</p>
+                <p className="mt-1 text-sm text-green-600">Lifetime access unlocked</p>
+              </div>
+
+              <CheckCircle size={23} className="shrink-0 text-green-600" />
+            </div>
+          </div>
+
+          {/* Redirect indicator */}
+          <div className="mt-7 flex items-center justify-center gap-3 text-sm text-gray-500">
+            <Loader2 size={18} className="animate-spin text-green-600" />
+            Redirecting you to your course...
+          </div>
+
+          <div className="mx-auto mt-5 h-1.5 w-48 overflow-hidden rounded-full bg-green-100">
+            <div className="h-full w-full origin-left animate-[progressFill_2.5s_linear] rounded-full bg-green-500" />
+          </div>
+        </div>
+
+        <style jsx>{`
+          @keyframes successPop {
+            0% {
+              opacity: 0;
+              transform: scale(0.5);
+            }
+            70% {
+              opacity: 1;
+              transform: scale(1.12);
+            }
+            100% {
+              opacity: 1;
+              transform: scale(1);
+            }
+          }
+
+          @keyframes progressFill {
+            from {
+              transform: scaleX(0);
+            }
+            to {
+              transform: scaleX(1);
+            }
+          }
+        `}</style>
+      </main>
+    );
+  }
 
   const lessonCount =
     course.sections?.reduce((total, section) => total + (section.lessons?.length || 0), 0) || 0;
@@ -556,12 +663,12 @@ export default function PaymentPage() {
                   {processing ? (
                     <>
                       <Loader2 size={19} className="animate-spin" />
-                      Processing...
+                      Processing payment...
                     </>
                   ) : !razorpayLoaded ? (
                     <>
-                      <Loader2 size={19} className="animate-spin" />
-                      Loading payment gateway...
+                      <CreditCard size={19} />
+                      Retry payment
                     </>
                   ) : (
                     <>

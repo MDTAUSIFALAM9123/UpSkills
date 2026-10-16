@@ -11,6 +11,8 @@ import {
   Bell,
   BookOpen,
   CheckCircle2,
+  ClipboardList,
+  CircleHelp,
   ChevronLeft,
   ChevronRight,
   CirclePlay,
@@ -22,6 +24,8 @@ import {
   Menu,
   Search,
   Settings,
+  Timer,
+  Trophy,
   Sparkles,
   UserRound,
   X,
@@ -89,7 +93,7 @@ interface ProfileData {
 }
 
 type View = 'dashboard' | 'learn';
-type ActiveTab = 'dashboard' | 'profile';
+type ActiveTab = 'dashboard' | 'profile' | 'quizzes';
 
 const clamp = (value: number) => Math.max(0, Math.min(100, Number(value) || 0));
 
@@ -891,6 +895,17 @@ export default function StudentDashboardPage() {
                 />
 
                 <SidebarItem
+                  icon={<ClipboardList size={19} />}
+                  label="Quizzes"
+                  active={activeTab === 'quizzes'}
+                  onClick={() => {
+                    leaveLearning();
+                    setActiveTab('quizzes');
+                    setMobileMenuOpen(false);
+                  }}
+                />
+
+                <SidebarItem
                   icon={<UserRound size={19} />}
                   label="My Profile"
                   active={activeTab === 'profile'}
@@ -953,6 +968,8 @@ export default function StudentDashboardPage() {
           <main className="min-w-0 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
             {loading ? (
               <MainLoader label="Loading your dashboard..." />
+            ) : activeTab === 'quizzes' ? (
+              <StudentQuizzesSection onBack={showDashboard} />
             ) : activeTab === 'profile' ? (
               <ProfileSection
                 key={userId}
@@ -1281,6 +1298,766 @@ export default function StudentDashboardPage() {
         </div>
       </div>
     </>
+  );
+}
+
+/* =========================
+   Student Quizzes — Inline Quiz Player
+========================= */
+
+interface StudentQuiz {
+  id: string;
+  title: string;
+  description?: string | null;
+  passingScore: number;
+  timeLimit?: number | null;
+  maxAttempts?: number | null;
+  questionCount?: number;
+  attemptsUsed?: number;
+  bestScore?: number | null;
+  lastStatus?: string | null;
+  courseTitle?: string | null;
+  lessonTitle?: string | null;
+}
+
+interface QuizOption {
+  id: string;
+  text: string;
+}
+
+interface QuizQuestion {
+  id: string;
+  question: string;
+  points?: number;
+  options: QuizOption[];
+}
+
+interface ActiveQuiz {
+  id: string;
+  title: string;
+  description?: string | null;
+  passingScore: number;
+  timeLimit?: number | null;
+  questions: QuizQuestion[];
+}
+
+interface QuizResult {
+  score: number;
+  totalPoints?: number;
+  passed: boolean;
+  message?: string;
+}
+
+function normalizeQuestions(raw: unknown): QuizQuestion[] {
+  if (!Array.isArray(raw)) return [];
+
+  return raw.map((item: any, index: number) => {
+    let rawOptions = item.options ?? [];
+
+    if (typeof rawOptions === 'string') {
+      try {
+        rawOptions = JSON.parse(rawOptions);
+      } catch {
+        rawOptions = [];
+      }
+    }
+
+    const options: QuizOption[] = Array.isArray(rawOptions)
+      ? rawOptions.map((option: any, optionIndex: number) => {
+          if (typeof option === 'string') {
+            return {
+              id: option,
+              text: option,
+            };
+          }
+
+          return {
+            id: String(option.id ?? option.value ?? optionIndex),
+            text: String(
+              option.text ??
+                option.label ??
+                option.value ??
+                option.option ??
+                `Option ${optionIndex + 1}`
+            ),
+          };
+        })
+      : Object.entries(rawOptions || {}).map(([key, value]) => ({
+          id: key,
+          text: String(value),
+        }));
+
+    return {
+      id: String(item.id ?? `question-${index + 1}`),
+      question: String(item.question ?? item.title ?? ''),
+      points: Number(item.points ?? 1),
+      options,
+    };
+  });
+}
+
+function StudentQuizzesSection({ onBack }: { onBack: () => void }) {
+  const [quizzes, setQuizzes] = useState<StudentQuiz[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const [starting, setStarting] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const [activeQuiz, setActiveQuiz] = useState<ActiveQuiz | null>(null);
+  const [attemptId, setAttemptId] = useState('');
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [remainingSeconds, setRemainingSeconds] = useState(0);
+  const [result, setResult] = useState<QuizResult | null>(null);
+  const [quizError, setQuizError] = useState('');
+
+  const loadQuizzes = useCallback(async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('/api/student/quizzes', {
+        credentials: 'include',
+        cache: 'no-store',
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Unable to load quizzes.');
+      }
+
+      setQuizzes(Array.isArray(data.quizzes) ? data.quizzes : []);
+    } catch (err) {
+      setError(getErrorMessage(err, 'Quizzes load nahi ho sake.'));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadQuizzes();
+  }, [loadQuizzes]);
+
+  // Countdown timer for the active quiz.
+  useEffect(() => {
+    if (!activeQuiz || result || remainingSeconds <= 0) return;
+
+    const timer = window.setInterval(() => {
+      setRemainingSeconds(previous => Math.max(0, previous - 1));
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [activeQuiz, result, remainingSeconds > 0]);
+
+  // Automatically submit when the timer expires.
+  useEffect(() => {
+    if (activeQuiz && !result && remainingSeconds === 0 && activeQuiz.timeLimit && !submitting) {
+      void submitQuiz();
+    }
+    // submitQuiz is declared below and called when the timer expires.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [remainingSeconds, activeQuiz, result, submitting]);
+
+  async function startQuiz(quiz: StudentQuiz) {
+    if (starting) return;
+
+    setStarting(true);
+    setQuizError('');
+    setResult(null);
+
+    try {
+      const response = await fetch(`/api/student/quizzes/${encodeURIComponent(quiz.id)}/start`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(data?.error || 'Unable to start quiz.');
+      }
+
+      const quizData = data?.quiz;
+
+      if (!quizData) {
+        throw new Error('API response mein quiz data nahi mila.');
+      }
+
+      const questions = normalizeQuestions(quizData.questions);
+
+      if (questions.length === 0) {
+        throw new Error('Is quiz mein questions nahi mile. Start API check karo.');
+      }
+
+      const id = String(data.attemptId ?? data.attempt?.id ?? '');
+
+      if (!id) {
+        throw new Error('Attempt ID missing hai. Start API mein attemptId return karo.');
+      }
+
+      const duration = Number(quizData.timeLimit ?? quiz.timeLimit ?? 0);
+
+      setAttemptId(id);
+
+      setActiveQuiz({
+        id: String(quizData.id ?? quiz.id),
+        title: String(quizData.title ?? quiz.title),
+        description: quizData.description ?? quiz.description ?? '',
+        passingScore: Number(quizData.passingScore ?? quiz.passingScore ?? 40),
+        timeLimit: duration > 0 ? duration : null,
+        questions,
+      });
+
+      setAnswers({});
+      setCurrentQuestion(0);
+      setRemainingSeconds(duration > 0 ? duration * 60 : 0);
+      setResult(null);
+    } catch (err: unknown) {
+      setQuizError(getErrorMessage(err, 'Quiz start nahi ho saka.'));
+    } finally {
+      setStarting(false);
+    }
+  }
+
+  async function submitQuiz() {
+    if (!activeQuiz || submitting || result) return;
+
+    if (!attemptId) {
+      setQuizError('Attempt ID missing hai. Please quiz dobara start karo.');
+      return;
+    }
+
+    setSubmitting(true);
+    setQuizError('');
+
+    try {
+      const response = await fetch(
+        `/api/student/quizzes/${encodeURIComponent(activeQuiz.id)}/submit`,
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            attemptId,
+            answers: Object.entries(answers).map(([questionId, selectedOptionId]) => ({
+              questionId,
+              selectedOptionId,
+            })),
+          }),
+        }
+      );
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(data?.error || 'Unable to submit quiz.');
+      }
+
+      const resultData = data?.result;
+
+      if (!resultData) {
+        throw new Error('Quiz submit ho gaya, lekin result response nahi mila.');
+      }
+
+      const score = Number(resultData.score ?? 0);
+      const totalPoints = Number(resultData.totalPoints ?? 0);
+
+      // API score = earned points, percentage UI par calculate hoga.
+      const percentage =
+        totalPoints > 0
+          ? Number((resultData.percentage ?? (score / totalPoints) * 100).toFixed(2))
+          : 0;
+
+      setResult({
+        score: percentage,
+        totalPoints,
+        passed: Boolean(resultData.passed),
+        message: resultData.timeExpired
+          ? 'Time expired. Your submitted answers have been evaluated.'
+          : resultData.requiresManualGrading
+            ? 'Your answers were submitted. Some questions require manual grading.'
+            : resultData.passed
+              ? 'You passed this quiz!'
+              : 'Quiz submitted. Review your learning and try again when attempts are available.',
+      });
+
+      toast.success('Quiz submitted successfully!');
+      void loadQuizzes();
+    } catch (err: unknown) {
+      setQuizError(getErrorMessage(err, 'Quiz submit nahi ho saka.'));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  function exitQuiz() {
+    setActiveQuiz(null);
+    setAttemptId('');
+    setAnswers({});
+    setCurrentQuestion(0);
+    setRemainingSeconds(0);
+    setResult(null);
+    setQuizError('');
+  }
+
+  const attemptedQuizzes = quizzes.filter(quiz => (Number(quiz.attemptsUsed) || 0) > 0).length;
+
+  const passedQuizzes = quizzes.filter(
+    quiz => typeof quiz.bestScore === 'number' && quiz.bestScore >= Number(quiz.passingScore || 0)
+  ).length;
+
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+
+    return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  };
+
+  // Inline quiz player: it renders inside the dashboard main area.
+  if (activeQuiz) {
+    const question = activeQuiz.questions[currentQuestion];
+    const answeredCount = Object.keys(answers).length;
+    const questionCount = activeQuiz.questions.length;
+    const progress = ((currentQuestion + 1) / questionCount) * 100;
+
+    return (
+      <div className="mx-auto max-w-5xl space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={exitQuiz}
+            disabled={submitting}
+            className="inline-flex items-center gap-2 text-sm font-bold text-violet-700 hover:text-violet-900 disabled:opacity-50"
+          >
+            <ArrowLeft size={17} />
+            Back to quizzes
+          </button>
+
+          {activeQuiz.timeLimit && !result && (
+            <div
+              className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-extrabold ${
+                remainingSeconds <= 60
+                  ? 'border-rose-200 bg-rose-50 text-rose-700'
+                  : 'border-violet-100 bg-white text-violet-700'
+              }`}
+            >
+              <Timer size={17} />
+              {formatTime(remainingSeconds)}
+            </div>
+          )}
+        </div>
+
+        <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+          <div className="bg-gradient-to-br from-violet-700 to-indigo-700 p-6 text-white sm:p-8">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-bold">
+              <ClipboardList size={15} />
+              Quiz assessment
+            </span>
+
+            <h2 className="mt-4 text-2xl font-black sm:text-3xl">{activeQuiz.title}</h2>
+
+            {activeQuiz.description && (
+              <p className="mt-2 text-sm leading-6 text-violet-100">{activeQuiz.description}</p>
+            )}
+
+            <div className="mt-5 flex flex-wrap gap-3 text-xs font-bold text-violet-100">
+              <span>{questionCount} questions</span>
+              <span>Pass score: {activeQuiz.passingScore}%</span>
+              <span>{answeredCount} answered</span>
+            </div>
+          </div>
+
+          {result ? (
+            <div className="p-6 text-center sm:p-10">
+              <div
+                className={`mx-auto grid h-20 w-20 place-items-center rounded-3xl ${
+                  result.passed ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
+                }`}
+              >
+                {result.passed ? <Trophy size={36} /> : <ClipboardList size={36} />}
+              </div>
+
+              <h3 className="mt-5 text-2xl font-black text-slate-950">
+                {result.passed ? 'Congratulations!' : 'Quiz completed'}
+              </h3>
+
+              <p className="mt-2 text-sm text-slate-500">
+                {result.message ||
+                  (result.passed
+                    ? 'You passed this quiz.'
+                    : 'Keep learning and try again when attempts are available.')}
+              </p>
+
+              <div className="mx-auto mt-6 max-w-sm rounded-2xl border border-slate-200 bg-slate-50 p-6">
+                <p className="text-sm font-semibold text-slate-500">Your score</p>
+                <p
+                  className={`mt-2 text-4xl font-black ${
+                    result.passed ? 'text-emerald-600' : 'text-slate-900'
+                  }`}
+                >
+                  {Math.round(result.score)}%
+                </p>
+                {typeof result.totalPoints === 'number' && (
+                  <p className="mt-2 text-sm font-semibold text-slate-500">
+                    Points:{' '}
+                    {result.totalPoints > 0
+                      ? `${((result.score / 100) * result.totalPoints).toFixed(1)} / ${result.totalPoints}`
+                      : '0'}
+                  </p>
+                )}
+                <p className="mt-2 text-xs text-slate-500">
+                  Passing score: {activeQuiz.passingScore}%
+                </p>
+              </div>
+
+              <div className="mt-7 flex flex-wrap justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={exitQuiz}
+                  className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50"
+                >
+                  Back to quizzes
+                </button>
+
+                <button
+                  type="button"
+                  onClick={onBack}
+                  className="rounded-xl bg-violet-600 px-5 py-3 text-sm font-extrabold text-white hover:bg-violet-700"
+                >
+                  Dashboard
+                </button>
+              </div>
+            </div>
+          ) : question ? (
+            <div className="p-5 sm:p-8">
+              <div className="mb-7">
+                <div className="mb-2 flex items-center justify-between gap-3 text-xs font-bold text-slate-500">
+                  <span>
+                    Question {currentQuestion + 1} of {questionCount}
+                  </span>
+                  <span>{Math.round((answeredCount / questionCount) * 100)}% answered</span>
+                </div>
+
+                <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+                  <div
+                    className="h-full rounded-full bg-violet-600 transition-all"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+              </div>
+
+              <p className="text-xs font-extrabold tracking-wider text-violet-700 uppercase">
+                Question {currentQuestion + 1}
+              </p>
+
+              <h3 className="mt-3 text-lg leading-7 font-black text-slate-950 sm:text-xl">
+                {question.question}
+              </h3>
+
+              <div className="mt-6 space-y-3">
+                {question.options.map((option, index) => {
+                  const selected = answers[question.id] === option.id;
+
+                  return (
+                    <button
+                      key={`${question.id}-${option.id}`}
+                      type="button"
+                      onClick={() =>
+                        setAnswers(previous => ({
+                          ...previous,
+                          [question.id]: option.id,
+                        }))
+                      }
+                      className={`flex w-full items-center gap-3 rounded-2xl border p-4 text-left transition ${
+                        selected
+                          ? 'border-violet-500 bg-violet-50 ring-2 ring-violet-100'
+                          : 'border-slate-200 bg-white hover:border-violet-200 hover:bg-violet-50/50'
+                      }`}
+                    >
+                      <span
+                        className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl text-sm font-black ${
+                          selected ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-600'
+                        }`}
+                      >
+                        {String.fromCharCode(65 + index)}
+                      </span>
+
+                      <span className="flex-1 text-sm leading-6 font-semibold text-slate-800">
+                        {option.text}
+                      </span>
+
+                      {selected && <CheckCircle2 size={19} className="shrink-0 text-violet-600" />}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {quizError && (
+                <div className="mt-5 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm font-medium text-rose-700">
+                  {quizError}
+                </div>
+              )}
+
+              <div className="mt-8 flex flex-col-reverse justify-between gap-3 border-t border-slate-100 pt-5 sm:flex-row">
+                <button
+                  type="button"
+                  disabled={currentQuestion === 0 || submitting}
+                  onClick={() => setCurrentQuestion(previous => previous - 1)}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+                >
+                  <ChevronLeft size={17} />
+                  Previous
+                </button>
+
+                {currentQuestion < questionCount - 1 ? (
+                  <button
+                    type="button"
+                    onClick={() => setCurrentQuestion(previous => previous + 1)}
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-5 py-3 text-sm font-extrabold text-white hover:bg-violet-700"
+                  >
+                    Next question
+                    <ChevronRight size={17} />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={submitting}
+                    onClick={() => void submitQuiz()}
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-extrabold text-white hover:bg-emerald-700 disabled:opacity-60"
+                  >
+                    {submitting ? <Spinner className="h-4 w-4" /> : <CheckCircle2 size={17} />}
+                    {submitting ? 'Submitting...' : 'Submit Quiz'}
+                  </button>
+                )}
+              </div>
+
+              <p className="mt-4 text-center text-xs text-slate-400">
+                Your answers: {answeredCount} of {questionCount}
+              </p>
+            </div>
+          ) : null}
+        </section>
+      </div>
+    );
+  }
+
+  const totalAttempts = quizzes.reduce((sum, quiz) => sum + (Number(quiz.attemptsUsed) || 0), 0);
+
+  return (
+    <div className="space-y-7">
+      <section className="flex flex-col justify-between gap-4 rounded-3xl bg-gradient-to-br from-violet-700 via-violet-700 to-indigo-700 p-6 text-white shadow-xl shadow-violet-200/50 sm:p-8 lg:flex-row lg:items-center">
+        <div>
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-bold text-violet-100">
+            <CircleHelp size={15} />
+            Assess your learning
+          </span>
+          <h2 className="mt-4 text-2xl font-black tracking-tight sm:text-3xl">My Quizzes</h2>
+          <p className="mt-2 max-w-xl text-sm leading-6 text-violet-100">
+            Test what you have learned, check your scores, and keep improving with every attempt.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={onBack}
+          className="inline-flex items-center justify-center gap-2 self-start rounded-xl bg-white px-4 py-3 text-sm font-extrabold text-violet-700 hover:bg-violet-50 lg:self-center"
+        >
+          <ArrowLeft size={16} />
+          Back to dashboard
+        </button>
+      </section>
+
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <StatCard
+          title="Available Quizzes"
+          value={loading ? '—' : quizzes.length}
+          subtitle="Published in your courses"
+          icon={<ClipboardList size={21} />}
+          color="violet"
+        />
+        <StatCard
+          title="Attempted"
+          value={loading ? '—' : attemptedQuizzes}
+          subtitle={`${totalAttempts} total attempts`}
+          icon={<Activity size={21} />}
+          color="sky"
+        />
+        <StatCard
+          title="Passed"
+          value={loading ? '—' : passedQuizzes}
+          subtitle="Based on your best score"
+          icon={<Trophy size={21} />}
+          color="emerald"
+        />
+      </section>
+
+      {quizError && (
+        <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+          {quizError}
+        </div>
+      )}
+
+      <section>
+        <div className="mb-4">
+          <h3 className="text-xl font-black tracking-tight text-slate-950">Available for you</h3>
+          <p className="mt-1 text-sm text-slate-500">
+            Published quizzes from your enrolled courses appear here.
+          </p>
+        </div>
+
+        {loading ? (
+          <MainLoader label="Loading quizzes..." compact />
+        ) : error ? (
+          <div className="rounded-2xl border border-rose-200 bg-white p-6 text-center">
+            <p className="font-bold text-slate-900">Could not load quizzes</p>
+            <p className="mt-2 text-sm text-slate-500">{error}</p>
+            <button
+              type="button"
+              onClick={() => void loadQuizzes()}
+              className="mt-4 rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-violet-700"
+            >
+              Try again
+            </button>
+          </div>
+        ) : quizzes.length === 0 ? (
+          <div className="rounded-3xl border border-dashed border-slate-300 bg-white px-5 py-14 text-center">
+            <ClipboardList size={29} className="mx-auto text-violet-600" />
+            <h4 className="mt-5 text-lg font-black text-slate-900">No quizzes available yet</h4>
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
+              Published quizzes attached to lessons in your enrolled courses will appear here.
+            </p>
+            <button
+              type="button"
+              onClick={onBack}
+              className="mt-5 rounded-xl bg-violet-600 px-5 py-3 text-sm font-bold text-white hover:bg-violet-700"
+            >
+              Back to learning
+            </button>
+          </div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {quizzes.map(quiz => {
+              const attemptsUsed = Number(quiz.attemptsUsed) || 0;
+              const maxAttempts = quiz.maxAttempts == null ? null : Number(quiz.maxAttempts);
+              const attemptsRemaining =
+                maxAttempts == null ? null : Math.max(0, maxAttempts - attemptsUsed);
+
+              const bestScore = typeof quiz.bestScore === 'number' ? quiz.bestScore : null;
+
+              const passed = bestScore !== null && bestScore >= Number(quiz.passingScore || 0);
+
+              const exhausted = attemptsRemaining === 0;
+
+              return (
+                <article
+                  key={quiz.id}
+                  className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-violet-200 hover:shadow-lg"
+                >
+                  <div className="flex items-start justify-between gap-3 border-b border-slate-100 bg-gradient-to-r from-violet-50 to-indigo-50 p-5">
+                    <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white text-violet-700 shadow-sm">
+                      <ClipboardList size={22} />
+                    </div>
+                    <span
+                      className={`rounded-full px-2.5 py-1 text-[11px] font-extrabold ${
+                        passed
+                          ? 'bg-emerald-100 text-emerald-700'
+                          : attemptsUsed
+                            ? 'bg-amber-100 text-amber-700'
+                            : 'bg-white text-violet-700'
+                      }`}
+                    >
+                      {passed ? 'Passed' : attemptsUsed ? 'Attempted' : 'Not started'}
+                    </span>
+                  </div>
+
+                  <div className="flex flex-1 flex-col p-5">
+                    <h4 className="text-base leading-6 font-extrabold text-slate-900">
+                      {quiz.title}
+                    </h4>
+
+                    {(quiz.courseTitle || quiz.lessonTitle) && (
+                      <p className="mt-1 text-xs font-semibold text-violet-700">
+                        {[quiz.courseTitle, quiz.lessonTitle].filter(Boolean).join(' · ')}
+                      </p>
+                    )}
+
+                    <p className="mt-2 line-clamp-3 min-h-[3.75rem] text-sm leading-5 text-slate-500">
+                      {quiz.description ||
+                        'Complete this quiz to check your understanding of the lesson.'}
+                    </p>
+
+                    <div className="mt-4 grid grid-cols-2 gap-2">
+                      <div className="rounded-xl bg-slate-50 p-3">
+                        <p className="text-[11px] font-semibold text-slate-500">Questions</p>
+                        <p className="mt-1 font-extrabold text-slate-900">
+                          {quiz.questionCount ?? '—'}
+                        </p>
+                      </div>
+                      <div className="rounded-xl bg-slate-50 p-3">
+                        <p className="text-[11px] font-semibold text-slate-500">Pass score</p>
+                        <p className="mt-1 font-extrabold text-slate-900">
+                          {Number(quiz.passingScore)}%
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-semibold text-slate-500">
+                      <span className="inline-flex items-center gap-1.5">
+                        <Timer size={14} />
+                        {quiz.timeLimit ? `${quiz.timeLimit} min` : 'No timer'}
+                      </span>
+                      <span>
+                        {maxAttempts === null
+                          ? 'Unlimited attempts'
+                          : `${attemptsRemaining} attempts left`}
+                      </span>
+                    </div>
+
+                    {bestScore !== null && (
+                      <div className="mt-3 flex items-center justify-between rounded-xl border border-slate-100 px-3 py-2.5">
+                        <span className="text-xs font-semibold text-slate-500">Best score</span>
+                        <span
+                          className={`text-sm font-black ${passed ? 'text-emerald-600' : 'text-slate-900'}`}
+                        >
+                          {Math.round(bestScore)}%
+                        </span>
+                      </div>
+                    )}
+
+                    <button
+                      type="button"
+                      disabled={exhausted || starting}
+                      onClick={() => void startQuiz(quiz)}
+                      className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-violet-600 px-4 py-3 text-sm font-extrabold text-white transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
+                    >
+                      {starting ? (
+                        <>
+                          <Spinner className="h-4 w-4" />
+                          Starting...
+                        </>
+                      ) : exhausted ? (
+                        'No attempts left'
+                      ) : attemptsUsed ? (
+                        'Continue / Retake Quiz'
+                      ) : (
+                        'Start Quiz'
+                      )}
+                      {!exhausted && !starting && <ArrowRight size={16} />}
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </section>
+    </div>
   );
 }
 

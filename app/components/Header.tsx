@@ -24,14 +24,18 @@ export default function Header() {
   const lastFetchRef = useRef(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // 🔐 Check login
+  // Check login status
   const checkLoginStatus = useCallback(async () => {
     const now = Date.now();
+
     if (now - lastFetchRef.current < 2000) return;
     lastFetchRef.current = now;
 
     try {
-      const res = await fetch('/api/account/me', { credentials: 'include' });
+      const res = await fetch('/api/account/me', {
+        credentials: 'include',
+      });
+
       const data = await res.json();
 
       setIsLoggedIn(Boolean(data?.loggedIn));
@@ -40,6 +44,8 @@ export default function Header() {
       setUser(data);
     } catch {
       setIsLoggedIn(false);
+      setIsAdmin(false);
+      setIsInstructor(false);
       setUser(null);
     }
   }, []);
@@ -48,16 +54,20 @@ export default function Header() {
     checkLoginStatus();
   }, [checkLoginStatus]);
 
+  // Close profile dropdown when clicking outside
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (!dropdownRef.current?.contains(e.target as Node)) {
         setShowDropdown(false);
       }
     };
+
     document.addEventListener('mousedown', handler);
+
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
+  // Logout
   const handleLogout = async () => {
     try {
       await fetch('/api/account/logout', {
@@ -66,27 +76,48 @@ export default function Header() {
       });
 
       setIsLoggedIn(false);
+      setIsAdmin(false);
+      setIsInstructor(false);
+      setUser(null);
       setShowDropdown(false);
       setMobileMenuOpen(false);
+
       router.push('/');
     } catch {
       console.error('Logout failed');
     }
   };
 
+  const closeMobileMenu = () => setMobileMenuOpen(false);
+
   return (
     <>
       {/* NAVBAR */}
-      <nav className="border-b border-gray-200 bg-white">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-10 px-4 sm:px-6 md:gap-4">
-          {/* Logo */}
-          <Link href="/" className="shrink-0">
-            <img src="/Logo.png" alt="Logo" className="w-32 cursor-pointer sm:w-36" />
-          </Link>
+      <nav className="relative z-40 border-b border-gray-200 bg-white">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 md:gap-4">
+          {/* LEFT: Mobile hamburger + logo */}
+          <div className="flex shrink-0 items-center gap-2">
+            {/* Hamburger only on mobile after login */}
+            {isLoggedIn && (
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(prev => !prev)}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-slate-700 transition hover:bg-slate-100 lg:hidden"
+                aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+                aria-expanded={mobileMenuOpen}
+              >
+                {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </button>
+            )}
 
-          {/* Desktop Navigation */}
+            {/* Logo: same position on desktop */}
+            <Link href="/" onClick={closeMobileMenu} className="shrink-0">
+              <img src="/Logo.png" alt="Logo" className="w-28 cursor-pointer sm:w-36 lg:w-36" />
+            </Link>
+          </div>
+
+          {/* DESKTOP NAVIGATION: unchanged */}
           <div className="ml-auto hidden items-center gap-8 lg:flex lg:gap-10">
-            {/* Links */}
             <nav className="flex items-center gap-10 font-semibold lg:gap-8">
               <Link
                 href="/"
@@ -110,8 +141,8 @@ export default function Header() {
               </Link>
             </nav>
 
-            {/* Search */}
-            <form className="w-72 lg:w-80 xl:w-96">
+            {/* Desktop Search */}
+            <form className="w-72 lg:w-80 xl:w-96" onSubmit={e => e.preventDefault()}>
               <div className="flex h-10 items-center rounded-lg border border-slate-200 bg-white shadow-xs transition focus-within:border-purple-400 focus-within:ring-2 focus-within:ring-purple-100">
                 <Search className="ml-3 h-[18px] w-[18px] shrink-0 text-slate-400" />
 
@@ -132,44 +163,41 @@ export default function Header() {
             </form>
           </div>
 
-          {/* Right Section */}
-          <div className="relative ml-4 flex items-center gap-3 sm:ml-6 sm:gap-4" ref={dropdownRef}>
+          {/* RIGHT SECTION */}
+          <div
+            className="relative ml-auto flex shrink-0 items-center gap-3 sm:gap-4 lg:ml-4"
+            ref={dropdownRef}
+          >
+            {/* Mobile right side */}
             <div className="flex items-center gap-2 lg:hidden">
-              {' '}
-              {!isLoggedIn ? (
-                <>
-                  {' '}
-                  {/* Bell */}
-                  <button
-                    type="button"
-                    aria-label="Notifications"
-                    className="rounded-lg p-2 text-slate-700 transition hover:bg-slate-100"
-                  >
-                    {' '}
-                    <Bell className="h-5 w-5" />{' '}
-                  </button>{' '}
-                  {/* Start Free */}{' '}
-                  <Link
-                    href="/register"
-                    className="rounded-lg bg-purple-600 px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-purple-700"
-                  >
-                    {' '}
-                    Start Free{' '}
-                  </Link>{' '}
-                </>
-              ) : (
-                /* Hamburger only when logged in */ <button
-                  onClick={() => setMobileMenuOpen(prev => !prev)}
-                  className="rounded-lg p-2 text-slate-700 transition hover:bg-slate-100"
-                  aria-label="Toggle menu"
+              {/* Bell visible before and after login */}
+              <button
+                type="button"
+                aria-label="Notifications"
+                onClick={() => {
+                  if (isLoggedIn) {
+                    router.push('/account/notifications');
+                  } else {
+                    router.push('/login');
+                  }
+                }}
+                className="relative flex h-10 w-10 items-center justify-center rounded-lg text-slate-700 transition hover:bg-slate-100"
+              >
+                <Bell className="h-5 w-5" />
+              </button>
+
+              {/* Start Free only when logged out */}
+              {!isLoggedIn && (
+                <Link
+                  href="/register"
+                  className="rounded-lg bg-purple-600 px-3.5 py-2 text-sm font-semibold whitespace-nowrap text-white transition hover:bg-purple-700"
                 >
-                  {' '}
-                  {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}{' '}
-                </button>
-              )}{' '}
+                  Start Free
+                </Link>
+              )}
             </div>
 
-            {/* Desktop Auth */}
+            {/* DESKTOP AUTH: unchanged */}
             {!isLoggedIn ? (
               <div className="hidden items-center gap-4 lg:flex">
                 <Link
@@ -187,10 +215,13 @@ export default function Header() {
                 </Link>
               </div>
             ) : (
-              <div className="hidden lg:block">
+              <div className="relative hidden lg:block">
                 <button
+                  type="button"
                   onClick={() => setShowDropdown(prev => !prev)}
                   className="flex items-center gap-2 font-medium text-purple-700"
+                  aria-expanded={showDropdown}
+                  aria-label="Open account menu"
                 >
                   <div className="flex h-9 w-9 items-center justify-center rounded-full bg-purple-600 text-sm font-bold text-white">
                     {user?.name?.trim().slice(0, 2).toUpperCase() || 'U'}
@@ -212,6 +243,7 @@ export default function Header() {
                       {isAdmin ? (
                         <Link
                           href="/admin"
+                          onClick={() => setShowDropdown(false)}
                           className="flex items-center gap-2 px-4 py-2.5 text-red-600 transition hover:bg-slate-50"
                         >
                           <Shield className="h-4 w-4" />
@@ -221,6 +253,7 @@ export default function Header() {
                         <>
                           <Link
                             href={`/account/profile/${user?.id}`}
+                            onClick={() => setShowDropdown(false)}
                             className="px-4 py-2.5 transition hover:bg-slate-50"
                           >
                             My Profile
@@ -228,6 +261,7 @@ export default function Header() {
 
                           <Link
                             href="/instructor"
+                            onClick={() => setShowDropdown(false)}
                             className="px-4 py-2.5 transition hover:bg-slate-50"
                           >
                             Instructor Dashboard
@@ -237,6 +271,7 @@ export default function Header() {
                         <>
                           <Link
                             href="/account/dashboard"
+                            onClick={() => setShowDropdown(false)}
                             className="px-4 py-2.5 transition hover:bg-slate-50"
                           >
                             Dashboard
@@ -245,6 +280,7 @@ export default function Header() {
                       )}
 
                       <button
+                        type="button"
                         onClick={handleLogout}
                         className="px-4 py-2.5 text-left text-red-600 transition hover:bg-slate-50"
                       >
@@ -260,70 +296,85 @@ export default function Header() {
       </nav>
 
       {/* MOBILE MENU */}
-      {mobileMenuOpen && (
-        <div className="border-t bg-white shadow-md lg:hidden">
-          <div className="flex flex-col gap-4 px-6 py-4 font-semibold">
-            <Link href="/" onClick={() => setMobileMenuOpen(false)}>
+      {mobileMenuOpen && isLoggedIn && (
+        <div className="relative z-30 border-t border-slate-100 bg-white shadow-md lg:hidden">
+          <div className="flex flex-col gap-1 px-4 py-4 font-semibold sm:px-6">
+            <Link
+              href="/"
+              onClick={closeMobileMenu}
+              className="rounded-lg px-3 py-3 text-slate-700 transition hover:bg-purple-50 hover:text-purple-700"
+            >
               Home
             </Link>
-            <Link href="/courses" onClick={() => setMobileMenuOpen(false)}>
+
+            <Link
+              href="/courses"
+              onClick={closeMobileMenu}
+              className="rounded-lg px-3 py-3 text-slate-700 transition hover:bg-purple-50 hover:text-purple-700"
+            >
               Courses
             </Link>
-            <Link href="/about" onClick={() => setMobileMenuOpen(false)}>
+
+            <Link
+              href="/about"
+              onClick={closeMobileMenu}
+              className="rounded-lg px-3 py-3 text-slate-700 transition hover:bg-purple-50 hover:text-purple-700"
+            >
               About
             </Link>
 
-            <hr />
+            <hr className="my-2 border-slate-200" />
 
-            {!isLoggedIn ? (
+            {isAdmin && (
+              <Link
+                href="/admin"
+                onClick={closeMobileMenu}
+                className="flex items-center gap-2 rounded-lg px-3 py-3 text-red-600 transition hover:bg-red-50"
+              >
+                <Shield className="h-4 w-4" />
+                Admin Panel
+              </Link>
+            )}
+
+            {isInstructor && (
               <>
                 <Link
-                  href="/register"
-                  className="bg-primaryColor rounded-md px-4 py-2 text-center text-white"
-                  onClick={() => setMobileMenuOpen(false)}
+                  href={`/account/profile/${user?.id}`}
+                  onClick={closeMobileMenu}
+                  className="rounded-lg px-3 py-3 text-slate-700 transition hover:bg-purple-50 hover:text-purple-700"
                 >
-                  Start Free
+                  My Profile
                 </Link>
+
                 <Link
-                  href="/login"
-                  className="bg-primaryColor rounded-md px-4 py-2 text-center text-white"
-                  onClick={() => setMobileMenuOpen(false)}
+                  href="/instructor"
+                  onClick={closeMobileMenu}
+                  className="rounded-lg px-3 py-3 text-slate-700 transition hover:bg-purple-50 hover:text-purple-700"
                 >
-                  Sign In
+                  Instructor Dashboard
                 </Link>
-              </>
-            ) : (
-              <>
-                {isAdmin && (
-                  <Link
-                    href="/admin"
-                    className="flex items-center gap-2 text-red-600"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <Shield className="h-4 w-4" />
-                    Admin Panel
-                  </Link>
-                )}
-
-                {isInstructor && (
-                  <Link href="/instructor" onClick={() => setMobileMenuOpen(false)}>
-                    Instructor Dashboard
-                  </Link>
-                )}
-
-                {!isAdmin && !isInstructor && (
-                  <>
-                    <Link href="/account/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                      Dashboard
-                    </Link>
-                  </>
-                )}
-
-                <button onClick={handleLogout} className="text-left text-red-600">
-                  Log Out
-                </button>
               </>
             )}
+
+            {!isAdmin && !isInstructor && (
+              <>
+                <Link
+                  href="/account/dashboard"
+                  onClick={closeMobileMenu}
+                  className="rounded-lg px-3 py-3 text-slate-700 transition hover:bg-purple-50 hover:text-purple-700"
+                >
+                  Dashboard
+                </Link>
+              </>
+            )}
+
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="rounded-lg px-3 py-3 text-left text-red-600 transition hover:bg-red-50"
+            >
+              Log Out
+            </button>
           </div>
         </div>
       )}

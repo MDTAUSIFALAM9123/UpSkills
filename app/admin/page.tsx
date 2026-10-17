@@ -422,20 +422,22 @@ export default function AdminDashboard() {
         }`}
       >
         <div className="flex h-[74px] shrink-0 items-center justify-between border-b border-slate-100 px-5">
-          <Link href="/" className="shrink-0">
+          <Link href="/" className="hidden shrink-0 lg:block">
             <img
               src="/Logo.png"
               alt="UpSkills"
               className="w-32 cursor-pointer object-contain sm:w-32"
             />
           </Link>
-
+          <div className="lg:hidden">
+            <h1 className="text-lg font-bold tracking-wide text-slate-600 uppercase">Menu</h1>
+          </div>
           <button
             type="button"
             onClick={() => setSidebarOpen(false)}
             className="rounded-lg p-2 text-slate-400 hover:bg-white lg:hidden"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
@@ -509,15 +511,19 @@ export default function AdminDashboard() {
               onClick={() => setSidebarOpen(true)}
               className="rounded-xl p-2 text-slate-500 hover:bg-slate-50 lg:hidden"
             >
-              <Menu size={20} />
+              <Menu size={21} />
             </button>
+
+            <Link href="/" className="shrink-0 lg:hidden">
+              <img src="/Logo.png" alt="UpSkills" className="w-30 cursor-pointer object-contain" />
+            </Link>
 
             <div className="hidden items-center gap-2 rounded-full bg-violet-50 px-3 py-2 text-xs font-bold text-violet-700 sm:flex">
               <ShieldCheck size={15} />
               Admin Console
             </div>
 
-            <div className="relative max-w-[430px] flex-1 sm:w-[380px] sm:flex-none">
+            <div className="relative hidden max-w-[430px] flex-1 sm:flex">
               <Search
                 size={17}
                 className="absolute top-1/2 left-3 -translate-y-1/2 text-slate-400"
@@ -544,13 +550,13 @@ export default function AdminDashboard() {
                 type="button"
                 className="relative rounded-xl p-2 text-slate-500 hover:bg-slate-50"
               >
-                <Bell size={19} />
+                <Bell size={20} />
                 <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
               </button>
 
               <div className="hidden h-9 w-px bg-slate-100 sm:block" />
 
-              <div className="hidden items-center gap-2 sm:flex">
+              <div className="flex items-center gap-2">
                 <div className="grid h-9 w-9 place-items-center rounded-full bg-violet-600 text-sm font-bold text-white">
                   A
                 </div>

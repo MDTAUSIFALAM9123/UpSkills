@@ -612,7 +612,7 @@ export default function StudentDashboardPage() {
                 onClick={() => setMobileMenuOpen(value => !value)}
                 aria-label="Toggle navigation"
                 aria-expanded={mobileMenuOpen}
-                className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 transition hover:border-violet-200 hover:bg-violet-50 lg:hidden"
+                className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-700 transition hover:border-violet-200 hover:bg-violet-50 lg:hidden"
               >
                 {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
               </button>
@@ -665,13 +665,13 @@ export default function StudentDashboardPage() {
                   }`}
                   aria-expanded={notificationsOpen}
                   title="Notifications"
-                  className={`relative flex h-10 w-10 items-center justify-center rounded-xl border transition sm:h-11 sm:w-11 ${
+                  className={`relative flex h-10 w-10 items-center justify-center rounded-xl transition sm:h-11 sm:w-11 ${
                     notificationsOpen
-                      ? 'border-violet-200 bg-violet-50 text-violet-700'
-                      : 'border-slate-200 bg-white text-slate-600 hover:border-violet-200 hover:bg-violet-50 hover:text-violet-700'
+                      ? 'bg-violet-50 text-violet-700'
+                      : 'bg-white text-slate-600 hover:border-violet-200 hover:bg-violet-50 hover:text-violet-700'
                   }`}
                 >
-                  <Bell size={19} />
+                  <Bell size={21} />
 
                   {unreadNotifications > 0 && (
                     <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-extrabold text-white ring-2 ring-white">
@@ -850,16 +850,24 @@ export default function StudentDashboardPage() {
             }`}
           >
             <div className="flex h-[74px] shrink-0 items-center justify-between border-b border-slate-100 px-5">
-              <Link href="/" className="shrink-0" onClick={() => setMobileMenuOpen(false)}>
+              <Link
+                href="/"
+                className="hidden shrink-0 lg:block"
+                onClick={() => setMobileMenuOpen(false)}
+              >
                 <img src="/Logo.png" alt="UpSkills" className="w-32 object-contain" />
               </Link>
+
+              <div className="lg:hidden">
+                <h1 className="text-lg font-bold tracking-wide text-slate-600 uppercase">Menu</h1>
+              </div>
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(false)}
                 aria-label="Close menu"
                 className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 lg:hidden"
               >
-                <X size={18} />
+                <X size={20} />
               </button>
             </div>
 
@@ -953,11 +961,22 @@ export default function StudentDashboardPage() {
 
                 <button
                   type="button"
-                  title="Open profile"
-                  onClick={showProfile}
+                  title="Logout"
+                  onClick={async () => {
+                    try {
+                      await fetch('/api/account/logout', {
+                        method: 'POST',
+                        credentials: 'include',
+                      });
+                      setMobileMenuOpen(false);
+                      router.push('/');
+                    } catch (error) {
+                      console.error('Logout failed:', error);
+                    }
+                  }}
                   className="rounded-lg p-2 text-slate-400 transition hover:bg-white hover:text-violet-700"
                 >
-                  <LogOut size={17} className="rotate-180" />
+                  <LogOut size={17} />
                 </button>
               </div>
             </div>

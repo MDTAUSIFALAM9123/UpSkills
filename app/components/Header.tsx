@@ -112,7 +112,7 @@ export default function Header() {
 
             {/* Logo: same position on desktop */}
             <Link href="/" onClick={closeMobileMenu} className="shrink-0">
-              <img src="/Logo.png" alt="Logo" className="w-28 cursor-pointer sm:w-36 lg:w-36" />
+              <img src="/Logo.png" alt="Logo" className="w-28 cursor-pointer sm:w-34 lg:w-34" />
             </Link>
           </div>
 
@@ -176,14 +176,14 @@ export default function Header() {
                 aria-label="Notifications"
                 onClick={() => {
                   if (isLoggedIn) {
-                    router.push('/account/notifications');
+                    router.push('#');
                   } else {
                     router.push('/login');
                   }
                 }}
                 className="relative flex h-10 w-10 items-center justify-center rounded-lg text-slate-700 transition hover:bg-slate-100"
               >
-                <Bell className="h-5 w-5" />
+                <Bell className="h-6 w-6" />
               </button>
 
               {/* Start Free only when logged out */}

@@ -381,13 +381,17 @@ export default function InstructorDashboard() {
         {/* Sidebar Header */}
         <div className="flex h-[74px] shrink-0 items-center justify-between border-b border-slate-100 px-5">
           {/* Logo */}
-          <Link href="/" className="shrink-0">
+          <Link href="/" className="hidden shrink-0 lg:block">
             <img
               src="/Logo.png"
               alt="UpSkills"
               className="w-32 cursor-pointer object-contain sm:w-32"
             />
           </Link>
+
+          <div className="lg:hidden">
+            <h1 className="text-lg font-bold tracking-wide text-slate-600 uppercase">Menu</h1>
+          </div>
 
           {/* Close Mobile Sidebar */}
           <button
@@ -396,7 +400,7 @@ export default function InstructorDashboard() {
             className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 lg:hidden"
             aria-label="Close sidebar"
           >
-            <X size={19} />
+            <X size={20} />
           </button>
         </div>
 
@@ -467,7 +471,18 @@ export default function InstructorDashboard() {
               {/* Logout */}
               <button
                 type="button"
-                onClick={() => toast('Logout endpoint is not present in the supplied code.')}
+                onClick={async () => {
+                  try {
+                    await fetch('/api/account/logout', {
+                      method: 'POST',
+                      credentials: 'include',
+                    });
+
+                    router.push('/');
+                  } catch (error) {
+                    console.error('Logout failed:', error);
+                  }
+                }}
                 title="Logout"
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-slate-400 transition-all duration-200 hover:bg-red-500/10 hover:text-red-400"
               >

@@ -23,7 +23,6 @@ import {
   LogOut,
   Menu,
   Search,
-  Settings,
   Timer,
   Trophy,
   Sparkles,
@@ -31,6 +30,7 @@ import {
   X,
 } from 'lucide-react';
 import Link from 'next/link';
+import StudentNotesSection from './StudentNotes';
 
 /* =========================
    Types
@@ -93,7 +93,7 @@ interface ProfileData {
 }
 
 type View = 'dashboard' | 'learn';
-type ActiveTab = 'dashboard' | 'profile' | 'quizzes';
+type ActiveTab = 'dashboard' | 'profile' | 'quizzes' | 'notes';
 
 const clamp = (value: number) => Math.max(0, Math.min(100, Number(value) || 0));
 
@@ -914,16 +914,19 @@ export default function StudentDashboardPage() {
                 />
 
                 <SidebarItem
+                  icon={<FileText size={19} />}
+                  label="My Notes"
+                  active={activeTab === 'notes'}
+                  onClick={() => {
+                    setActiveTab('notes');
+                    setView('dashboard');
+                    setMobileMenuOpen(false);
+                  }}
+                />
+                <SidebarItem
                   icon={<UserRound size={19} />}
                   label="My Profile"
                   active={activeTab === 'profile'}
-                  onClick={showProfile}
-                />
-
-                <SidebarItem
-                  icon={<Settings size={19} />}
-                  label="Account Settings"
-                  active={false}
                   onClick={showProfile}
                 />
               </nav>
@@ -989,6 +992,8 @@ export default function StudentDashboardPage() {
               <MainLoader label="Loading your dashboard..." />
             ) : activeTab === 'quizzes' ? (
               <StudentQuizzesSection onBack={showDashboard} />
+            ) : activeTab === 'notes' ? (
+              <StudentNotesSection />
             ) : activeTab === 'profile' ? (
               <ProfileSection
                 key={userId}
@@ -2806,15 +2811,6 @@ function ProfileSection({
   return (
     <section className="mx-auto max-w-4xl">
       <div className="mb-6">
-        <button
-          type="button"
-          onClick={onBack}
-          className="mb-4 inline-flex items-center gap-2 text-sm font-bold text-violet-700 transition hover:text-violet-900"
-        >
-          <ArrowLeft size={17} />
-          Back to dashboard
-        </button>
-
         <p className="text-xs font-extrabold tracking-widest text-violet-700 uppercase">
           Account settings
         </p>

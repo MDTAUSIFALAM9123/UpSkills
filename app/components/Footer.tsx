@@ -82,29 +82,12 @@ export default function Footer() {
             <p className="mt-2 text-gray-600">
               Phone: <strong>(+91) 8340593996</strong>
             </p>
-            <div className="mt-4 flex space-x-2">
-              <a href="">
-                <img
-                  src="https://www.avaza.com/wp-content/uploads/2020/06/App-store.webp"
-                  alt="App Store"
-                  className="w-32"
-                />
-              </a>
-              <a href="">
-                {' '}
-                <img
-                  src="https://www.gulfjobpaper.com/wp-content/uploads/2023/09/App-Gulf-Job-Paper.webp"
-                  alt="Google Play"
-                  className="w-32"
-                />
-              </a>
-            </div>
           </div>
         </div>
       </div>
 
       <div className="text-md mt-2 border-t pt-3 text-center text-gray-500 sm:mt-4 sm:pt-5">
-        <p>&copy; 2025 UpSkills</p>
+        <p>&copy; {new Date().getFullYear()} UpSkills</p>
       </div>
     </footer>
   );

@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronRight, Edit, Eye, EyeOff, Star, Users } from 'lucide-react';
+import { ChevronRight, Edit, Eye, EyeOff, Star, Trash2, Users } from 'lucide-react';
 import type { Course } from './types';
 
 export function DashboardStat({
@@ -164,7 +164,7 @@ export function CourseCard({
             aria-label={`Delete ${course.title}`}
             className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-500 hover:bg-red-100"
           >
-            <span className="text-sm font-black">×</span>
+            <Trash2 size={15} />
           </button>
         </div>
       </div>

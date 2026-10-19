@@ -297,10 +297,6 @@ export default function InstructorDashboard() {
 
       await loadCourses();
       setActiveTab('courses');
-
-      if (data?.id) {
-        router.push(`/instructor/courses/${data.id}/edit`);
-      }
     } catch (error) {
       console.error(error);
       toast.error('Network error while creating course');

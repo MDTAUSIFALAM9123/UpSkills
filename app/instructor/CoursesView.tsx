@@ -133,20 +133,6 @@ function CoursesView({
               onDelete={() => onDelete(course)}
             />
           ))}
-
-          <button
-            type="button"
-            onClick={onCreate}
-            className="flex min-h-[440px] flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-white p-8 text-center transition hover:border-violet-300 hover:bg-violet-50/30"
-          >
-            <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-violet-100 text-violet-700">
-              <Plus size={30} />
-            </div>
-            <h3 className="text-xl font-extrabold text-slate-900">Create New Course</h3>
-            <p className="mt-2 max-w-[250px] text-sm leading-6 text-slate-500">
-              Start building your next course and add curriculum.
-            </p>
-          </button>
         </div>
       )}
     </div>

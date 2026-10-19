@@ -112,7 +112,7 @@ export default function Header() {
 
             {/* Logo: same position on desktop */}
             <Link href="/" onClick={closeMobileMenu} className="shrink-0">
-              <img src="/Logo.png" alt="Logo" className="w-28 cursor-pointer sm:w-34 lg:w-34" />
+              <img src="/Logo.png" alt="Logo" className="w-28 cursor-pointer sm:w-32 lg:w-32" />
             </Link>
           </div>
 
@@ -181,7 +181,7 @@ export default function Header() {
                     router.push('/login');
                   }
                 }}
-                className="relative flex h-10 w-10 items-center justify-center rounded-lg text-slate-700 transition hover:bg-slate-100"
+                className="relative flex h-10 w-10 items-center justify-center rounded-lg text-slate-700 transition"
               >
                 <Bell className="h-6 w-6" />
               </button>
@@ -190,7 +190,7 @@ export default function Header() {
               {!isLoggedIn && (
                 <Link
                   href="/register"
-                  className="rounded-lg bg-purple-600 px-3.5 py-2 text-sm font-semibold whitespace-nowrap text-white transition hover:bg-purple-700"
+                  className="rounded-lg bg-purple-600 px-3.5 py-2 text-sm font-semibold whitespace-nowrap text-white transition"
                 >
                   Start Free
                 </Link>

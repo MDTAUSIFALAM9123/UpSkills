@@ -36,6 +36,7 @@ import {
   Zap,
 } from 'lucide-react';
 import Link from 'next/link';
+import PaymentHistory from './PaymentHistory';
 
 interface User {
   id: string;
@@ -728,6 +729,9 @@ export default function AdminDashboard() {
                     </tbody>
                   </table>
                 </div>
+              </div>
+              <div className="mt-6">
+                <PaymentHistory />
               </div>
             </SimpleSection>
           )}

@@ -367,7 +367,15 @@ export default function StudentNotesSection() {
 
             <button
               type="button"
-              onClick={openCreateForm}
+              onClick={() => {
+                openCreateForm();
+                requestAnimationFrame(() => {
+                  document.getElementById('student-note-form')?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start',
+                  });
+                });
+              }}
               className="inline-flex shrink-0 items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3.5 text-sm font-bold text-violet-700 shadow-lg transition hover:-translate-y-0.5 hover:bg-violet-50 focus:ring-4 focus:ring-white/30 focus:outline-none"
             >
               <Plus size={19} />
@@ -720,11 +728,11 @@ export default function StudentNotesSection() {
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100 text-amber-700">
                     <NotebookPen size={17} />
                   </div>
-                  <h3 className="text-sm font-extrabold text-slate-800">Note Content</h3>
+                  <h3 className="text-md font-extrabold text-slate-800">Note Content</h3>
                 </div>
 
                 <div className="min-h-48 rounded-2xl border border-slate-200 bg-slate-50/70 p-5 sm:p-6">
-                  <p className="text-sm leading-7 break-words whitespace-pre-wrap text-slate-700">
+                  <p className="text-md leading-7 break-words whitespace-pre-wrap text-slate-700">
                     {viewingNote.content}
                   </p>
                 </div>
@@ -979,7 +987,16 @@ export default function StudentNotesSection() {
             ) : lessons.length > 0 ? (
               <button
                 type="button"
-                onClick={openCreateForm}
+                onClick={() => {
+                  openCreateForm();
+
+                  requestAnimationFrame(() => {
+                    document.getElementById('student-note-form')?.scrollIntoView({
+                      behavior: 'smooth',
+                      block: 'start',
+                    });
+                  });
+                }}
                 className="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-violet-200 transition hover:bg-violet-700"
               >
                 <Plus size={18} />

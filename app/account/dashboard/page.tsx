@@ -2104,7 +2104,7 @@ function SidebarItem({
     <button
       type="button"
       onClick={onClick}
-      className={`group flex w-full items-center gap-3 rounded-xl px-3.5 py-3 text-left text-xs font-bold transition ${
+      className={`group flex w-full items-center gap-3 rounded-xl px-3.5 py-3 text-left text-sm font-bold transition ${
         active
           ? 'bg-violet-600 text-white shadow-lg shadow-violet-200'
           : 'text-slate-600 hover:bg-violet-50 hover:text-violet-700'

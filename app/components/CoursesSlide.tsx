@@ -5,6 +5,11 @@ import { useCourses } from '@/hooks/useCourse';
 import { ArrowRight, Star, UserRound, Zap } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
+function toNumber(value: unknown, fallback = 0): number {
+  const parsed = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
 export default function CoursesSlide() {
   const router = useRouter();
 
@@ -114,9 +119,11 @@ export default function CoursesSlide() {
                       <div className="flex shrink-0 items-center gap-1 text-sm">
                         <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
 
-                        <span className="font-semibold text-gray-800">4.5</span>
+                        <span className="font-semibold text-gray-800">
+                          {toNumber(course.avgRating).toFixed(1)}
+                        </span>
 
-                        <span className="text-gray-400">(940)</span>
+                        {/* <span className="text-xs text-gray-400">({course.totalRatings ?? 0})</span> */}
                       </div>
                     </div>
 
@@ -139,8 +146,12 @@ export default function CoursesSlide() {
                       <div>
                         <p className="text-sm font-medium text-gray-400">Fee</p>
 
-                        <p className="mt-0.5 text-[22px] font-bold text-gray-900">
-                          ₹{course.price}
+                        <p
+                          className={`mt-0.5 text-[22px] font-bold ${
+                            Number(course.price) === 0 ? 'text-green-600' : 'text-gray-900'
+                          }`}
+                        >
+                          {Number(course.price) === 0 ? 'Free' : `₹${course.price}`}
                         </p>
                       </div>
 
@@ -189,10 +200,14 @@ export default function CoursesSlide() {
                         <span className="truncate">{course.instructor.name}</span>
                       </div>
 
-                      <div className="flex shrink-0 items-center gap-1 text-xs">
-                        <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                      <div className="flex shrink-0 items-center gap-1 text-sm">
+                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
 
-                        <span className="font-semibold text-gray-800">4.5</span>
+                        <span className="font-semibold text-gray-800">
+                          {toNumber(course.avgRating).toFixed(1)}
+                        </span>
+
+                        {/* <span className="text-xs text-gray-400">({course.totalRatings ?? 0})</span> */}
                       </div>
                     </div>
 
@@ -209,7 +224,13 @@ export default function CoursesSlide() {
                     <div className="my-4 border-t border-gray-200" />
                     {/* Bottom */}
                     <div className="mt-4 flex items-center justify-between gap-2">
-                      <p className="text-lg font-bold text-gray-900">₹{course.price}</p>
+                      <p
+                        className={`text-lg font-bold ${
+                          Number(course.price) === 0 ? 'text-green-600' : 'text-gray-900'
+                        }`}
+                      >
+                        {Number(course.price) === 0 ? 'Free' : `₹${course.price}`}
+                      </p>
 
                       <button
                         type="button"

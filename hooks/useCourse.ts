@@ -11,6 +11,8 @@ interface Course {
   title: string;
   description: string;
   price: number;
+  avgRating?: number;
+  totalRatings?: number;
   thumbnail?: string | null;
   instructor: {
     name: string;

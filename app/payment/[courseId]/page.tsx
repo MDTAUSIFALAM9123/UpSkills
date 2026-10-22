@@ -15,6 +15,16 @@ import {
   Loader2,
   CreditCard,
   Download,
+  User,
+  GraduationCap,
+  Wallet,
+  Play,
+  FileText,
+  Smartphone,
+  Headphones,
+  MessageCircle,
+  Mail,
+  Globe,
 } from 'lucide-react';
 
 interface Course {
@@ -98,6 +108,19 @@ interface PaymentReceipt {
   receiptNumber: string;
 }
 
+// Receipt branding / support details. Put your logo at /public/upskills-logo.png
+const RECEIPT_LOGO_SRC = '/Logo.png';
+const SUPPORT_PHONE = '+91 98765 43210';
+const SUPPORT_EMAIL = 'upskills854@gmail.com';
+const WEBSITE = 'www.upskills-nu.vercel.app';
+
+const INCLUDED_ITEMS = [
+  { label: 'Video Lessons', Icon: Play },
+  { label: 'Study Materials', Icon: FileText },
+  { label: 'Community Support', Icon: Users },
+  { label: 'Learn on Any Device', Icon: Smartphone },
+];
+
 export default function PaymentPage() {
   const params = useParams<{ courseId: string }>();
   const courseId = params.courseId;
@@ -111,11 +134,12 @@ export default function PaymentPage() {
   const [paid, setPaid] = useState(false);
   const [receiptData, setReceiptData] = useState<PaymentReceipt | null>(null);
 
-  const formatPrice = (price: number) =>
+  const formatPrice = (price: number, currency = 'INR') =>
     new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'INR',
+      currency,
       maximumFractionDigits: 2,
+      minimumFractionDigits: 2,
     }).format(price);
 
   useEffect(() => {
@@ -412,17 +436,25 @@ export default function PaymentPage() {
   if (!course) return null;
 
   if (paid) {
-    const receiptPrice = receiptData
-      ? new Intl.NumberFormat('en-IN', {
-          style: 'currency',
-          currency: receiptData.currency || 'INR',
-          maximumFractionDigits: 2,
-        }).format(receiptData.amount)
-      : formatPrice(course.price);
+    const currency = receiptData?.currency || 'INR';
+    const totalPaid = receiptData?.amount ?? course.price;
+    const courseFee = Math.max(course.price, totalPaid);
+    const discount = Math.max(0, courseFee - totalPaid);
+
+    const paidAtText = receiptData?.paidAt
+      ? new Date(receiptData.paidAt).toLocaleString('en-IN', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true,
+        })
+      : '—';
 
     return (
       <main className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 px-4 py-10 print:bg-white print:p-0">
-        <div className="mx-auto w-full max-w-2xl">
+        <div className="mx-auto w-full max-w-3xl">
           <div className="mb-6 text-center print:hidden">
             <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-green-100 text-green-600 shadow-sm">
               <CheckCircle size={48} strokeWidth={1.8} />
@@ -440,149 +472,269 @@ export default function PaymentPage() {
             </p>
           </div>
 
+          {/* ===== RECEIPT ===== */}
           <section
             id="payment-receipt"
-            className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-green-900/5 print:rounded-none print:border-0 print:shadow-none"
+            className="overflow-hidden rounded-3xl border border-slate-200 bg-white px-6 py-8 shadow-xl shadow-violet-900/5 sm:px-10 print:rounded-none print:border-0 print:shadow-none"
           >
-            <div className="flex items-center justify-between gap-4 bg-slate-950 px-6 py-6 text-white sm:px-8">
+            {/* Brand header */}
+            <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:items-start sm:justify-between sm:text-left">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={RECEIPT_LOGO_SRC}
+                alt="UpSkills by NextGen"
+                className="h-12 w-auto object-contain sm:h-14"
+              />
+
+              <div className="pt-0 text-center sm:pt-2 sm:text-right">
+                <p className="text-[10px] font-semibold tracking-[0.18em] text-slate-500 uppercase">
+                  Skills for a better tomorrow
+                </p>
+                <p className="mt-1.5 text-sm font-medium text-slate-600">{WEBSITE}</p>
+              </div>
+            </div>
+
+            <hr className="my-6 border-slate-200" />
+
+            {/* Title + receipt meta */}
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h2 className="mt-2 text-2xl font-bold">Payment Receipt</h2>
-                <p className="mt-1 text-sm text-slate-300">
+                <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
+                  Payment Receipt
+                </h2>
+                <p className="mt-1 text-sm text-slate-500">
                   Course enrollment payment confirmation
                 </p>
               </div>
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-green-400/15 text-green-300">
-                <CheckCircle size={32} />
+
+              <div className="flex items-stretch gap-5">
+                <div className="hidden w-px bg-slate-200 sm:block" />
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-xs text-slate-500">Receipt No.</p>
+                    <p className="text-sm font-bold break-all text-slate-900">
+                      {receiptData?.receiptNumber || '—'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-500">Payment Date</p>
+                    <p className="text-sm font-semibold text-slate-900">{paidAtText}</p>
+                  </div>
+                </div>
+                <span className="inline-flex h-fit items-center gap-2 self-start rounded-full bg-green-100 px-3.5 py-2 text-xs font-bold text-green-800">
+                  <CheckCircle size={16} className="text-green-700" /> Successful
+                </span>
               </div>
             </div>
 
-            <div className="p-6 sm:p-8">
-              <div className="flex flex-col justify-between gap-4 border-b border-dashed border-slate-200 pb-6 sm:flex-row sm:items-start">
-                <div>
-                  <p className="text-xs font-semibold tracking-wider text-slate-500 uppercase">
-                    Payment status
-                  </p>
-                  <span className="mt-2 inline-flex items-center gap-2 rounded-full bg-green-50 px-3 py-1.5 text-sm font-bold text-green-700">
-                    <span className="h-2 w-2 rounded-full bg-green-500" /> Successful
-                  </span>
-                </div>
-                <div className="sm:text-right">
-                  <p className="text-xs font-semibold tracking-wider text-slate-500 uppercase">
-                    Amount paid
-                  </p>
-                  <p className="mt-1 text-3xl font-extrabold tracking-tight text-slate-900">
-                    {receiptPrice}
-                  </p>
-                  <p className="mt-1 text-xs text-slate-500">Inclusive of applicable charges</p>
-                </div>
-              </div>
+            <hr className="my-6 border-slate-200" />
 
-              <div className="grid gap-5 border-b border-slate-100 py-6 sm:grid-cols-2">
-                <div>
-                  <p className="text-xs font-semibold tracking-wider text-slate-500 uppercase">
-                    Course
-                  </p>
-                  <p className="mt-1 font-bold text-slate-900">{course.title}</p>
-                  <p className="mt-1 text-sm text-slate-500">Lifetime course access</p>
+            {/* Student + course details */}
+            <div className="grid gap-6 sm:grid-cols-2">
+              <div className="flex gap-4 sm:border-r sm:border-slate-200 sm:pr-6">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-violet-100 text-violet-700">
+                  <User size={20} />
                 </div>
-                <div>
-                  <p className="text-xs font-semibold tracking-wider text-slate-500 uppercase">
-                    Paid by
-                  </p>
-                  <p className="mt-1 font-bold text-slate-900 uppercase">
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-base font-bold text-slate-900">Student Details</h3>
+                  <p className="mt-3 text-xs text-slate-500">Name</p>
+                  <p className="text-sm font-bold text-slate-900 uppercase">
                     {currentUser?.name || 'Student'}
                   </p>
-                  <p className="mt-1 text-sm break-all text-slate-500">
-                    {currentUser?.email || '—'}
+
+                  <div className="mt-4 uppercase">
+                    <div className="min-w-0">
+                      <p className="text-xs text-slate-500">Payment ID</p>
+                      <p className="text-xs font-semibold break-all text-slate-800">
+                        {receiptData?.paymentId || '—'}
+                      </p>
+                    </div>
+                    <div className="mt-4 min-w-0">
+                      <p className="text-xs text-slate-500">Order ID</p>
+                      <p className="text-xs font-semibold break-all text-slate-800">
+                        {receiptData?.orderId || '—'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-violet-100 text-violet-700">
+                  <GraduationCap size={22} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-base font-bold text-slate-900">Course Details</h3>
+                  <p className="mt-3 text-xs text-slate-500">Course</p>
+                  <p className="text-sm font-bold text-slate-900">{course.title}</p>
+                  <p className="text-xs text-slate-500">Lifetime course access</p>
+
+                  <p className="mt-4 text-xs text-slate-500">Platform</p>
+                  <p className="text-sm font-bold text-slate-900">UpSkills Learning Platform</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Payment summary + method/status */}
+            <div className="mt-8 grid gap-4 sm:grid-cols-[1.15fr_1fr]">
+              <div className="rounded-2xl bg-indigo-50/70 p-5 print:bg-indigo-50">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 text-indigo-700">
+                    <Wallet size={20} />
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-900">Payment Summary</h3>
+                </div>
+
+                <div className="mt-5 text-sm">
+                  <div className="flex items-center justify-between border-b border-indigo-100 py-3">
+                    <span className="text-slate-700">Course Fee</span>
+                    <span className="font-semibold text-slate-900">
+                      {formatPrice(courseFee, currency)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between border-b border-indigo-100 py-3">
+                    <span className="text-slate-700">Discount</span>
+                    <span className="font-semibold text-green-600">
+                      - {formatPrice(discount, currency)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between pt-4">
+                    <span className="text-base font-bold text-slate-900">Total Paid</span>
+                    <span className="text-xl font-extrabold text-indigo-800">
+                      {formatPrice(totalPaid, currency)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl bg-indigo-50/70 p-5 print:bg-indigo-50">
+                <div className="flex items-center gap-3 border-b border-indigo-100 pb-4">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-indigo-700">
+                    <Wallet size={18} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-slate-600">Payment Method</p>
+                    <p className="text-base font-bold text-slate-900">Razorpay</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 pt-4">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-indigo-700">
+                    <CheckCircle size={18} />
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-600">Payment Status</p>
+                    <p className="flex items-center gap-1 text-sm font-bold text-green-600">
+                      <CheckCircle size={14} /> Successful
+                    </p>
+                    <p className="text-[11px] text-slate-500">Your payment has been confirmed.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <hr className="my-7 border-slate-200" />
+
+            {/* What's included */}
+            <h3 className="text-base font-bold text-slate-900">What&apos;s Included</h3>
+            <div className="mt-4 grid grid-cols-2 gap-y-4 sm:grid-cols-4">
+              {INCLUDED_ITEMS.map(({ label, Icon }, index) => (
+                <div
+                  key={label}
+                  className={`flex flex-col gap-2 px-2 ${
+                    index > 0 ? 'sm:border-l sm:border-slate-200 sm:pl-5' : ''
+                  }`}
+                >
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-violet-100 text-violet-700">
+                    <Icon size={18} />
+                  </div>
+                  <span className="text-sm leading-5 text-slate-700">{label}</span>
+                </div>
+              ))}
+            </div>
+
+            <hr className="my-7 border-slate-200" />
+
+            {/* Thank you + help */}
+            <div className="grid gap-6 sm:grid-cols-2">
+              <div className="flex gap-4">
+                <div className="w-1 shrink-0 rounded-full bg-violet-700" />
+                <div>
+                  <h3 className="text-2xl font-extrabold text-slate-900">Thank You!</h3>
+                  <p className="mt-2 text-sm leading-6 text-slate-500">
+                    Your trust inspires us to keep building better learning experiences.
                   </p>
+                  <p className="mt-2 text-sm font-semibold text-violet-700">– Team UpSkills</p>
                 </div>
               </div>
 
-              <div className="space-y-4 py-6 text-sm">
-                <div className="flex flex-col justify-between gap-1 sm:flex-row sm:gap-4">
-                  <span className="text-slate-500">Receipt number</span>
-                  <span className="font-semibold break-all text-slate-800 sm:text-right">
-                    {receiptData?.receiptNumber || 'Pending'}
-                  </span>
+              <div className="flex gap-4 sm:border-l sm:border-slate-200 sm:pl-6">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-violet-100 text-violet-700">
+                  <Headphones size={20} />
                 </div>
-                <div className="flex flex-col justify-between gap-1 sm:flex-row sm:gap-4">
-                  <span className="text-slate-500">Payment ID</span>
-                  <span className="font-semibold break-all text-slate-800 sm:text-right">
-                    {receiptData?.paymentId || '—'}
-                  </span>
-                </div>
-                <div className="flex flex-col justify-between gap-1 sm:flex-row sm:gap-4">
-                  <span className="text-slate-500">Order ID</span>
-                  <span className="font-semibold break-all text-slate-800 sm:text-right">
-                    {receiptData?.orderId || '—'}
-                  </span>
-                </div>
-                <div className="flex flex-col justify-between gap-1 sm:flex-row sm:gap-4">
-                  <span className="text-slate-500">Payment date</span>
-                  <span className="font-semibold text-slate-800 sm:text-right">
-                    {receiptData?.paidAt
-                      ? new Date(receiptData.paidAt).toLocaleString('en-IN', {
-                          dateStyle: 'medium',
-                          timeStyle: 'short',
-                        })
-                      : '—'}
-                  </span>
-                </div>
-                <div className="flex flex-col justify-between gap-1 sm:flex-row sm:gap-4">
-                  <span className="text-slate-500">Payment provider</span>
-                  <span className="font-semibold text-slate-800 sm:text-right">Razorpay</span>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">Need Help?</h3>
+                  <p className="text-sm text-slate-500">Our support team is here for you.</p>
+                  <ul className="mt-3 space-y-2 text-sm text-slate-700">
+                    <li className="flex items-center gap-2.5">
+                      <MessageCircle size={16} className="text-violet-700" /> {SUPPORT_PHONE}
+                    </li>
+                    <li className="flex items-center gap-2.5">
+                      <Mail size={16} className="text-violet-700" /> {SUPPORT_EMAIL}
+                    </li>
+                    <li className="flex items-center gap-2.5">
+                      <Globe size={16} className="text-violet-700" /> {WEBSITE}
+                    </li>
+                  </ul>
                 </div>
               </div>
-
-              <div className="rounded-2xl bg-slate-50 p-4 text-xs leading-5 text-slate-600 print:bg-white print:p-0">
-                This receipt confirms the payment recorded by UpSkills. Keep the receipt number and
-                payment ID for future reference. For payment issues, contact the platform support
-                team.
-              </div>
-
-              <div className="mt-6 grid gap-3 sm:grid-cols-2 print:hidden">
-                <button
-                  type="button"
-                  onClick={() => window.print()}
-                  className="flex items-center justify-center gap-2 rounded-xl border border-violet-200 bg-white px-4 py-3 font-semibold text-violet-700 transition hover:bg-violet-50"
-                >
-                  <Download size={18} /> Download / Save PDF
-                </button>
-                <button
-                  type="button"
-                  onClick={() => router.push(`/courses/${course.id}`)}
-                  className="flex items-center justify-center gap-2 rounded-xl bg-violet-700 px-4 py-3 font-semibold text-white transition hover:bg-violet-800"
-                >
-                  <BookOpen size={18} /> Go to Course
-                </button>
-              </div>
-              <p className="mt-4 text-center text-xs text-slate-400 print:hidden">
-                Choose “Save as PDF” in your browser’s print dialog to download a PDF copy.
-              </p>
             </div>
           </section>
+
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 print:hidden">
+            <button
+              type="button"
+              onClick={() => window.print()}
+              className="flex items-center justify-center gap-2 rounded-xl border border-violet-200 bg-white px-4 py-3 font-semibold text-violet-700 transition hover:bg-violet-50"
+            >
+              <Download size={18} /> Download / Save PDF
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push(`/courses/${course.id}`)}
+              className="flex items-center justify-center gap-2 rounded-xl bg-violet-700 px-4 py-3 font-semibold text-white transition hover:bg-violet-800"
+            >
+              <BookOpen size={18} /> Go to Course
+            </button>
+          </div>
+          <p className="mt-4 text-center text-xs text-slate-400 print:hidden">
+            Choose “Save as PDF” in your browser’s print dialog to download a PDF copy.
+          </p>
         </div>
         <style jsx global>{`
           @media print {
-            body {
-              background: white !important;
-            }
-            body * {
-              visibility: hidden;
-            }
-            #payment-receipt,
-            #payment-receipt * {
-              visibility: visible;
-            }
-            #payment-receipt {
-              position: absolute;
-              left: 0;
-              top: 0;
-              width: 100%;
-            }
             @page {
               size: A4;
-              margin: 14mm;
+              margin: 10mm;
+            }
+
+            body {
+              background: white !important;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+
+            body * {
+              visibility: visible !important;
+            }
+
+            #payment-receipt {
+              position: static !important;
+              display: block !important;
+              width: 100% !important;
+              height: auto !important;
+              overflow: visible !important;
+              box-shadow: none !important;
             }
           }
         `}</style>

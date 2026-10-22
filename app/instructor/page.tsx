@@ -39,6 +39,10 @@ import {
   SkeletonRows,
 } from './dashboard-ui';
 import EditCourseView from './courses/[id]/edit/page';
+import NotificationBell from '../components/notifications/NotificationBell';
+import NotificationComposer from '../components/notifications/NotificationComposer';
+
+type InstructorTab = Tab | 'notifications';
 
 function SidebarItem({
   icon,
@@ -85,7 +89,7 @@ export default function InstructorDashboard() {
   const [account, setAccount] = useState<Account | null>(null);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<Tab>('dashboard');
+  const [activeTab, setActiveTab] = useState<InstructorTab>('dashboard');
   const [courseFilter, setCourseFilter] = useState<CourseFilter>('all');
   const [search, setSearch] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
@@ -242,7 +246,7 @@ export default function InstructorDashboard() {
 
   const maxEnrollment = Math.max(1, ...topCourses.map(course => course._count?.enrollments || 0));
 
-  const navigateTab = (tab: Tab) => {
+  const navigateTab = (tab: InstructorTab) => {
     setActiveTab(tab);
     setSidebarOpen(false);
     setShowNotifications(false);
@@ -443,6 +447,13 @@ export default function InstructorDashboard() {
               label="Reviews & Q&A"
               onClick={() => navigateTab('reviews')}
             />
+
+            <SidebarItem
+              active={activeTab === 'notifications'}
+              icon={<Bell size={18} />}
+              label="Notifications"
+              onClick={() => navigateTab('notifications')}
+            />
           </nav>
         </div>
 
@@ -525,34 +536,7 @@ export default function InstructorDashboard() {
             {/* Right Side */}
             <div className="ml-auto flex items-center gap-2 sm:gap-4">
               {/* Notification */}
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setShowNotifications(value => !value)}
-                  className="relative flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 transition hover:bg-slate-50"
-                  aria-label="Notifications"
-                >
-                  <Bell size={20} />
-
-                  <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
-                </button>
-
-                {showNotifications && (
-                  <div className="absolute top-12 right-0 z-50 w-[300px] rounded-2xl border border-slate-100 bg-white p-4 shadow-xl">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-extrabold">Notifications</h3>
-
-                      <span className="rounded-full bg-violet-50 px-2 py-1 text-[10px] font-bold text-violet-700">
-                        Instructor
-                      </span>
-                    </div>
-
-                    <div className="mt-4 rounded-xl bg-slate-50 p-4 text-sm text-slate-500">
-                      Notifications will appear here when notification APIs are connected.
-                    </div>
-                  </div>
-                )}
-              </div>
+              <NotificationBell />
 
               {/* Desktop Profile */}
               <div className="hidden items-center gap-3 md:flex">
@@ -634,6 +618,7 @@ export default function InstructorDashboard() {
                   onCourses={() => navigateTab('courses')}
                 />
               )}
+              {activeTab === 'notifications' && <NotificationComposer role="INSTRUCTOR" />}
 
               {activeTab === 'analytics' && (
                 <AnalyticsView

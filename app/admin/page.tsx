@@ -37,6 +37,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import PaymentHistory from './PaymentHistory';
+import NotificationBell from '../components/notifications/NotificationBell';
+import NotificationComposer from '../components/notifications/NotificationComposer';
 
 interface User {
   id: string;
@@ -75,9 +77,10 @@ type DashboardSection =
   | 'courses'
   | 'enrollments'
   | 'instructors'
+  | 'notifications'
   | 'payments'
-  | 'reports'
-  | 'settings';
+  | 'reports';
+// | 'settings';
 
 const navItems: {
   id: DashboardSection;
@@ -90,9 +93,10 @@ const navItems: {
   { id: 'courses', label: 'Courses & Curriculum', icon: BookOpen },
   { id: 'enrollments', label: 'Enrollments', icon: GraduationCap },
   { id: 'instructors', label: 'Instructors', icon: UserCheck },
+  { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'payments', label: 'Financials & Payments', icon: CircleDollarSign },
   { id: 'reports', label: 'Reports & Analytics', icon: Activity },
-  { id: 'settings', label: 'Platform Settings', icon: Settings },
+  // { id: 'settings', label: 'Platform Settings', icon: Settings },
 ];
 
 export default function AdminDashboard() {
@@ -547,13 +551,7 @@ export default function AdminDashboard() {
             </div>
 
             <div className="ml-auto flex items-center gap-2">
-              <button
-                type="button"
-                className="relative rounded-xl p-2 text-slate-500 hover:bg-slate-50"
-              >
-                <Bell size={20} />
-                <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
-              </button>
+              <NotificationBell />
 
               <div className="hidden h-9 w-px bg-slate-100 sm:block" />
 
@@ -671,6 +669,8 @@ export default function AdminDashboard() {
             </SimpleSection>
           )}
 
+          {activeSection === 'notifications' && <NotificationComposer role="ADMIN" />}
+
           {activeSection === 'payments' && (
             <SimpleSection
               title="Financials & Payments"
@@ -787,7 +787,7 @@ export default function AdminDashboard() {
             </SimpleSection>
           )}
 
-          {activeSection === 'settings' && (
+          {/* {activeSection === 'settings' && (
             <SimpleSection
               title="Platform Settings"
               subtitle="Administrative controls and platform configuration."
@@ -820,7 +820,7 @@ export default function AdminDashboard() {
                 />
               </div>
             </SimpleSection>
-          )}
+          )} */}
         </main>
       </div>
     </div>
@@ -1703,12 +1703,12 @@ function QuickActions({
       tone: 'bg-rose-50 text-rose-600',
       action: () => onSection('reports'),
     },
-    {
-      label: 'System Settings',
-      icon: Settings,
-      tone: 'bg-amber-50 text-amber-600',
-      action: () => onSection('settings'),
-    },
+    // {
+    //   label: 'System Settings',
+    //   icon: Settings,
+    //   tone: 'bg-amber-50 text-amber-600',
+    //   action: () => onSection('settings'),
+    // },
   ];
 
   return (

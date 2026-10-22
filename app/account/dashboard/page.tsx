@@ -31,6 +31,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import StudentNotesSection from './StudentNotes';
+import NotificationBell from '@/app/components/notifications/NotificationBell';
+import NotificationHistoryPage from './notifications';
 
 /* =========================
    Types
@@ -93,8 +95,7 @@ interface ProfileData {
 }
 
 type View = 'dashboard' | 'learn';
-type ActiveTab = 'dashboard' | 'profile' | 'quizzes' | 'notes';
-
+type ActiveTab = 'dashboard' | 'profile' | 'quizzes' | 'notes' | 'notifications';
 const clamp = (value: number) => Math.max(0, Math.min(100, Number(value) || 0));
 
 const getErrorMessage = (error: unknown, fallback: string) =>
@@ -653,143 +654,7 @@ export default function StudentDashboardPage() {
             {/* Right: Logo (mobile only) + Notifications + Profile */}
             <div className="flex shrink-0 items-center gap-4 sm:gap-3">
               {/* Notifications */}
-              <div ref={notifRef} className="sm:relative">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setNotificationsOpen(value => !value);
-                    setNavSearchOpen(false);
-                  }}
-                  aria-label={`Notifications${
-                    unreadNotifications ? `, ${unreadNotifications} unread` : ''
-                  }`}
-                  aria-expanded={notificationsOpen}
-                  title="Notifications"
-                  className={`relative flex h-10 w-10 items-center justify-center rounded-xl transition sm:h-11 sm:w-11 ${
-                    notificationsOpen
-                      ? 'bg-violet-50 text-violet-700'
-                      : 'bg-white text-slate-600 hover:border-violet-200 hover:bg-violet-50 hover:text-violet-700'
-                  }`}
-                >
-                  <Bell size={21} />
-
-                  {unreadNotifications > 0 && (
-                    <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-extrabold text-white ring-2 ring-white">
-                      {unreadNotifications > 9 ? '9+' : unreadNotifications}
-                    </span>
-                  )}
-                </button>
-
-                {/* Notification Dropdown */}
-                {notificationsOpen && (
-                  <>
-                    <div className="absolute top-full right-3 left-3 z-50 mt-2 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/10 sm:right-0 sm:left-auto sm:w-[360px]">
-                      <div className="flex items-center justify-between border-b border-slate-100 px-4 py-4">
-                        <div>
-                          <h3 className="text-sm font-extrabold text-slate-900">
-                            Learning updates
-                          </h3>
-                          <p className="mt-1 text-xs text-slate-500">
-                            {unreadNotifications
-                              ? `${unreadNotifications} unread notifications`
-                              : "You're all caught up"}
-                          </p>
-                        </div>
-
-                        {unreadNotifications > 0 && (
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setReadNotificationIds(learningNotifications.map(item => item.id))
-                            }
-                            className="text-xs font-bold text-violet-700 hover:text-violet-900"
-                          >
-                            Mark all read
-                          </button>
-                        )}
-                      </div>
-
-                      <div className="max-h-[360px] overflow-y-auto">
-                        {learningNotifications.length > 0 ? (
-                          learningNotifications.map(notification => {
-                            const isRead = readNotificationIds.includes(notification.id);
-
-                            return (
-                              <button
-                                key={notification.id}
-                                type="button"
-                                onClick={() => {
-                                  setReadNotificationIds(previous =>
-                                    previous.includes(notification.id)
-                                      ? previous
-                                      : [...previous, notification.id]
-                                  );
-                                  setNotificationsOpen(false);
-                                  void startCourse(notification.course);
-                                }}
-                                className={`flex w-full items-start gap-3 border-b border-slate-100 px-4 py-3.5 text-left transition hover:bg-violet-50 ${
-                                  isRead ? 'bg-white' : 'bg-violet-50/60'
-                                }`}
-                              >
-                                <span
-                                  className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
-                                    notification.progress >= 100
-                                      ? 'bg-emerald-100 text-emerald-700'
-                                      : 'bg-violet-100 text-violet-700'
-                                  }`}
-                                >
-                                  {notification.progress >= 100 ? (
-                                    <Award size={18} />
-                                  ) : (
-                                    <BookOpen size={18} />
-                                  )}
-                                </span>
-
-                                <span className="min-w-0 flex-1">
-                                  <span className="flex items-center gap-2 text-sm font-bold text-slate-900">
-                                    {notification.title}
-                                    {!isRead && (
-                                      <span className="h-2 w-2 shrink-0 rounded-full bg-violet-600" />
-                                    )}
-                                  </span>
-
-                                  <span className="mt-1 block text-xs leading-5 text-slate-500">
-                                    {notification.message}
-                                  </span>
-                                </span>
-                              </button>
-                            );
-                          })
-                        ) : (
-                          <div className="px-5 py-8 text-center">
-                            <Bell size={26} className="mx-auto text-slate-300" />
-                            <p className="mt-3 text-sm font-bold text-slate-700">
-                              No learning updates yet
-                            </p>
-                            <p className="mt-1 text-xs text-slate-500">
-                              Enroll in a course to see your learning reminders here.
-                            </p>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="border-t border-slate-100 p-3">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setNotificationsOpen(false);
-                            showDashboard();
-                          }}
-                          className="w-full rounded-xl py-2.5 text-xs font-extrabold text-violet-700 transition hover:bg-violet-50"
-                        >
-                          View dashboard
-                        </button>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-
+              <NotificationBell />
               {/* Profile: Last Item */}
               <button
                 type="button"
@@ -929,6 +794,16 @@ export default function StudentDashboardPage() {
                   active={activeTab === 'profile'}
                   onClick={showProfile}
                 />
+                <SidebarItem
+                  icon={<Bell size={19} />}
+                  label="Notifications"
+                  active={activeTab === 'notifications'}
+                  onClick={() => {
+                    leaveLearning();
+                    setActiveTab('notifications');
+                    setMobileMenuOpen(false);
+                  }}
+                />
               </nav>
 
               <div className="my-4 border-t border-slate-100" />
@@ -994,6 +869,8 @@ export default function StudentDashboardPage() {
               <StudentQuizzesSection onBack={showDashboard} />
             ) : activeTab === 'notes' ? (
               <StudentNotesSection />
+            ) : activeTab === 'notifications' ? (
+              <NotificationHistoryPage />
             ) : activeTab === 'profile' ? (
               <ProfileSection
                 key={userId}

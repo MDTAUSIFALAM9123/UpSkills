@@ -143,9 +143,9 @@ export default function NotificationBell() {
           setOpen(value => !value);
           if (!open) void loadNotifications();
         }}
-        className="relative flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 transition hover:bg-violet-50 hover:text-violet-700"
+        className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-slate-700 transition hover:bg-violet-50 hover:text-violet-700"
       >
-        <Bell size={20} />
+        <Bell size={24} />
 
         {unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white ring-2 ring-white">

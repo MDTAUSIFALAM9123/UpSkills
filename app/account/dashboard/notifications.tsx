@@ -168,7 +168,7 @@ export default function NotificationHistoryPage() {
     <main className="min-h-screen bg-[#f7f7fc]">
       <div className="mx-auto max-w-5xl">
         {/* Hero */}
-        <section className="relative mb-8 overflow-hidden rounded-3xl bg-gradient-to-br from-violet-700 via-violet-700 to-indigo-900 p-6 text-white shadow-xl shadow-violet-900/10 sm:p-9">
+        <section className="relative mb-8 overflow-hidden rounded-3xl bg-gradient-to-br from-violet-700 via-violet-700 to-indigo-900 p-6 text-white shadow-xl shadow-violet-900/10 sm:p-8">
           <div className="pointer-events-none absolute -top-20 -right-12 h-64 w-64 rounded-full bg-white/10 blur-2xl" />
           <div className="pointer-events-none absolute right-1/4 -bottom-24 h-48 w-48 rounded-full bg-indigo-300/20 blur-3xl" />
 

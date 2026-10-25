@@ -661,7 +661,7 @@ export default function StudentDashboardPage() {
                 onClick={showProfile}
                 title="Open my profile"
                 aria-label="Open my profile"
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-violet-200 bg-gradient-to-br from-violet-100 to-indigo-100 text-sm font-black text-violet-700 shadow-sm transition hover:border-violet-400 hover:shadow-md sm:h-11 sm:w-11"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-violet-200 bg-violet-600 text-sm font-black text-white shadow-sm transition hover:border-violet-400 hover:shadow-md sm:h-11 sm:w-11"
               >
                 {(userName?.[0] || 'S').toUpperCase()}
               </button>

@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronDown, Shield, Menu, X, SlidersHorizontal, Search, Bell } from 'lucide-react';
+import { ChevronDown, Shield, Menu, X, SlidersHorizontal, Search } from 'lucide-react';
+import NotificationBell from './notifications/NotificationBell';
 
 export default function Header() {
   const router = useRouter();
@@ -171,20 +172,7 @@ export default function Header() {
             {/* Mobile right side */}
             <div className="flex items-center gap-2 lg:hidden">
               {/* Bell visible before and after login */}
-              <button
-                type="button"
-                aria-label="Notifications"
-                onClick={() => {
-                  if (isLoggedIn) {
-                    router.push('#');
-                  } else {
-                    router.push('/login');
-                  }
-                }}
-                className="relative flex h-10 w-10 items-center justify-center rounded-lg text-slate-700 transition"
-              >
-                <Bell className="h-6 w-6" />
-              </button>
+              <NotificationBell />
 
               {/* Start Free only when logged out */}
               {!isLoggedIn && (

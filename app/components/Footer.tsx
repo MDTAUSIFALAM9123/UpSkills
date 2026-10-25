@@ -39,7 +39,7 @@ export default function Footer() {
               <h3 className="text-1g font-semibold text-gray-800">Company</h3>
               <ul className="mt-4 space-y-2 text-gray-600">
                 <li>
-                  <Link href="#">About</Link>
+                  <Link href="/about">About</Link>
                 </li>
                 <li>
                   <Link href="#">Pricing</Link>

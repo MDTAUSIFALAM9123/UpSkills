@@ -19,7 +19,7 @@ export default function AboutPage() {
       <Navroute />
       {/* ================= HERO ================= */}
       <section className="relative overflow-hidden bg-gradient-to-tr from-purple-200/50 via-violet-100/40 to-teal-100/30">
-        <div className="relative mx-auto max-w-7xl px-6 py-10 lg:py-18">
+        <div className="relative mx-auto max-w-6xl px-6 py-10 lg:py-18">
           <div className="mx-auto max-w-3xl text-center">
             <span className="inline-flex items-center rounded-full bg-purple-100 px-4 py-2 text-sm font-semibold text-purple-700">
               About Our Platform
@@ -38,7 +38,7 @@ export default function AboutPage() {
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
               <Link
                 href="/courses"
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-purple-600 px-6 py-3 font-semibold text-white transition hover:bg-purple-700"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-violet-700 to-purple-600 px-6 py-3 font-semibold text-white transition hover:bg-purple-700"
               >
                 Explore Courses
                 <ArrowRight className="h-5 w-5" />
@@ -56,7 +56,7 @@ export default function AboutPage() {
       </section>
 
       {/* ================= ABOUT ================= */}
-      <section className="mx-auto max-w-7xl px-6 py-20">
+      <section className="mx-auto max-w-6xl px-6 py-20">
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <div>
             <span className="text-sm font-bold tracking-wider text-purple-600 uppercase">
@@ -95,7 +95,7 @@ export default function AboutPage() {
           </div>
 
           <div className="relative">
-            <div className="rounded-3xl bg-gradient-to-br from-purple-600 via-violet-600 to-indigo-600 p-8 shadow-2xl">
+            <div className="rounded-3xl bg-gradient-to-r from-violet-700 to-purple-600 p-8 shadow-2xl">
               <div className="rounded-2xl bg-white/10 p-8 backdrop-blur-sm">
                 <GraduationCap className="h-14 w-14 text-white" />
 
@@ -125,7 +125,7 @@ export default function AboutPage() {
 
       {/* ================= STATS ================= */}
       <section className="bg-slate-50">
-        <div className="mx-auto max-w-7xl px-6 py-16">
+        <div className="mx-auto max-w-6xl px-6 py-16">
           <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
             {[
               {
@@ -163,7 +163,7 @@ export default function AboutPage() {
       </section>
 
       {/* ================= VALUES ================= */}
-      <section className="mx-auto max-w-7xl px-6 py-20">
+      <section className="mx-auto max-w-6xl px-6 py-20">
         <div className="mx-auto max-w-2xl text-center">
           <span className="text-sm font-bold tracking-wider text-purple-600 uppercase">
             What Drives Us
@@ -216,7 +216,7 @@ export default function AboutPage() {
 
       {/* ================= HOW IT WORKS ================= */}
       <section className="bg-gradient-to-br from-purple-50 to-violet-50">
-        <div className="mx-auto max-w-7xl px-6 py-20">
+        <div className="mx-auto max-w-6xl px-6 py-20">
           <div className="mx-auto max-w-2xl text-center">
             <span className="text-sm font-bold tracking-wider text-purple-600 uppercase">
               Simple Learning Process
@@ -260,7 +260,7 @@ export default function AboutPage() {
 
       {/* ================= CTA ================= */}
       <section className="px-6 py-20">
-        <div className="mx-auto max-w-5xl overflow-hidden rounded-3xl bg-gradient-to-r from-purple-600 to-violet-600 px-6 py-14 text-center shadow-xl sm:px-12">
+        <div className="mx-auto max-w-5xl overflow-hidden rounded-3xl bg-gradient-to-r from-violet-700 to-purple-600 px-6 py-14 text-center shadow-xl sm:px-12">
           <h2 className="text-3xl font-bold text-white sm:text-4xl">Ready to Start Learning?</h2>
 
           <p className="mx-auto mt-4 max-w-2xl text-purple-100">

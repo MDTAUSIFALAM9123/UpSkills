@@ -54,8 +54,8 @@ export async function POST(request: NextRequest) {
       return errorResponse('Invalid notification type', 400);
     }
 
-    if (link && (!link.startsWith('/') || link.startsWith('//'))) {
-      return errorResponse('Link must be an internal path beginning with /', 400);
+    if (link && !link.startsWith('https://') && !link.startsWith('http://')) {
+      return errorResponse('Link must be an external URL beginning with https:// or http://', 400);
     }
 
     if (!['ALL_STUDENTS', 'SELECTED_STUDENTS', 'COURSE_STUDENTS'].includes(audience)) {

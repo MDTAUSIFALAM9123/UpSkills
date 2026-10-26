@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
       !message.trim() ||
       message.length > 5000
     ) {
-      return NextResponse.json({ error: 'Valid title and message are required' }, { status: 400 });
+      return NextResponse.json({ error: 'Valid title and message are required.' }, { status: 400 });
     }
 
     if (!validTypes.includes(type)) {

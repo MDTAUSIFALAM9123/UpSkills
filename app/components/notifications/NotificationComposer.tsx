@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { BellRing, CheckCircle2, LoaderCircle, Send, Users } from 'lucide-react';
+import { BellRing, CheckCircle2, LoaderCircle, Send, Users, X } from 'lucide-react';
 
 type Course = { id: string; title: string };
 type Student = { id: string; name: string; email: string };
@@ -179,124 +179,156 @@ export default function NotificationComposer({ role }: Props) {
   }
 
   return (
-    <section className="mx-auto w-full max-w-4xl rounded-3xl border border-slate-200 bg-white shadow-sm">
-      <div className="rounded-t-3xl bg-gradient-to-r from-violet-700 to-indigo-700 p-6 text-white sm:p-8">
+    <section className="mx-auto w-full max-w-5xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-violet-700 to-indigo-700 px-5 py-4 text-white sm:px-6">
         <div className="flex items-center gap-3">
-          <div className="rounded-2xl bg-white/15 p-3">
-            <BellRing size={25} />
+          <div className="rounded-xl bg-white/15 p-2.5">
+            <BellRing size={22} />
           </div>
           <div>
-            <h2 className="text-xl font-bold sm:text-2xl">Send notification</h2>
-            <p className="mt-1 text-sm text-violet-100">Share announcements with your students.</p>
+            <h2 className="text-lg font-bold sm:text-xl">Send notification</h2>
+            <p className="mt-0.5 text-xs text-violet-100 sm:text-sm">
+              Share announcements with your students.
+            </p>
           </div>
         </div>
       </div>
 
-      <form onSubmit={sendNotification} className="space-y-6 p-5 sm:p-8">
+      <form onSubmit={sendNotification} className="p-6 sm:p-8">
+        {/* Error */}
         {error && (
           <div
             role="alert"
-            className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+            className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700"
           >
             {error}
           </div>
         )}
 
+        {/* Success */}
         {success && (
           <div
             role="status"
-            className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800"
+            className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800"
           >
-            <CheckCircle2 size={18} />
-            {success}
+            <div className="flex items-center gap-2">
+              <CheckCircle2 size={18} className="shrink-0" />
+              <span>{success}</span>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setSuccess('')}
+              className="shrink-0 rounded-full p-1 font-medium text-emerald-700 transition hover:bg-emerald-100 hover:text-emerald-900"
+            >
+              <X size={16} />
+            </button>
           </div>
         )}
 
-        <div>
-          <label className="mb-2 block text-sm font-semibold text-slate-700">
-            Notification title
-          </label>
-          <input
-            required
-            maxLength={150}
-            value={title}
-            onChange={event => setTitle(event.target.value)}
-            placeholder="e.g. Important course announcement"
-            className="w-full rounded-xl border border-slate-200 px-4 py-3 transition outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-100"
-          />
-        </div>
+        {/* Two-column layout */}
+        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2 lg:gap-8">
+          {/* LEFT COLUMN */}
+          <div className="space-y-4">
+            {/* Title */}
+            <div>
+              <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+                Notification title
+              </label>
+              <input
+                required
+                maxLength={150}
+                value={title}
+                onChange={event => setTitle(event.target.value)}
+                placeholder="e.g. Important course announcement"
+                className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm transition outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-100"
+              />
+            </div>
 
-        <div>
-          <label className="mb-2 block text-sm font-semibold text-slate-700">Message</label>
-          <textarea
-            required
-            maxLength={10000}
-            rows={5}
-            value={message}
-            onChange={event => setMessage(event.target.value)}
-            placeholder="Write your announcement here..."
-            className="w-full resize-y rounded-xl border border-slate-200 px-4 py-3 transition outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-100"
-          />
-          <p className="mt-1 text-right text-xs text-slate-400">{message.length}/10000</p>
-        </div>
+            {/* Notification Type */}
+            <div>
+              <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+                Notification type
+              </label>
+              <select
+                value={type}
+                onChange={event =>
+                  setType(event.target.value as (typeof notificationTypes)[number])
+                }
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-100"
+              >
+                {notificationTypes.map(item => (
+                  <option key={item} value={item}>
+                    {item.replaceAll('_', ' ')}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-        <div className="grid gap-5 sm:grid-cols-2">
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-slate-700">
-              Notification type
-            </label>
-            <select
-              value={type}
-              onChange={event => setType(event.target.value as (typeof notificationTypes)[number])}
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none focus:border-violet-500"
-            >
-              {notificationTypes.map(item => (
-                <option key={item} value={item}>
-                  {item.replaceAll('_', ' ')}
-                </option>
-              ))}
-            </select>
+            {/* Course - Instructor only */}
+            {!isAdmin && (
+              <div>
+                <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+                  Your course
+                </label>
+                <select
+                  required
+                  value={courseId}
+                  onChange={event => {
+                    setCourseId(event.target.value);
+                    setSelectedIds([]);
+                  }}
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-100"
+                >
+                  <option value="">Select your course</option>
+                  {courses.map(course => (
+                    <option key={course.id} value={course.id}>
+                      {course.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
 
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-slate-700">
-              Internal destination (optional)
-            </label>
-            <input
-              value={link}
-              onChange={event => setLink(event.target.value)}
-              placeholder="/account/course"
-              className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-violet-500"
-            />
+          {/* RIGHT COLUMN */}
+          <div className="space-y-4">
+            {/* Message */}
+            <div>
+              <label className="mb-1.5 block text-sm font-semibold text-slate-700">Message</label>
+              <textarea
+                required
+                maxLength={10000}
+                rows={4}
+                value={message}
+                onChange={event => setMessage(event.target.value)}
+                placeholder="Write your announcement here..."
+                className="w-full resize-y rounded-lg border border-slate-200 px-3 py-2.5 text-sm transition outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-100"
+              />
+              <p className="mt-1 text-right text-xs text-slate-400">{message.length}/10000</p>
+            </div>
+
+            {/* External URL */}
+            <div>
+              <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+                External URL <span className="font-normal text-slate-400">(optional)</span>
+              </label>
+              <input
+                type="url"
+                value={link}
+                onChange={event => setLink(event.target.value)}
+                placeholder="https://example.com"
+                className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm transition outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-100"
+              />
+            </div>
           </div>
         </div>
 
-        {!isAdmin && (
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-slate-700">Your course</label>
-            <select
-              required
-              value={courseId}
-              onChange={event => {
-                setCourseId(event.target.value);
-                setSelectedIds([]);
-              }}
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none focus:border-violet-500"
-            >
-              <option value="">Select your course</option>
-              {courses.map(course => (
-                <option key={course.id} value={course.id}>
-                  {course.title}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        <div>
+        <div className="py-2">
           <label className="mb-2 block text-sm font-semibold text-slate-700">Recipients</label>
 
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="mb-2 grid gap-3 sm:grid-cols-3">
             {isAdmin && (
               <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 p-4 has-[:checked]:border-violet-500 has-[:checked]:bg-violet-50">
                 <input
@@ -403,15 +435,17 @@ export default function NotificationComposer({ role }: Props) {
             </div>
           </div>
         )}
-
-        <button
-          type="submit"
-          disabled={sending}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-violet-600 px-5 py-3.5 font-semibold text-white shadow-lg shadow-violet-600/20 transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {sending ? <LoaderCircle size={19} className="animate-spin" /> : <Send size={18} />}
-          {sending ? 'Sending...' : 'Send notification'}
-        </button>
+        {/* Submit */}
+        <div className="mt-6 border-t border-slate-100 pt-4">
+          <button
+            type="submit"
+            disabled={sending}
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-violet-600 px-5 py-3 font-semibold text-white shadow-md shadow-violet-600/20 transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {sending ? <LoaderCircle size={18} className="animate-spin" /> : <Send size={17} />}
+            {sending ? 'Sending...' : 'Send notification'}
+          </button>
+        </div>
       </form>
     </section>
   );

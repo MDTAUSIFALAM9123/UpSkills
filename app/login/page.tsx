@@ -331,7 +331,7 @@ export default function Login() {
                   <Linkedin size={17} />
                 </SocialButton>
 
-                <SocialButton href="https://www.instagram.com/">
+                <SocialButton href="https://www.instagram.com/upskills854?dlrf=MW94aHJoZzMzd2w4Mw==">
                   <Instagram size={17} />
                 </SocialButton>
 

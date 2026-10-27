@@ -121,7 +121,6 @@ export default function Introduction() {
             <div className="flex items-center gap-1 text-[10px] text-white">
               <Star size={13} fill="currentColor" className="text-amber-300" />
               <span className="font-bold">4.9/5</span>
-              <span className="text-white/70">(3,200+)</span>
             </div>
           </div>
 
@@ -238,7 +237,7 @@ export default function Introduction() {
 
             <div className="mb-12 flex flex-col gap-4 sm:flex-row">
               <a
-                href="#"
+                href="/register"
                 className="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-violet-700 to-purple-600 px-8 py-3.5 text-sm font-semibold text-white shadow-md transition hover:shadow-lg"
               >
                 Start for Free

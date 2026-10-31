@@ -1,3 +1,4 @@
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -26,16 +27,43 @@ model User {
   updatedAt DateTime @updatedAt
 
   courses               Course[]                @relation("InstructorCourses")
-  enrollments            Enrollment[]
-  progress               Progress[]
-  reviews                Review[]
-  notes                  Note[]
-  quizAttempts           QuizAttempt[]
-  assignmentSubmissions  AssignmentSubmission[]
-  payments               Payment[]
-  notifications          Notification[]
-  wishlist               Wishlist[]
-  announcements          Announcement[]          @relation("InstructorAnnouncements")
+  enrollments           Enrollment[]
+  progress              Progress[]
+  reviews               Review[]
+  notes                 Note[]
+  quizAttempts          QuizAttempt[]
+  assignmentSubmissions AssignmentSubmission[]
+  payments              Payment[]
+  notifications         Notification[]
+  wishlist              Wishlist[]
+  announcements         Announcement[]          @relation("InstructorAnnouncements")
+  couponUsages          CouponUsage[]
+
+  @@index([role])
+}
+
+// ========================
+// COACHING MANAGEMENT
+// ========================
+
+model Coaching {
+  id        String  @id @default(cuid())
+  name      String
+  code      String  @unique
+  ownerName String?
+  email     String?
+  phone     String?
+  address   String?
+  isActive  Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  enrollments Enrollment[]
+  coupons     Coupon[]
+  payments    Payment[]
+
+  @@index([isActive])
 }
 
 // ========================
@@ -43,25 +71,34 @@ model User {
 // ========================
 
 model Course {
-  id           String   @id @default(cuid())
+  id           String  @id @default(cuid())
   title        String
   description  String
   thumbnail    String?
-  price        Float    @default(0)
-  isPublished  Boolean  @default(false)
+  price        Float   @default(0)
+  isPublished  Boolean @default(false)
   instructorId String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
 
-  instructor   User         @relation("InstructorCourses", fields: [instructorId], references: [id])
-  sections     Section[]
-  enrollments  Enrollment[]
-  reviews      Review[]
-  assignments  Assignment[]
-  payments     Payment[]
-  wishlist     Wishlist[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  instructor    User           @relation("InstructorCourses", fields: [instructorId], references: [id])
+  sections      Section[]
+  enrollments   Enrollment[]
+  reviews       Review[]
+  assignments   Assignment[]
+  payments      Payment[]
+  wishlist      Wishlist[]
   announcements Announcement[]
+  coupons       Coupon[]
+
+  @@index([instructorId])
+  @@index([isPublished])
 }
+
+// ========================
+// SECTION MANAGEMENT
+// ========================
 
 model Section {
   id        String   @id @default(cuid())
@@ -75,56 +112,142 @@ model Section {
   lessons Lesson[]
 
   @@unique([courseId, order])
+  @@index([courseId])
 }
 
+// ========================
+// LESSON MANAGEMENT
+// ========================
+
 model Lesson {
-  id        String    @id @default(cuid())
+  id        String     @id @default(cuid())
   title     String
   type      LessonType
   videoUrl  String?
   content   String?
   duration  Int?
-  isPreview Boolean   @default(false)
-  order     Int      @default(0)
+  isPreview Boolean    @default(false)
+  order     Int        @default(0)
   sectionId String
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  section     Section       @relation(fields: [sectionId], references: [id], onDelete: Cascade)
-  progress    Progress[]
-  notes       Note[]
-  quiz        Quiz?
+  section  Section   @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  progress Progress[]
+  notes    Note[]
+  quiz     Quiz?
 
   @@unique([sectionId, order])
+  @@index([sectionId])
 }
 
 // ========================
-// ENROLLMENT & PROGRESS
+// COUPON MANAGEMENT
+// ========================
+
+model Coupon {
+  id                String       @id @default(cuid())
+  code              String       @unique
+  description       String?
+
+  discountType      DiscountType
+  discountValue     Float
+  maxDiscountAmount Float?
+
+  minOrderAmount    Float?
+  maxUsesPerUser    Int?
+
+  usageLimit        Int?
+  usedCount         Int           @default(0)
+
+  startsAt          DateTime?
+  expiresAt         DateTime?
+  isActive          Boolean       @default(true)
+
+  coachingId        String
+  courseId          String?
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  coaching Coaching @relation(fields: [coachingId], references: [id], onDelete: Restrict)
+  course   Course?  @relation(fields: [courseId], references: [id], onDelete: Restrict)
+
+  usages   CouponUsage[]
+  payments Payment[]
+
+  @@index([coachingId])
+  @@index([courseId])
+  @@index([isActive])
+  @@index([expiresAt])
+}
+
+// ========================
+// ENROLLMENT & ADMISSION
 // ========================
 
 model Enrollment {
-  id        String   @id @default(cuid())
-  userId    String
-  courseId  String
+  id         String  @id @default(cuid())
+  userId     String
+  courseId   String
+  coachingId String?
+
+  // Price snapshot
+  originalAmount Float @default(0)
+  discountAmount Float @default(0)
+  finalAmount    Float @default(0)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course      Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course   Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  coaching Coaching? @relation(fields: [coachingId], references: [id], onDelete: Restrict)
+
   certificate Certificate?
+  couponUsage CouponUsage?
 
   @@unique([userId, courseId])
   @@index([userId])
   @@index([courseId])
+  @@index([coachingId])
+  @@index([createdAt])
 }
 
+// ========================
+// COUPON USAGE HISTORY
+// ========================
+
+model CouponUsage {
+  id             String   @id @default(cuid())
+  couponId       String
+  enrollmentId   String   @unique
+  userId         String
+
+  discountAmount Float
+  createdAt      DateTime @default(now())
+
+  coupon     Coupon     @relation(fields: [couponId], references: [id], onDelete: Restrict)
+  enrollment Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  user       User       @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([couponId, userId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// ========================
+// PROGRESS TRACKING
+// ========================
+
 model Progress {
-  id        String   @id @default(cuid())
-  userId    String
-  lessonId  String
-  completed Boolean  @default(false)
+  id          String   @id @default(cuid())
+  userId      String
+  lessonId    String
+  completed   Boolean  @default(false)
   completedAt DateTime?
-  updatedAt DateTime @updatedAt
+  updatedAt   DateTime @updatedAt
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
@@ -132,6 +255,10 @@ model Progress {
   @@unique([userId, lessonId])
   @@index([userId, completed])
 }
+
+// ========================
+// NOTES
+// ========================
 
 model Note {
   id        String   @id @default(cuid())
@@ -147,6 +274,10 @@ model Note {
 
   @@index([userId, lessonId])
 }
+
+// ========================
+// WISHLIST
+// ========================
 
 model Wishlist {
   id        String   @id @default(cuid())
@@ -185,17 +316,18 @@ model Review {
 // ========================
 
 model Quiz {
-  id             String   @id @default(cuid())
-  title          String
-  description    String?
-  lessonId       String   @unique
-  passingScore   Float    @default(40)
-  timeLimit      Int?
-  maxAttempts    Int?
-  shuffleQuestions Boolean @default(false)
-  isPublished    Boolean  @default(false)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id               String   @id @default(cuid())
+  title            String
+  description      String?
+  lessonId         String   @unique
+  passingScore     Float    @default(40)
+  timeLimit        Int?
+  maxAttempts      Int?
+  shuffleQuestions Boolean  @default(false)
+  isPublished      Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   lesson    Lesson         @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   questions QuizQuestion[]
@@ -210,11 +342,12 @@ model QuizQuestion {
   points      Float        @default(1)
   order       Int          @default(0)
   quizId      String
-  createdAt   DateTime     @default(now())
 
-  quiz      Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  options   QuizOption[]
-  answers   QuizAnswer[]
+  createdAt DateTime @default(now())
+
+  quiz    Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  options QuizOption[]
+  answers QuizAnswer[]
 
   @@unique([quizId, order])
 }
@@ -226,7 +359,7 @@ model QuizOption {
   order      Int     @default(0)
   questionId String
 
-  question QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  question        QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
   selectedAnswers QuizAnswer[]
 
   @@unique([questionId, order])
@@ -250,6 +383,10 @@ model QuizAttempt {
   @@index([userId, quizId])
 }
 
+// ========================
+// QUIZ ANSWERS
+// ========================
+
 model QuizAnswer {
   id               String  @id @default(cuid())
   attemptId        String
@@ -271,22 +408,27 @@ model QuizAnswer {
 // ========================
 
 model Assignment {
-  id           String   @id @default(cuid())
-  title        String
-  description  String
-  instructions String?
+  id            String   @id @default(cuid())
+  title         String
+  description   String
+  instructions  String?
   attachmentUrl String?
-  dueDate      DateTime?
-  maxPoints    Float    @default(100)
-  courseId     String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  dueDate       DateTime?
+  maxPoints     Float    @default(100)
+  courseId      String
 
-  course     Course                 @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course      Course                 @relation(fields: [courseId], references: [id], onDelete: Cascade)
   submissions AssignmentSubmission[]
 
   @@index([courseId])
 }
+
+// ========================
+// ASSIGNMENT SUBMISSIONS
+// ========================
 
 model AssignmentSubmission {
   id           String           @id @default(cuid())
@@ -315,24 +457,38 @@ model Payment {
   id                String        @id @default(cuid())
   userId            String
   courseId          String
+
   amount            Float
   currency          String        @default("INR")
   status            PaymentStatus @default(PENDING)
-  provider           String?
-  providerOrderId    String?       @unique
-  providerPaymentId  String?       @unique
-  providerSignature  String?
-  receipt            String?       @unique
-  failureReason      String?
-  paidAt             DateTime?
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
+  provider          String?
 
-  user   User   @relation(fields: [userId], references: [id], onDelete: Restrict)
-  course Course @relation(fields: [courseId], references: [id], onDelete: Restrict)
+  providerOrderId   String?       @unique
+  providerPaymentId String?       @unique
+  providerSignature String?
+  receipt           String?       @unique
+  failureReason     String?
+  paidAt            DateTime?
+
+  // Coupon and coaching snapshot
+  couponId       String?
+  coachingId     String?
+  originalAmount Float?
+  discountAmount Float         @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Restrict)
+  course   Course    @relation(fields: [courseId], references: [id], onDelete: Restrict)
+  coupon   Coupon?   @relation(fields: [couponId], references: [id], onDelete: Restrict)
+  coaching Coaching? @relation(fields: [coachingId], references: [id], onDelete: Restrict)
 
   @@index([userId, status])
   @@index([courseId])
+  @@index([couponId])
+  @@index([coachingId])
+  @@index([createdAt])
 }
 
 // ========================
@@ -340,11 +496,11 @@ model Payment {
 // ========================
 
 model Certificate {
-  id           String   @id @default(cuid())
-  enrollmentId String   @unique
-  certificateNo String  @unique @default(cuid())
-  issuedAt     DateTime @default(now())
-  fileUrl      String?
+  id            String   @id @default(cuid())
+  enrollmentId  String   @unique
+  certificateNo String   @unique @default(cuid())
+  issuedAt      DateTime @default(now())
+  fileUrl       String?
 
   enrollment Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
 }
@@ -359,11 +515,12 @@ model Announcement {
   content      String
   instructorId String
   courseId     String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
 
-  instructor User    @relation("InstructorAnnouncements", fields: [instructorId], references: [id], onDelete: Cascade)
-  course     Course? @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  instructor User     @relation("InstructorAnnouncements", fields: [instructorId], references: [id], onDelete: Cascade)
+  course     Course?  @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@index([courseId, createdAt])
 }
@@ -436,4 +593,9 @@ enum NotificationType {
   ASSIGNMENT
   QUIZ
   CERTIFICATE
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED
 }

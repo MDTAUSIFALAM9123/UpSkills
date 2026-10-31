@@ -19,6 +19,9 @@ CREATE TYPE "PaymentStatus" AS ENUM ('PENDING', 'SUCCESS', 'FAILED', 'REFUNDED')
 -- CreateEnum
 CREATE TYPE "NotificationType" AS ENUM ('GENERAL', 'COURSE', 'PAYMENT', 'ASSIGNMENT', 'QUIZ', 'CERTIFICATE');
 
+-- CreateEnum
+CREATE TYPE "DiscountType" AS ENUM ('PERCENTAGE', 'FIXED');
+
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
@@ -35,6 +38,22 @@ CREATE TABLE "User" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Coaching" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "code" TEXT NOT NULL,
+    "ownerName" TEXT,
+    "email" TEXT,
+    "phone" TEXT,
+    "address" TEXT,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Coaching_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -82,14 +101,53 @@ CREATE TABLE "Lesson" (
 );
 
 -- CreateTable
+CREATE TABLE "Coupon" (
+    "id" TEXT NOT NULL,
+    "code" TEXT NOT NULL,
+    "description" TEXT,
+    "discountType" "DiscountType" NOT NULL,
+    "discountValue" DOUBLE PRECISION NOT NULL,
+    "maxDiscountAmount" DOUBLE PRECISION,
+    "minOrderAmount" DOUBLE PRECISION,
+    "maxUsesPerUser" INTEGER,
+    "usageLimit" INTEGER,
+    "usedCount" INTEGER NOT NULL DEFAULT 0,
+    "startsAt" TIMESTAMP(3),
+    "expiresAt" TIMESTAMP(3),
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "coachingId" TEXT NOT NULL,
+    "courseId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Coupon_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Enrollment" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "courseId" TEXT NOT NULL,
+    "coachingId" TEXT,
+    "originalAmount" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "discountAmount" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "finalAmount" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Enrollment_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "CouponUsage" (
+    "id" TEXT NOT NULL,
+    "couponId" TEXT NOT NULL,
+    "enrollmentId" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "discountAmount" DOUBLE PRECISION NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "CouponUsage_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -257,6 +315,10 @@ CREATE TABLE "Payment" (
     "receipt" TEXT,
     "failureReason" TEXT,
     "paidAt" TIMESTAMP(3),
+    "couponId" TEXT,
+    "coachingId" TEXT,
+    "originalAmount" DOUBLE PRECISION,
+    "discountAmount" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -308,10 +370,46 @@ CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 CREATE UNIQUE INDEX "User_phone_key" ON "User"("phone");
 
 -- CreateIndex
+CREATE INDEX "User_role_idx" ON "User"("role");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Coaching_code_key" ON "Coaching"("code");
+
+-- CreateIndex
+CREATE INDEX "Coaching_isActive_idx" ON "Coaching"("isActive");
+
+-- CreateIndex
+CREATE INDEX "Course_instructorId_idx" ON "Course"("instructorId");
+
+-- CreateIndex
+CREATE INDEX "Course_isPublished_idx" ON "Course"("isPublished");
+
+-- CreateIndex
+CREATE INDEX "Section_courseId_idx" ON "Section"("courseId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Section_courseId_order_key" ON "Section"("courseId", "order");
 
 -- CreateIndex
+CREATE INDEX "Lesson_sectionId_idx" ON "Lesson"("sectionId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Lesson_sectionId_order_key" ON "Lesson"("sectionId", "order");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Coupon_code_key" ON "Coupon"("code");
+
+-- CreateIndex
+CREATE INDEX "Coupon_coachingId_idx" ON "Coupon"("coachingId");
+
+-- CreateIndex
+CREATE INDEX "Coupon_courseId_idx" ON "Coupon"("courseId");
+
+-- CreateIndex
+CREATE INDEX "Coupon_isActive_idx" ON "Coupon"("isActive");
+
+-- CreateIndex
+CREATE INDEX "Coupon_expiresAt_idx" ON "Coupon"("expiresAt");
 
 -- CreateIndex
 CREATE INDEX "Enrollment_userId_idx" ON "Enrollment"("userId");
@@ -320,7 +418,25 @@ CREATE INDEX "Enrollment_userId_idx" ON "Enrollment"("userId");
 CREATE INDEX "Enrollment_courseId_idx" ON "Enrollment"("courseId");
 
 -- CreateIndex
+CREATE INDEX "Enrollment_coachingId_idx" ON "Enrollment"("coachingId");
+
+-- CreateIndex
+CREATE INDEX "Enrollment_createdAt_idx" ON "Enrollment"("createdAt");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Enrollment_userId_courseId_key" ON "Enrollment"("userId", "courseId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "CouponUsage_enrollmentId_key" ON "CouponUsage"("enrollmentId");
+
+-- CreateIndex
+CREATE INDEX "CouponUsage_couponId_userId_idx" ON "CouponUsage"("couponId", "userId");
+
+-- CreateIndex
+CREATE INDEX "CouponUsage_userId_idx" ON "CouponUsage"("userId");
+
+-- CreateIndex
+CREATE INDEX "CouponUsage_createdAt_idx" ON "CouponUsage"("createdAt");
 
 -- CreateIndex
 CREATE INDEX "Progress_userId_completed_idx" ON "Progress"("userId", "completed");
@@ -380,6 +496,15 @@ CREATE INDEX "Payment_userId_status_idx" ON "Payment"("userId", "status");
 CREATE INDEX "Payment_courseId_idx" ON "Payment"("courseId");
 
 -- CreateIndex
+CREATE INDEX "Payment_couponId_idx" ON "Payment"("couponId");
+
+-- CreateIndex
+CREATE INDEX "Payment_coachingId_idx" ON "Payment"("coachingId");
+
+-- CreateIndex
+CREATE INDEX "Payment_createdAt_idx" ON "Payment"("createdAt");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Certificate_enrollmentId_key" ON "Certificate"("enrollmentId");
 
 -- CreateIndex
@@ -401,10 +526,28 @@ ALTER TABLE "Section" ADD CONSTRAINT "Section_courseId_fkey" FOREIGN KEY ("cours
 ALTER TABLE "Lesson" ADD CONSTRAINT "Lesson_sectionId_fkey" FOREIGN KEY ("sectionId") REFERENCES "Section"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Coupon" ADD CONSTRAINT "Coupon_coachingId_fkey" FOREIGN KEY ("coachingId") REFERENCES "Coaching"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Coupon" ADD CONSTRAINT "Coupon_courseId_fkey" FOREIGN KEY ("courseId") REFERENCES "Course"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Enrollment" ADD CONSTRAINT "Enrollment_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Enrollment" ADD CONSTRAINT "Enrollment_courseId_fkey" FOREIGN KEY ("courseId") REFERENCES "Course"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Enrollment" ADD CONSTRAINT "Enrollment_coachingId_fkey" FOREIGN KEY ("coachingId") REFERENCES "Coaching"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "CouponUsage" ADD CONSTRAINT "CouponUsage_couponId_fkey" FOREIGN KEY ("couponId") REFERENCES "Coupon"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "CouponUsage" ADD CONSTRAINT "CouponUsage_enrollmentId_fkey" FOREIGN KEY ("enrollmentId") REFERENCES "Enrollment"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "CouponUsage" ADD CONSTRAINT "CouponUsage_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Progress" ADD CONSTRAINT "Progress_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -468,6 +611,12 @@ ALTER TABLE "Payment" ADD CONSTRAINT "Payment_userId_fkey" FOREIGN KEY ("userId"
 
 -- AddForeignKey
 ALTER TABLE "Payment" ADD CONSTRAINT "Payment_courseId_fkey" FOREIGN KEY ("courseId") REFERENCES "Course"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Payment" ADD CONSTRAINT "Payment_couponId_fkey" FOREIGN KEY ("couponId") REFERENCES "Coupon"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Payment" ADD CONSTRAINT "Payment_coachingId_fkey" FOREIGN KEY ("coachingId") REFERENCES "Coaching"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Certificate" ADD CONSTRAINT "Certificate_enrollmentId_fkey" FOREIGN KEY ("enrollmentId") REFERENCES "Enrollment"("id") ON DELETE CASCADE ON UPDATE CASCADE;

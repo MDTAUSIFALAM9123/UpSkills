@@ -29,6 +29,7 @@ import {
   Sparkles,
   UserCheck,
   UserCog,
+  Building2,
   UserPlus,
   Users,
   X,
@@ -39,6 +40,7 @@ import Link from 'next/link';
 import PaymentHistory from './PaymentHistory';
 import NotificationBell from '../components/notifications/NotificationBell';
 import NotificationComposer from '../components/notifications/NotificationComposer';
+import CoachingCouponManagement from './CoachingCouponManagement';
 
 interface User {
   id: string;
@@ -79,7 +81,8 @@ type DashboardSection =
   | 'instructors'
   | 'notifications'
   | 'payments'
-  | 'reports';
+  | 'reports'
+  | 'coaching-coupons';
 // | 'settings';
 
 const navItems: {
@@ -91,6 +94,11 @@ const navItems: {
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
   { id: 'users', label: 'User Management', icon: Users },
   { id: 'courses', label: 'Courses & Curriculum', icon: BookOpen },
+  {
+    id: 'coaching-coupons',
+    label: 'Coaching & Coupons',
+    icon: Building2,
+  },
   { id: 'enrollments', label: 'Enrollments', icon: GraduationCap },
   { id: 'instructors', label: 'Instructors', icon: UserCheck },
   { id: 'notifications', label: 'Notifications', icon: Bell },
@@ -668,6 +676,8 @@ export default function AdminDashboard() {
               />
             </SimpleSection>
           )}
+
+          {activeSection === 'coaching-coupons' && <CoachingCouponManagement />}
 
           {activeSection === 'notifications' && <NotificationComposer role="ADMIN" />}
 

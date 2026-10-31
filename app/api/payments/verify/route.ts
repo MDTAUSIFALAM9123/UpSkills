@@ -13,7 +13,7 @@ type VerifyBody = {
   razorpay_signature?: string;
 };
 
-// Notify the instructor after a successful enrollment
+// Notify instructor after a new successful enrollment
 async function notifyInstructorOnEnrollment({
   instructorId,
   courseId,
@@ -32,7 +32,7 @@ async function notifyInstructorOnEnrollment({
     throw new Error(`Instructor not found: ${instructorId}`);
   }
 
-  const notification = await prisma.notification.create({
+  return prisma.notification.create({
     data: {
       userId: instructor.id,
       title: 'New Student Enrolled',
@@ -41,20 +41,12 @@ async function notifyInstructorOnEnrollment({
       link: '/instructor',
     },
   });
-
-  console.log('[Enrollment Notification] Saved:', {
-    notificationId: notification.id,
-    instructorId: instructor.id,
-    courseId,
-  });
-
-  return notification;
 }
 
 export async function POST(req: NextRequest) {
   const user = getAuthFromRequest(req);
 
-  if (!user) {
+  if (!user?.id) {
     return NextResponse.json({ success: false, message: 'Please log in first.' }, { status: 401 });
   }
 
@@ -73,6 +65,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // 1. Verify Razorpay signature
     const expectedSignature = createHmac('sha256', secret)
       .update(`${orderId}|${paymentId}`)
       .digest('hex');
@@ -90,14 +83,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // 2. Find payment record
     const paymentRecord = await prisma.payment.findUnique({
-      where: { providerOrderId: orderId },
+      where: {
+        providerOrderId: orderId,
+      },
       include: {
         course: {
           select: {
             id: true,
             title: true,
-            price: true,
             isPublished: true,
             instructorId: true,
           },
@@ -119,24 +114,61 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (
-      !paymentRecord.course ||
-      !paymentRecord.course.isPublished ||
-      paymentRecord.course.price !== paymentRecord.amount
-    ) {
+    if (!paymentRecord.course || !paymentRecord.course.isPublished) {
       return NextResponse.json(
-        { success: false, message: 'Course or payment amount is invalid.' },
+        { success: false, message: 'Course is unavailable.' },
         { status: 400 }
       );
     }
 
-    // Verify the payment with Razorpay even when retrying a successful order.
+    if (!paymentRecord.coachingId || !paymentRecord.couponId) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Coaching or coupon information is missing from this payment.',
+        },
+        { status: 400 }
+      );
+    }
+
+    // 3. Validate saved payment amounts
+    const originalAmount = paymentRecord.originalAmount;
+    const discountAmount = paymentRecord.discountAmount;
+    const finalAmount = paymentRecord.amount;
+
+    if (
+      originalAmount === null ||
+      !Number.isFinite(originalAmount) ||
+      !Number.isFinite(discountAmount) ||
+      !Number.isFinite(finalAmount) ||
+      originalAmount <= 0 ||
+      discountAmount < 0 ||
+      discountAmount > originalAmount
+    ) {
+      return NextResponse.json(
+        { success: false, message: 'Invalid payment amount details.' },
+        { status: 400 }
+      );
+    }
+
+    const calculatedFinalAmount = Math.round((originalAmount - discountAmount) * 100) / 100;
+
+    if (Math.round(finalAmount * 100) !== Math.round(calculatedFinalAmount * 100)) {
+      return NextResponse.json(
+        { success: false, message: 'Payment amount calculation mismatch.' },
+        { status: 400 }
+      );
+    }
+
+    // 4. Verify payment directly with Razorpay
     const razorpayPayment = await razorpay.payments.fetch(paymentId);
+
+    const expectedAmountInPaise = Math.round(finalAmount * 100);
 
     if (
       razorpayPayment.order_id !== orderId ||
       razorpayPayment.status !== 'captured' ||
-      razorpayPayment.amount !== Math.round(paymentRecord.amount * 100) ||
+      razorpayPayment.amount !== expectedAmountInPaise ||
       razorpayPayment.currency !== paymentRecord.currency
     ) {
       return NextResponse.json(
@@ -162,25 +194,61 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Transaction: mark payment successful and create enrollment.
-    const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-      const currentPayment = await tx.payment.findUnique({
-        where: { id: paymentRecord.id },
-      });
+    // 5. Complete payment, enrollment and coupon usage atomically
+    const result = await prisma.$transaction(
+      async (tx: Prisma.TransactionClient) => {
+        const currentPayment = await tx.payment.findUnique({
+          where: { id: paymentRecord.id },
+        });
 
-      if (!currentPayment || currentPayment.userId !== user.id) {
-        throw new Error('Payment record is no longer available.');
-      }
+        if (!currentPayment || currentPayment.userId !== user.id) {
+          throw new Error('Payment record is no longer available.');
+        }
 
-      if (currentPayment.status === 'FAILED' || currentPayment.status === 'REFUNDED') {
-        throw new Error('Payment is no longer eligible for verification.');
-      }
+        if (currentPayment.status === 'FAILED' || currentPayment.status === 'REFUNDED') {
+          throw new Error('Payment is no longer eligible for verification.');
+        }
 
-      if (currentPayment.providerPaymentId && currentPayment.providerPaymentId !== paymentId) {
-        throw new Error('Payment ID does not match the verified payment.');
-      }
+        if (currentPayment.providerPaymentId && currentPayment.providerPaymentId !== paymentId) {
+          throw new Error('Payment ID does not match the verified payment.');
+        }
 
-      if (currentPayment.status !== 'SUCCESS') {
+        // Idempotency: do not process coupon usage again on retry
+        if (currentPayment.status === 'SUCCESS') {
+          const existingEnrollment = await tx.enrollment.findUnique({
+            where: {
+              userId_courseId: {
+                userId: user.id,
+                courseId: paymentRecord.courseId,
+              },
+            },
+          });
+
+          if (!existingEnrollment) {
+            throw new Error('Successful payment has no enrollment record.');
+          }
+
+          return {
+            enrollment: existingEnrollment,
+            alreadyCompleted: true,
+            newEnrollment: false,
+          };
+        }
+
+        // Confirm coaching and coupon still belong together
+        const coupon = await tx.coupon.findUnique({
+          where: { id: currentPayment.couponId! },
+          select: {
+            id: true,
+            coachingId: true,
+          },
+        });
+
+        if (!coupon || coupon.coachingId !== currentPayment.coachingId) {
+          throw new Error('Payment coaching and coupon details do not match.');
+        }
+
+        // Mark payment successful
         await tx.payment.update({
           where: { id: currentPayment.id },
           data: {
@@ -192,31 +260,82 @@ export async function POST(req: NextRequest) {
             failureReason: null,
           },
         });
-      }
 
-      const enrollment = await tx.enrollment.upsert({
-        where: {
-          userId_courseId: {
-            userId: user.id,
-            courseId: paymentRecord.courseId,
+        // Create enrollment with coaching and discount information
+        let enrollment = await tx.enrollment.findUnique({
+          where: {
+            userId_courseId: {
+              userId: user.id,
+              courseId: paymentRecord.courseId,
+            },
           },
-        },
-        create: {
-          userId: user.id,
-          courseId: paymentRecord.courseId,
-        },
-        update: {},
-      });
+        });
 
-      return enrollment;
-    });
+        let newEnrollment = false;
 
-    // Notify only after payment verification and enrollment succeed.
-    // A notification failure must not undo a successful payment.
+        if (!enrollment) {
+          enrollment = await tx.enrollment.create({
+            data: {
+              userId: user.id,
+              courseId: paymentRecord.courseId,
+
+              coachingId: currentPayment.coachingId,
+              originalAmount: currentPayment.originalAmount!,
+              discountAmount: currentPayment.discountAmount,
+              finalAmount: currentPayment.amount,
+            },
+          });
+
+          newEnrollment = true;
+        }
+
+        // Check whether this enrollment already has coupon usage
+        const existingCouponUsage = await tx.couponUsage.findUnique({
+          where: {
+            enrollmentId: enrollment.id,
+          },
+        });
+
+        if (!existingCouponUsage) {
+          // Create coupon usage only once
+          await tx.couponUsage.create({
+            data: {
+              couponId: currentPayment.couponId!,
+              enrollmentId: enrollment.id,
+              userId: user.id,
+              discountAmount: currentPayment.discountAmount,
+            },
+          });
+
+          // Increment usedCount in the same transaction
+          await tx.coupon.update({
+            where: {
+              id: currentPayment.couponId!,
+            },
+            data: {
+              usedCount: {
+                increment: 1,
+              },
+            },
+          });
+        }
+
+        return {
+          enrollment,
+          alreadyCompleted: false,
+          newEnrollment,
+        };
+      },
+      {
+        isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      }
+    );
+
+    // 6. Notify instructor only for a newly created enrollment
     let notificationSaved = false;
     let notificationError: string | undefined;
 
-    if (paymentRecord.course.instructorId) {
+    if (result.newEnrollment && paymentRecord.course.instructorId) {
       try {
         await notifyInstructorOnEnrollment({
           instructorId: paymentRecord.course.instructorId,
@@ -230,15 +349,25 @@ export async function POST(req: NextRequest) {
 
         notificationError = error instanceof Error ? error.message : 'Unknown notification error';
       }
-    } else {
+    } else if (result.newEnrollment) {
       notificationError = 'This course has no assigned instructor.';
-      console.error('[Enrollment Notification]', notificationError);
     }
 
     return NextResponse.json({
       success: true,
-      message: 'Payment verified and enrollment completed.',
-      enrollmentId: result.id,
+      message: result.alreadyCompleted
+        ? 'Payment was already verified and enrollment is active.'
+        : 'Payment verified and coaching enrollment completed.',
+
+      enrollmentId: result.enrollment.id,
+
+      coachingId: paymentRecord.coachingId,
+      couponId: paymentRecord.couponId,
+
+      originalAmount,
+      discountAmount,
+      finalAmount,
+
       notificationSaved,
       ...(notificationError ? { notificationError } : {}),
     });

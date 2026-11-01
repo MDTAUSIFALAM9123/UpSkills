@@ -24,7 +24,7 @@ interface UseCoursesOptions {
   limit?: number;
 }
 
-const CACHE_TIME = 5 * 60 * 1000;
+const CACHE_TIME = 2 * 60 * 1000;
 
 export function useCourses(options?: UseCoursesOptions) {
   const [courses, setCourses] = useState<Course[]>([]);

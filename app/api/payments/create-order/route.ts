@@ -6,6 +6,26 @@ import { razorpay, razorpayKeyId } from '@/lib/razorpay';
 
 export const runtime = 'nodejs';
 
+// Helper only used so TypeScript can infer the coupon type from the schema
+// (no need to import the Prisma namespace).
+async function findCouponByCode(code: string) {
+  return prisma.coupon.findUnique({
+    where: { code },
+    include: {
+      coaching: {
+        select: {
+          id: true,
+          name: true,
+          code: true,
+          isActive: true,
+        },
+      },
+    },
+  });
+}
+
+type CouponWithCoaching = NonNullable<Awaited<ReturnType<typeof findCouponByCode>>>;
+
 export async function POST(req: NextRequest) {
   const user = getAuthFromRequest(req);
 
@@ -18,19 +38,12 @@ export async function POST(req: NextRequest) {
 
     const courseId = typeof body?.courseId === 'string' ? body.courseId.trim() : '';
 
+    // Coupon is OPTIONAL. Empty string means "no coupon".
     const couponCode =
       typeof body?.couponCode === 'string' ? body.couponCode.trim().toUpperCase() : '';
 
     if (!courseId) {
       return NextResponse.json({ success: false, message: 'Invalid course ID.' }, { status: 400 });
-    }
-
-    // Coupon is mandatory because it identifies the coaching.
-    if (!couponCode) {
-      return NextResponse.json(
-        { success: false, message: 'Please enter a coaching coupon code.' },
-        { status: 400 }
-      );
     }
 
     // 1. Find published course
@@ -80,122 +93,111 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 3. Find coupon and its coaching automatically
-    const coupon = await prisma.coupon.findUnique({
-      where: {
-        code: couponCode,
-      },
-      include: {
-        coaching: {
-          select: {
-            id: true,
-            name: true,
-            code: true,
-            isActive: true,
-          },
-        },
-      },
-    });
+    // 3. Optional coupon
+    let coupon: CouponWithCoaching | null = null;
+    let discountAmount = 0;
 
-    if (!coupon) {
-      return NextResponse.json(
-        { success: false, message: 'Invalid coupon code.' },
-        { status: 404 }
-      );
-    }
+    if (couponCode) {
+      coupon = await findCouponByCode(couponCode);
 
-    // 4. Validate coupon
-    const now = new Date();
+      if (!coupon) {
+        return NextResponse.json(
+          { success: false, message: 'Invalid coupon code.' },
+          { status: 404 }
+        );
+      }
 
-    if (!coupon.isActive || !coupon.coaching.isActive) {
-      return NextResponse.json(
-        { success: false, message: 'This coaching coupon is inactive.' },
-        { status: 400 }
-      );
-    }
+      // 4. Validate coupon
+      const now = new Date();
 
-    if (coupon.startsAt && now < coupon.startsAt) {
-      return NextResponse.json(
-        { success: false, message: 'This coupon is not active yet.' },
-        { status: 400 }
-      );
-    }
+      if (!coupon.isActive || !coupon.coaching.isActive) {
+        return NextResponse.json(
+          { success: false, message: 'This coaching coupon is inactive.' },
+          { status: 400 }
+        );
+      }
 
-    if (coupon.expiresAt && now > coupon.expiresAt) {
-      return NextResponse.json(
-        { success: false, message: 'This coupon has expired.' },
-        { status: 400 }
-      );
-    }
+      if (coupon.startsAt && now < coupon.startsAt) {
+        return NextResponse.json(
+          { success: false, message: 'This coupon is not active yet.' },
+          { status: 400 }
+        );
+      }
 
-    // Check course restriction
-    if (coupon.courseId && coupon.courseId !== course.id) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: 'This coupon is not valid for this course.',
-        },
-        { status: 400 }
-      );
-    }
+      if (coupon.expiresAt && now > coupon.expiresAt) {
+        return NextResponse.json(
+          { success: false, message: 'This coupon has expired.' },
+          { status: 400 }
+        );
+      }
 
-    // Check minimum order amount
-    if (coupon.minOrderAmount !== null && course.price < coupon.minOrderAmount) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: `Minimum course amount for this coupon is ₹${coupon.minOrderAmount}.`,
-        },
-        { status: 400 }
-      );
-    }
-
-    // Check total coupon usage limit
-    if (coupon.usageLimit !== null && coupon.usedCount >= coupon.usageLimit) {
-      return NextResponse.json(
-        { success: false, message: 'Coupon usage limit reached.' },
-        { status: 400 }
-      );
-    }
-
-    // Check per-student usage limit
-    if (coupon.maxUsesPerUser !== null) {
-      const userUsageCount = await prisma.couponUsage.count({
-        where: {
-          couponId: coupon.id,
-          userId: user.id,
-        },
-      });
-
-      if (userUsageCount >= coupon.maxUsesPerUser) {
+      // Check course restriction
+      if (coupon.courseId && coupon.courseId !== course.id) {
         return NextResponse.json(
           {
             success: false,
-            message: 'You have already used this coupon the maximum number of times.',
+            message: 'This coupon is not valid for this course.',
           },
           { status: 400 }
         );
       }
-    }
 
-    // 5. Calculate discount on server
-    let discountAmount = 0;
-
-    if (coupon.discountType === 'PERCENTAGE') {
-      discountAmount = (course.price * coupon.discountValue) / 100;
-
-      if (coupon.maxDiscountAmount !== null) {
-        discountAmount = Math.min(discountAmount, coupon.maxDiscountAmount);
+      // Check minimum order amount
+      if (coupon.minOrderAmount !== null && course.price < coupon.minOrderAmount) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: `Minimum course amount for this coupon is ₹${coupon.minOrderAmount}.`,
+          },
+          { status: 400 }
+        );
       }
-    } else if (coupon.discountType === 'FIXED') {
-      discountAmount = coupon.discountValue;
+
+      // Check total coupon usage limit
+      if (coupon.usageLimit !== null && coupon.usedCount >= coupon.usageLimit) {
+        return NextResponse.json(
+          { success: false, message: 'Coupon usage limit reached.' },
+          { status: 400 }
+        );
+      }
+
+      // Check per-student usage limit
+      if (coupon.maxUsesPerUser !== null) {
+        const userUsageCount = await prisma.couponUsage.count({
+          where: {
+            couponId: coupon.id,
+            userId: user.id,
+          },
+        });
+
+        if (userUsageCount >= coupon.maxUsesPerUser) {
+          return NextResponse.json(
+            {
+              success: false,
+              message: 'You have already used this coupon the maximum number of times.',
+            },
+            { status: 400 }
+          );
+        }
+      }
+
+      // 5. Calculate discount on server
+      if (coupon.discountType === 'PERCENTAGE') {
+        discountAmount = (course.price * coupon.discountValue) / 100;
+
+        if (coupon.maxDiscountAmount !== null) {
+          discountAmount = Math.min(discountAmount, coupon.maxDiscountAmount);
+        }
+      } else if (coupon.discountType === 'FIXED') {
+        discountAmount = coupon.discountValue;
+      }
+
+      // Never allow discount above course price
+      discountAmount = Math.min(discountAmount, course.price);
+
+      // Round to two decimal places
+      discountAmount = Math.round(discountAmount * 100) / 100;
     }
-
-    // Never allow discount above course price
-    discountAmount = Math.min(discountAmount, course.price);
-
-    // Round amounts to two decimal places
-    discountAmount = Math.round(discountAmount * 100) / 100;
 
     const finalAmount = Math.round((course.price - discountAmount) * 100) / 100;
 
@@ -222,13 +224,13 @@ export async function POST(req: NextRequest) {
       notes: {
         courseId: course.id,
         userId: user.id,
-        coachingId: coupon.coachingId,
-        couponId: coupon.id,
-        couponCode: coupon.code,
+        coachingId: coupon?.coachingId ?? '',
+        couponId: coupon?.id ?? '',
+        couponCode: coupon?.code ?? '',
       },
     });
 
-    // 7. Save payment with automatic coaching details
+    // 7. Save payment (coaching / coupon are null when no coupon is used)
     const payment = await prisma.payment.create({
       data: {
         userId: user.id,
@@ -240,8 +242,8 @@ export async function POST(req: NextRequest) {
         providerOrderId: order.id,
         receipt,
 
-        coachingId: coupon.coachingId,
-        couponId: coupon.id,
+        coachingId: coupon?.coachingId ?? null,
+        couponId: coupon?.id ?? null,
         originalAmount: course.price,
         discountAmount,
       },
@@ -257,18 +259,22 @@ export async function POST(req: NextRequest) {
 
       courseName: course.title,
 
-      coaching: {
-        id: coupon.coaching.id,
-        name: coupon.coaching.name,
-        code: coupon.coaching.code,
-      },
+      coaching: coupon
+        ? {
+            id: coupon.coaching.id,
+            name: coupon.coaching.name,
+            code: coupon.coaching.code,
+          }
+        : null,
 
-      coupon: {
-        id: coupon.id,
-        code: coupon.code,
-        discountType: coupon.discountType,
-        discountValue: coupon.discountValue,
-      },
+      coupon: coupon
+        ? {
+            id: coupon.id,
+            code: coupon.code,
+            discountType: coupon.discountType,
+            discountValue: coupon.discountValue,
+          }
+        : null,
 
       originalAmount: course.price,
       discountAmount,

@@ -812,7 +812,7 @@ export default function CourseDetailsPage() {
             <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg shadow-slate-200/50">
               <div className="relative">
                 <img
-                  src={course.thumbnail || '/placeholder.png'}
+                  src={course.thumbnail || '/Normal.png'}
                   alt={course.title}
                   className="h-48 w-full bg-slate-100 object-cover"
                   onError={event => {

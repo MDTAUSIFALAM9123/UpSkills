@@ -33,7 +33,7 @@ export default function CourseCard({ course }: CourseCardProps) {
   return (
     <div className="rounded-xl border border-gray-200 bg-white transition hover:-translate-y-1 hover:shadow-md">
       {/* Thumbnail */}
-      <div className="relative h-36 overflow-hidden rounded-t-xl border-b border-gray-200 bg-purple-100">
+      <div className="relative h-56 overflow-hidden rounded-t-xl border-b border-gray-200 bg-purple-100 sm:h-40">
         <Image
           src={course.thumbnail || '/Normal.png'}
           alt={course.title}

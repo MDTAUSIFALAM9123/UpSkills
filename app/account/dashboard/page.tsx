@@ -2432,7 +2432,26 @@ function LearningRoom({
                 </div>
 
                 <div className="text-sm leading-7 whitespace-pre-wrap text-slate-600">
-                  {activeLesson.content}
+                  {activeLesson.content && (
+                    <>
+                      {/^https?:\/\/\S+$/i.test(activeLesson.content.trim()) ? (
+                        <div className="space-y-3">
+                          <p className="font-medium text-slate-800">Document Link:</p>
+
+                          <a
+                            href={activeLesson.content.trim()}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="break-all text-violet-600 underline hover:text-violet-800"
+                          >
+                            {activeLesson.content.trim()}
+                          </a>
+                        </div>
+                      ) : (
+                        activeLesson.content
+                      )}
+                    </>
+                  )}
                 </div>
               </div>
             )}

@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createHmac, timingSafeEqual } from 'crypto';
+import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { getAuthFromRequest } from '@/lib/getAuth';
 import { razorpay } from '@/lib/razorpay';
-import { Prisma } from '@prisma/client';
 
 export const runtime = 'nodejs';
 
@@ -121,11 +121,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!paymentRecord.coachingId || !paymentRecord.couponId) {
+    // Coaching / coupon are OPTIONAL.
+    // But if one is present the other must be present too.
+    if (Boolean(paymentRecord.coachingId) !== Boolean(paymentRecord.couponId)) {
       return NextResponse.json(
         {
           success: false,
-          message: 'Coaching or coupon information is missing from this payment.',
+          message: 'Coaching and coupon information do not match for this payment.',
         },
         { status: 400 }
       );
@@ -147,6 +149,14 @@ export async function POST(req: NextRequest) {
     ) {
       return NextResponse.json(
         { success: false, message: 'Invalid payment amount details.' },
+        { status: 400 }
+      );
+    }
+
+    // Without a coupon there must be no discount
+    if (!paymentRecord.couponId && discountAmount !== 0) {
+      return NextResponse.json(
+        { success: false, message: 'Invalid discount for a payment without coupon.' },
         { status: 400 }
       );
     }
@@ -194,7 +204,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 5. Complete payment, enrollment and coupon usage atomically
+    // 5. Complete payment, enrollment and (optional) coupon usage atomically.
+    // `tx` type is inferred automatically, so no Prisma namespace import is needed.
     const result = await prisma.$transaction(
       async (tx: Prisma.TransactionClient) => {
         const currentPayment = await tx.payment.findUnique({
@@ -235,17 +246,19 @@ export async function POST(req: NextRequest) {
           };
         }
 
-        // Confirm coaching and coupon still belong together
-        const coupon = await tx.coupon.findUnique({
-          where: { id: currentPayment.couponId! },
-          select: {
-            id: true,
-            coachingId: true,
-          },
-        });
+        // If a coupon was used, confirm coaching and coupon still belong together
+        if (currentPayment.couponId) {
+          const coupon = await tx.coupon.findUnique({
+            where: { id: currentPayment.couponId },
+            select: {
+              id: true,
+              coachingId: true,
+            },
+          });
 
-        if (!coupon || coupon.coachingId !== currentPayment.coachingId) {
-          throw new Error('Payment coaching and coupon details do not match.');
+          if (!coupon || coupon.coachingId !== currentPayment.coachingId) {
+            throw new Error('Payment coaching and coupon details do not match.');
+          }
         }
 
         // Mark payment successful
@@ -261,7 +274,7 @@ export async function POST(req: NextRequest) {
           },
         });
 
-        // Create enrollment with coaching and discount information
+        // Create enrollment (coachingId is null when no coupon was used)
         let enrollment = await tx.enrollment.findUnique({
           where: {
             userId_courseId: {
@@ -289,35 +302,35 @@ export async function POST(req: NextRequest) {
           newEnrollment = true;
         }
 
-        // Check whether this enrollment already has coupon usage
-        const existingCouponUsage = await tx.couponUsage.findUnique({
-          where: {
-            enrollmentId: enrollment.id,
-          },
-        });
-
-        if (!existingCouponUsage) {
-          // Create coupon usage only once
-          await tx.couponUsage.create({
-            data: {
-              couponId: currentPayment.couponId!,
-              enrollmentId: enrollment.id,
-              userId: user.id,
-              discountAmount: currentPayment.discountAmount,
-            },
-          });
-
-          // Increment usedCount in the same transaction
-          await tx.coupon.update({
+        // Coupon usage only when a coupon was used
+        if (currentPayment.couponId) {
+          const existingCouponUsage = await tx.couponUsage.findUnique({
             where: {
-              id: currentPayment.couponId!,
-            },
-            data: {
-              usedCount: {
-                increment: 1,
-              },
+              enrollmentId: enrollment.id,
             },
           });
+
+          if (!existingCouponUsage) {
+            await tx.couponUsage.create({
+              data: {
+                couponId: currentPayment.couponId,
+                enrollmentId: enrollment.id,
+                userId: user.id,
+                discountAmount: currentPayment.discountAmount,
+              },
+            });
+
+            await tx.coupon.update({
+              where: {
+                id: currentPayment.couponId,
+              },
+              data: {
+                usedCount: {
+                  increment: 1,
+                },
+              },
+            });
+          }
         }
 
         return {
@@ -327,7 +340,7 @@ export async function POST(req: NextRequest) {
         };
       },
       {
-        isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+        isolationLevel: 'Serializable',
       }
     );
 
@@ -357,7 +370,7 @@ export async function POST(req: NextRequest) {
       success: true,
       message: result.alreadyCompleted
         ? 'Payment was already verified and enrollment is active.'
-        : 'Payment verified and coaching enrollment completed.',
+        : 'Payment verified and enrollment completed.',
 
       enrollmentId: result.enrollment.id,
 

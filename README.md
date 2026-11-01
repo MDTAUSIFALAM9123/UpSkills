@@ -1,36 +1,165 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🚀 UpSkills – Learning Management System
 
-## Getting Started
+<p align="center">
+  **Learn Today. Build Tomorrow.**
+</p>
 
-First, run the development server:
+<p align="center">
+  A modern Learning Management System designed to make online education simple, accessible, and engaging.
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-16-black?logo=next.js" />
+  <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react" />
+  <img src="https://img.shields.io/badge/TypeScript-5.9-blue?logo=typescript" />
+  <img src="https://img.shields.io/badge/Prisma-7-2D3748?logo=prisma" />
+  <img src="https://img.shields.io/badge/Database-PostgreSQL-316192?logo=postgresql" />
+</p>
+
+---
+
+## ✨ About UpSkills
+
+**UpSkills** is a feature-rich online learning platform built to connect students, instructors, and coaching institutes in one place.
+
+It provides an organized learning experience with course enrollment, online payments, quizzes, progress tracking, and more.
+
+## 🌟 Key Features
+
+- 📚 **Online Courses** – Browse and enroll in available courses.
+- 🏫 **Coaching Integration** – Coaching-specific enrollment and coupon management.
+- 💳 **Secure Payments** – Integrated Razorpay payment gateway.
+- 🎟️ **Coupon System** – Apply coaching-specific discount coupons.
+- 👨‍🎓 **Student Dashboard** – Manage courses, learning progress, and activities.
+- 👨‍🏫 **Instructor Dashboard** – Create and manage courses and lessons.
+- 🛡️ **Admin Dashboard** – Manage users, courses, and platform activities.
+- 📝 **Quizzes & Assessments** – Test knowledge and track performance.
+- 🔔 **Notifications** – Stay updated with important announcements.
+- 📊 **Progress Tracking** – Monitor learning progress.
+- 📱 **Responsive Design** – Optimized for desktop, tablet, and mobile.
+
+## 🛠️ Tech Stack
+
+| Technology   | Purpose             |
+| ------------ | ------------------- |
+| Next.js      | Frontend & Backend  |
+| React.js     | User Interface      |
+| TypeScript   | Type Safety         |
+| Tailwind CSS | Styling             |
+| Prisma ORM   | Database Management |
+| PostgreSQL   | Database            |
+| Razorpay     | Payment Integration |
+| JWT          | Authentication      |
+
+## 🚀 Getting Started
+
+Follow these steps to run UpSkills locally.
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/MDTAUSIFALAM9123/UpSkills.git
+```
+
+### 2. Navigate to Project
+
+```bash
+cd UpSkills
+```
+
+### 3. Install Dependencies
+
+```bash
+npm install
+```
+
+### 4. Configure Environment Variables
+
+Create a `.env` file in the root directory.
+
+Add the required environment variables:
+
+```env
+DATABASE_URL="your_postgresql_connection_string"
+JWT_SECRET="your_jwt_secret"
+
+RAZORPAY_KEY_ID="your_razorpay_key_id"
+RAZORPAY_KEY_SECRET="your_razorpay_key_secret"
+```
+
+Add other environment variables required by your project.
+
+### 5. Generate Prisma Client
+
+```bash
+npx prisma generate
+```
+
+### 6. Start Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open your browser and visit:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+**http://localhost:3000**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📁 Project Structure
 
-## Learn More
+```text
+UpSkills/
+├── app/
+│   ├── admin/
+│   ├── instructor/
+│   ├── account/
+│   ├── courses/
+│   └── api/
+├── components/
+├── lib/
+├── prisma/
+│   └── schema.prisma
+├── public/
+├── package.json
+└── README.md
+```
 
-To learn more about Next.js, take a look at the following resources:
+## 📦 Available Scripts
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Command               | Description                  |
+| --------------------- | ---------------------------- |
+| `npm run dev`         | Start development server     |
+| `npm run build`       | Build production application |
+| `npm run start`       | Start production server      |
+| `npm run lint`        | Run ESLint                   |
+| `npm run format`      | Format project files         |
+| `npx prisma generate` | Generate Prisma Client       |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🌐 Deployment
 
-## Deploy on Vercel
+UpSkills can be deployed using **Vercel**.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Push your project to GitHub.
+2. Import the repository into Vercel.
+3. Configure environment variables.
+4. Deploy your application.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Useful resource: [Next.js Deployment Documentation](https://nextjs.org/docs/app/building-your-application/deploying)
+
+## 📖 Useful Resources
+
+- [Next.js Documentation](https://nextjs.org/docs)
+- [React Documentation](https://react.dev/)
+- [Prisma Documentation](https://www.prisma.io/docs)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+- [PostgreSQL Documentation](https://www.postgresql.org/docs/)
+
+---
+
+<p align="center">
+  **🎯 UpSkills – Skills for a Better Tomorrow**
+</p>
+
+<p align="center">
+  Built with ❤️ using Next.js and modern web technologies.
+</p>

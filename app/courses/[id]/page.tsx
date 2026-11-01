@@ -142,6 +142,7 @@ export default function CourseDetailsPage() {
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewComment, setReviewComment] = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [showFullDescription, setShowFullDescription] = useState(false);
 
   const fetchCourse = useCallback(async () => {
     if (!courseId) {
@@ -685,6 +686,7 @@ export default function CourseDetailsPage() {
                   <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-100 text-violet-700">
                     <FileText size={21} />
                   </div>
+
                   <div>
                     <h2 className="text-xl font-bold text-slate-900">Course Description</h2>
                     <p className="text-sm text-slate-500">Learn more about this course.</p>
@@ -692,9 +694,33 @@ export default function CourseDetailsPage() {
                 </div>
 
                 <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 sm:p-5">
-                  <p className="text-sm leading-7 whitespace-pre-line text-slate-600">
+                  <p
+                    className={`text-sm leading-7 whitespace-pre-line text-slate-800 ${
+                      showFullDescription ? '' : 'line-clamp-20'
+                    }`}
+                  >
                     {course.description || 'No description is available for this course.'}
                   </p>
+
+                  {course.description && course.description.length > 250 && (
+                    <button
+                      type="button"
+                      onClick={() => setShowFullDescription(prev => !prev)}
+                      className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-violet-700 transition-colors hover:text-violet-900"
+                    >
+                      {showFullDescription ? (
+                        <>
+                          Show Less
+                          <ChevronUp size={16} />
+                        </>
+                      ) : (
+                        <>
+                          Show More
+                          <ChevronDown size={16} />
+                        </>
+                      )}
+                    </button>
+                  )}
                 </div>
               </div>
             )}

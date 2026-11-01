@@ -28,6 +28,8 @@ import {
   Sparkles,
   UserRound,
   X,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import Link from 'next/link';
 import StudentNotesSection from './StudentNotes';
@@ -2235,7 +2237,7 @@ function LearningRoom({
       ),
     [sections]
   );
-
+  const [showFullLessonContent, setShowFullLessonContent] = useState(false);
   const activeIndex = allLessons.findIndex(lesson => lesson.id === activeLesson?.id);
 
   const isCompleted =
@@ -2448,7 +2450,33 @@ function LearningRoom({
                           </a>
                         </div>
                       ) : (
-                        activeLesson.content
+                        <>
+                          <p
+                            className={`whitespace-pre-wrap ${
+                              showFullLessonContent ? '' : 'line-clamp-10'
+                            }`}
+                          >
+                            {activeLesson.content}
+                          </p>
+
+                          {activeLesson.content.length > 250 && (
+                            <button
+                              type="button"
+                              onClick={() => setShowFullLessonContent(prev => !prev)}
+                              className="mt-2 inline-flex items-center gap-1.5 font-semibold text-violet-700 hover:text-violet-900"
+                            >
+                              {showFullLessonContent ? (
+                                <>
+                                  Show Less <ChevronUp size={16} />
+                                </>
+                              ) : (
+                                <>
+                                  Show More <ChevronDown size={16} />
+                                </>
+                              )}
+                            </button>
+                          )}
+                        </>
                       )}
                     </>
                   )}

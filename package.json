@@ -12,8 +12,8 @@
     "seed": "prisma db push && npx tsx prisma/seed.ts"
   },
   "dependencies": {
-    "@prisma/adapter-pg": "^7.2.0",
-    "@prisma/client": "^7.2.0",
+    "@prisma/adapter-pg": "^7.10.1",
+    "@prisma/client": "^7.10.1",
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.2.3",
     "jsonwebtoken": "^9.0.3",
@@ -36,7 +36,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
-    "prettier": "^3.7.4",
+    "prettier": "^3.9.10",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "prisma": "^7.2.0",
     "tailwindcss": "^4",

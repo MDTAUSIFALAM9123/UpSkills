@@ -66,8 +66,7 @@ export default function Login() {
       const data = await res.json();
 
       if (data.success) {
-        toast.success(data.message || 'Login successful!');
-        window.location.href = '/';
+        router.push('/');
       } else {
         setErrorMessage(data.message || 'Invalid credentials');
       }

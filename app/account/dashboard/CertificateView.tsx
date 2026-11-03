@@ -63,51 +63,59 @@ export function CertificateView({
         #certificate-print * {
           box-sizing: border-box;
         }
-
+        
         @media print {
           @page {
             size: A4 landscape;
             margin: 0;
           }
 
-          html,
-          body {
-            width: 297mm !important;
-            height: 210mm !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            overflow: hidden !important;
-            background: #ffffff !important;
-          }
-
-          body * {
-            visibility: hidden !important;
-          }
-
-          #certificate-print,
-          #certificate-print * {
-            visibility: visible !important;
-          }
-
-         #certificate-print {
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 297mm !important;
-  height: 210mm !important;
-  max-width: none !important;
-  aspect-ratio: auto !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  overflow: hidden !important;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  transform: none !important;
-  -webkit-print-color-adjust: exact !important;
-  print-color-adjust: exact !important;
-}
+        html,
+        body {
+          width: 297mm !important;
+          height: 210mm !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          overflow: hidden !important;
+          background: white !important;
         }
+
+        body * {
+          visibility: hidden !important;
+        }
+
+        #certificate-print,
+        #certificate-print * {
+          visibility: visible !important;
+        }
+
+        #certificate-print {
+          position: absolute !important;
+          display: block !important;
+          top: 0 !important;
+          left: 0 !important;
+          width: 297mm !important;
+          height: 210mm !important;
+          min-width: 297mm !important;
+          max-width: 297mm !important;
+          aspect-ratio: auto !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          overflow: hidden !important;
+          border: none !important;
+          border-radius: 0 !important;
+          box-shadow: none !important;
+          transform: none !important;
+          break-before: avoid !important;
+          break-after: avoid !important;
+          break-inside: avoid !important;
+          page-break-before: avoid !important;
+          page-break-after: avoid !important;
+          page-break-inside: avoid !important;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+      }
       `}</style>
 
       {/* Decorative Background */}

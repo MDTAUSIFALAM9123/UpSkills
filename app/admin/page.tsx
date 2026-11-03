@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import {
@@ -8,6 +8,7 @@ import {
   ArrowUpRight,
   Bell,
   BookOpen,
+  Building2,
   CalendarDays,
   Check,
   CheckCircle2,
@@ -24,12 +25,9 @@ import {
   Pencil,
   Plus,
   Search,
-  Settings,
   ShieldCheck,
   Sparkles,
   UserCheck,
-  UserCog,
-  Building2,
   UserPlus,
   Users,
   X,
@@ -59,6 +57,7 @@ interface Course {
   id: string;
   title: string;
   description: string;
+  thumbnail: string;
   price: number;
   isPublished: boolean;
   avgRating: number;
@@ -81,8 +80,8 @@ type DashboardSection =
   | 'instructors'
   | 'notifications'
   | 'payments'
-  | 'reports'
-  | 'coaching-coupons';
+  | 'coaching-coupons'
+  | 'reports';
 // | 'settings';
 
 const navItems: {
@@ -93,12 +92,8 @@ const navItems: {
 }[] = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
   { id: 'users', label: 'User Management', icon: Users },
+  { id: 'coaching-coupons', label: 'Coaching & Coupons', icon: Building2 },
   { id: 'courses', label: 'Courses & Curriculum', icon: BookOpen },
-  {
-    id: 'coaching-coupons',
-    label: 'Coaching & Coupons',
-    icon: Building2,
-  },
   { id: 'enrollments', label: 'Enrollments', icon: GraduationCap },
   { id: 'instructors', label: 'Instructors', icon: UserCheck },
   { id: 'notifications', label: 'Notifications', icon: Bell },
@@ -106,6 +101,90 @@ const navItems: {
   { id: 'reports', label: 'Reports & Analytics', icon: Activity },
   // { id: 'settings', label: 'Platform Settings', icon: Settings },
 ];
+
+/* -------------------------------------------------------------------------- */
+/* Animation helpers (design is unchanged, only motion is added)               */
+/* -------------------------------------------------------------------------- */
+
+function AnimationStyles() {
+  return (
+    <style>{`
+      @keyframes ud-fade-up { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+      @keyframes ud-fade-in { from { opacity: 0; } to { opacity: 1; } }
+      @keyframes ud-slide-in { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: none; } }
+      @keyframes ud-pop { from { opacity: 0; transform: scale(.6) rotate(-40deg); } to { opacity: 1; transform: none; } }
+      @keyframes ud-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+      @keyframes ud-bar { from { width: 0; } }
+      @keyframes ud-pulse-ring {
+        0% { box-shadow: 0 0 0 0 rgba(16,185,129,.55); }
+        70% { box-shadow: 0 0 0 7px rgba(16,185,129,0); }
+        100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
+      }
+
+      .ud-up { opacity: 0; animation: ud-fade-up .6s cubic-bezier(.22,1,.36,1) forwards; }
+      .ud-in { opacity: 0; animation: ud-fade-in .45s ease forwards; }
+      .ud-slide { opacity: 0; animation: ud-slide-in .5s cubic-bezier(.22,1,.36,1) forwards; }
+      .ud-pop { animation: ud-pop 1.1s cubic-bezier(.22,1,.36,1) backwards; }
+      .ud-grow { transform-origin: bottom; animation: ud-grow .8s cubic-bezier(.22,1,.36,1) backwards; }
+      .ud-bar { animation: ud-bar 1.1s cubic-bezier(.22,1,.36,1) backwards; }
+      .ud-live { animation: ud-pulse-ring 2s infinite; }
+
+      @media (prefers-reduced-motion: reduce) {
+        .ud-up, .ud-in, .ud-slide, .ud-pop, .ud-grow, .ud-bar, .ud-live {
+          animation: none !important; opacity: 1 !important; transform: none !important;
+        }
+      }
+    `}</style>
+  );
+}
+
+/** Animates a number from its previous value to the new one. */
+function useCountUp(target: number, duration = 1000) {
+  const [val, setVal] = useState(0);
+  const prev = useRef(0);
+
+  useEffect(() => {
+    const from = prev.current;
+    const start = performance.now();
+    let raf = 0;
+
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 4);
+      setVal(Math.round(from + (target - from) * eased));
+      if (t < 1) raf = requestAnimationFrame(tick);
+      else prev.current = target;
+    };
+
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, duration]);
+
+  return val;
+}
+
+function AnimatedNumber({ value }: { value: React.ReactNode }) {
+  const isNum = typeof value === 'number' && Number.isFinite(value);
+  const animated = useCountUp(isNum ? (value as number) : 0);
+  return <>{isNum ? animated.toLocaleString('en-IN') : value}</>;
+}
+
+/** Staggered fade-up wrapper. Children keep their original layout (full height of the grid cell). */
+function Reveal({
+  children,
+  delay = 0,
+  className = '',
+}: {
+  children: React.ReactNode;
+  delay?: number;
+  className?: string;
+}) {
+  return (
+    <div className={`ud-up [&>*]:h-full ${className}`} style={{ animationDelay: `${delay}ms` }}>
+      {children}
+    </div>
+  );
+}
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -419,13 +498,15 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-[#f7f8fc] text-slate-900">
+      <AnimationStyles />
+
       {/* Mobile overlay */}
       {sidebarOpen && (
         <button
           type="button"
           aria-label="Close sidebar"
           onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 z-40 bg-slate-950/30 backdrop-blur-sm lg:hidden"
+          className="ud-in fixed inset-0 z-40 bg-slate-950/30 backdrop-blur-sm lg:hidden"
         />
       )}
 
@@ -448,7 +529,7 @@ export default function AdminDashboard() {
           <button
             type="button"
             onClick={() => setSidebarOpen(false)}
-            className="rounded-lg p-2 text-slate-400 hover:bg-white lg:hidden"
+            className="rounded-lg p-2 text-slate-400 transition hover:rotate-90 hover:bg-white lg:hidden"
           >
             <X size={20} />
           </button>
@@ -460,7 +541,7 @@ export default function AdminDashboard() {
           </div>
 
           <nav className="space-y-1">
-            {navItems.map(item => {
+            {navItems.map((item, i) => {
               const Icon = item.icon;
               const active = activeSection === item.id;
 
@@ -469,13 +550,18 @@ export default function AdminDashboard() {
                   key={item.id}
                   type="button"
                   onClick={() => setSection(item.id)}
-                  className={`group flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-[12px] font-semibold transition ${
+                  style={{ animationDelay: `${i * 45}ms` }}
+                  className={`ud-slide group flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-[12px] font-semibold transition-all duration-300 ${
                     active
                       ? 'bg-violet-600 text-white shadow-lg shadow-violet-200'
-                      : 'text-slate-600 hover:bg-white hover:text-violet-700'
+                      : 'text-slate-600 hover:translate-x-1 hover:bg-white hover:text-violet-700'
                   }`}
                 >
-                  <Icon size={18} strokeWidth={active ? 2.4 : 2} />
+                  <Icon
+                    size={18}
+                    strokeWidth={active ? 2.4 : 2}
+                    className="transition-transform duration-300 group-hover:scale-110"
+                  />
                   <span className="flex-1">{item.label}</span>
                   {item.id === 'users' && stats.totalStudents > 0 && (
                     <span
@@ -500,19 +586,6 @@ export default function AdminDashboard() {
             })}
           </nav>
         </div>
-
-        <div className="mt-auto p-4">
-          <div className="rounded-2xl border border-violet-100 bg-white p-4 shadow-sm">
-            <div className="mb-2 flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-emerald-500" />
-              <span className="text-xs font-bold text-slate-700">All Systems Operational</span>
-            </div>
-            <div className="flex items-center justify-between text-[11px] text-slate-400">
-              <span>Platform Engine</span>
-              <span className="rounded bg-violet-50 px-2 font-bold text-violet-600">v2.4</span>
-            </div>
-          </div>
-        </div>
       </aside>
 
       <div className="lg:pl-[255px]">
@@ -522,7 +595,7 @@ export default function AdminDashboard() {
             <button
               type="button"
               onClick={() => setSidebarOpen(true)}
-              className="rounded-xl p-2 text-slate-500 hover:bg-slate-50 lg:hidden"
+              className="rounded-xl p-2 text-slate-500 transition hover:bg-slate-50 lg:hidden"
             >
               <Menu size={21} />
             </button>
@@ -581,7 +654,11 @@ export default function AdminDashboard() {
           </div>
         </header>
 
-        <main className="mx-auto max-w-[1400px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
+        {/* key re-mounts on section change so the content animates in */}
+        <main
+          key={activeSection}
+          className="ud-in mx-auto max-w-[1400px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7"
+        >
           {activeSection === 'overview' && (
             <Overview
               loading={loading}
@@ -643,24 +720,32 @@ export default function AdminDashboard() {
               icon={GraduationCap}
             >
               <div className="grid gap-4 sm:grid-cols-3">
-                <MetricBox
-                  label="Total Enrollments"
-                  value={stats.totalEnrollments}
-                  icon={GraduationCap}
-                />
-                <MetricBox
-                  label="Published Courses"
-                  value={stats.publishedCourses}
-                  icon={BookOpen}
-                />
-                <MetricBox
-                  label="Avg. Enrollments / Course"
-                  value={courses.length ? Math.round(stats.totalEnrollments / courses.length) : 0}
-                  icon={Activity}
-                />
+                <Reveal delay={60}>
+                  <MetricBox
+                    label="Total Enrollments"
+                    value={stats.totalEnrollments}
+                    icon={GraduationCap}
+                  />
+                </Reveal>
+                <Reveal delay={130}>
+                  <MetricBox
+                    label="Published Courses"
+                    value={stats.publishedCourses}
+                    icon={BookOpen}
+                  />
+                </Reveal>
+                <Reveal delay={200}>
+                  <MetricBox
+                    label="Avg. Enrollments / Course"
+                    value={courses.length ? Math.round(stats.totalEnrollments / courses.length) : 0}
+                    icon={Activity}
+                  />
+                </Reveal>
               </div>
 
-              <CourseEnrollmentTable courses={courses} />
+              <Reveal delay={280}>
+                <CourseEnrollmentTable courses={courses} />
+              </Reveal>
             </SimpleSection>
           )}
 
@@ -676,9 +761,11 @@ export default function AdminDashboard() {
               />
             </SimpleSection>
           )}
-
-          {activeSection === 'coaching-coupons' && <CoachingCouponManagement />}
-
+          {activeSection === 'coaching-coupons' && (
+            <Reveal delay={340} className="mt-6">
+              <CoachingCouponManagement />{' '}
+            </Reveal>
+          )}
           {activeSection === 'notifications' && <NotificationComposer role="ADMIN" />}
 
           {activeSection === 'payments' && (
@@ -688,61 +775,76 @@ export default function AdminDashboard() {
               icon={CircleDollarSign}
             >
               <div className="grid gap-4 sm:grid-cols-3">
-                <MetricBox
-                  label="Paid Courses"
-                  value={courses.filter(c => c.price > 0).length}
-                  icon={CircleDollarSign}
-                />
-                <MetricBox
-                  label="Free Courses"
-                  value={courses.filter(c => c.price === 0).length}
-                  icon={Sparkles}
-                />
-                <MetricBox
-                  label="Catalog Price Sum"
-                  value={`₹${stats.estimatedCatalogValue.toLocaleString('en-IN')}`}
-                  icon={CircleDollarSign}
-                />
+                <Reveal delay={60}>
+                  <MetricBox
+                    label="Paid Courses"
+                    value={courses.filter(c => c.price > 0).length}
+                    icon={CircleDollarSign}
+                  />
+                </Reveal>
+                <Reveal delay={130}>
+                  <MetricBox
+                    label="Free Courses"
+                    value={courses.filter(c => c.price === 0).length}
+                    icon={Sparkles}
+                  />
+                </Reveal>
+                <Reveal delay={200}>
+                  <MetricBox
+                    label="Catalog Price Sum"
+                    value={`₹${stats.estimatedCatalogValue.toLocaleString('en-IN')}`}
+                    icon={CircleDollarSign}
+                  />
+                </Reveal>
               </div>
 
-              <div className="mt-5 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-                <SectionTitle
-                  title="Course pricing"
-                  subtitle="Current course prices from the admin course API."
-                />
-                <div className="mt-4 overflow-x-auto">
-                  <table className="w-full min-w-[650px] text-sm">
-                    <thead>
-                      <tr className="border-b border-slate-100 text-left text-xs tracking-wide text-slate-400 uppercase">
-                        <th className="px-3 py-3">Course</th>
-                        <th className="px-3 py-3">Instructor</th>
-                        <th className="px-3 py-3">Price</th>
-                        <th className="px-3 py-3">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-50">
-                      {courses.map(course => (
-                        <tr key={course.id}>
-                          <td className="px-3 py-4 font-semibold text-slate-700">{course.title}</td>
-                          <td className="px-3 py-4 text-slate-500">{course.instructor.name}</td>
-                          <td className="px-3 py-4 font-bold text-slate-800">
-                            {course.price === 0 ? 'Free' : `₹${course.price}`}
-                          </td>
-                          <td className="px-3 py-4">
-                            <StatusBadge
-                              label={course.isPublished ? 'Published' : 'Draft'}
-                              tone={course.isPublished ? 'green' : 'yellow'}
-                            />
-                          </td>
+              <Reveal delay={270}>
+                <div className="mt-5 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+                  <SectionTitle
+                    title="Course pricing"
+                    subtitle="Current course prices from the admin course API."
+                  />
+                  <div className="mt-4 overflow-x-auto">
+                    <table className="w-full min-w-[650px] text-sm">
+                      <thead>
+                        <tr className="border-b border-slate-100 text-left text-xs tracking-wide text-slate-400 uppercase">
+                          <th className="px-3 py-3">Course</th>
+                          <th className="px-3 py-3">Instructor</th>
+                          <th className="px-3 py-3">Price</th>
+                          <th className="px-3 py-3">Status</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className="divide-y divide-slate-50">
+                        {courses.map((course, i) => (
+                          <tr
+                            key={course.id}
+                            className="ud-slide"
+                            style={{ animationDelay: `${Math.min(i, 12) * 35 + 350}ms` }}
+                          >
+                            <td className="px-3 py-4 font-semibold text-slate-700">
+                              {course.title}
+                            </td>
+                            <td className="px-3 py-4 text-slate-500">{course.instructor.name}</td>
+                            <td className="px-3 py-4 font-bold text-slate-800">
+                              {course.price === 0 ? 'Free' : `₹${course.price}`}
+                            </td>
+                            <td className="px-3 py-4">
+                              <StatusBadge
+                                label={course.isPublished ? 'Published' : 'Draft'}
+                                tone={course.isPublished ? 'green' : 'yellow'}
+                              />
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
-              <div className="mt-6">
+              </Reveal>
+
+              <Reveal delay={340} className="mt-6">
                 <PaymentHistory />
-              </div>
+              </Reveal>
             </SimpleSection>
           )}
 
@@ -753,46 +855,55 @@ export default function AdminDashboard() {
               icon={Activity}
             >
               <div className="grid gap-5 lg:grid-cols-2">
-                <EnrollmentChart
-                  chartData={chartData}
-                  maxChart={maxChart}
-                  total={stats.totalEnrollments}
-                />
-
-                <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-                  <SectionTitle
-                    title="Platform distribution"
-                    subtitle="Current account and course mix."
+                <Reveal delay={60}>
+                  <EnrollmentChart
+                    chartData={chartData}
+                    maxChart={maxChart}
+                    total={stats.totalEnrollments}
                   />
+                </Reveal>
 
-                  <div className="mt-5 space-y-4">
-                    <ProgressRow
-                      label="Students"
-                      value={stats.totalStudents}
-                      total={Math.max(users.length, 1)}
+                <Reveal delay={140}>
+                  <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+                    <SectionTitle
+                      title="Platform distribution"
+                      subtitle="Current account and course mix."
                     />
-                    <ProgressRow
-                      label="Instructors"
-                      value={stats.totalInstructors}
-                      total={Math.max(users.length, 1)}
-                    />
-                    <ProgressRow
-                      label="Admins"
-                      value={stats.totalAdmins}
-                      total={Math.max(users.length, 1)}
-                    />
-                    <ProgressRow
-                      label="Published courses"
-                      value={stats.publishedCourses}
-                      total={Math.max(courses.length, 1)}
-                    />
-                    <ProgressRow
-                      label="Draft courses"
-                      value={stats.draftCourses}
-                      total={Math.max(courses.length, 1)}
-                    />
+
+                    <div className="mt-5 space-y-4">
+                      <ProgressRow
+                        label="Students"
+                        value={stats.totalStudents}
+                        total={Math.max(users.length, 1)}
+                        delay={200}
+                      />
+                      <ProgressRow
+                        label="Instructors"
+                        value={stats.totalInstructors}
+                        total={Math.max(users.length, 1)}
+                        delay={280}
+                      />
+                      <ProgressRow
+                        label="Admins"
+                        value={stats.totalAdmins}
+                        total={Math.max(users.length, 1)}
+                        delay={360}
+                      />
+                      <ProgressRow
+                        label="Published courses"
+                        value={stats.publishedCourses}
+                        total={Math.max(courses.length, 1)}
+                        delay={440}
+                      />
+                      <ProgressRow
+                        label="Draft courses"
+                        value={stats.draftCourses}
+                        total={Math.max(courses.length, 1)}
+                        delay={520}
+                      />
+                    </div>
                   </div>
-                </div>
+                </Reveal>
               </div>
             </SimpleSection>
           )}
@@ -865,118 +976,142 @@ function Overview({
 }: any) {
   return (
     <>
-      <div className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-        <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
-            Platform Overview & User Management
-          </h1>
+      <Reveal>
+        <div className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+          <div>
+            <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
+              Platform Overview & User Management
+            </h1>
 
-          <p className="mt-1 max-w-2xl text-sm text-slate-500">
-            Manage learners, instructors, curriculum publishing and administrative operations across
-            UpSkills.
-          </p>
-        </div>
+            <p className="mt-1 max-w-2xl text-sm text-slate-500">
+              Manage learners, instructors, curriculum publishing and administrative operations
+              across UpSkills.
+            </p>
+          </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={onExport}
-            className="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600 transition hover:border-violet-200 hover:text-violet-700"
-          >
-            <Download size={15} />
-            Export CSV
-          </button>
-          <button
-            type="button"
-            onClick={() => onSection('users')}
-            className="inline-flex h-10 items-center gap-2 rounded-xl bg-violet-600 px-4 text-sm font-bold text-white shadow-lg shadow-violet-200 transition hover:bg-violet-700"
-          >
-            <UserPlus size={15} />
-            Add New User
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={onExport}
+              className="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600 transition hover:border-violet-200 hover:text-violet-700 active:scale-95"
+            >
+              <Download size={15} />
+              Export CSV
+            </button>
+            <button
+              type="button"
+              onClick={() => onSection('users')}
+              className="inline-flex h-10 items-center gap-2 rounded-xl bg-violet-600 px-4 text-sm font-bold text-white shadow-lg shadow-violet-200 transition hover:bg-violet-700 active:scale-95"
+            >
+              <UserPlus size={15} />
+              Add New User
+            </button>
+          </div>
         </div>
-      </div>
+      </Reveal>
 
       <div className="mb-5 grid grid-cols-2 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          label="Total Students"
-          value={stats.totalStudents}
-          helper={`${stats.approvedUsers} approved accounts`}
-          icon={GraduationCap}
-          trend="+14.2%"
-          trendUp
-          tone="blue"
-        />
+        <Reveal delay={80}>
+          <StatCard
+            label="Total Students"
+            value={stats.totalStudents}
+            helper={`${stats.approvedUsers} approved accounts`}
+            icon={GraduationCap}
+            trend="+14.2%"
+            trendUp
+            tone="blue"
+          />
+        </Reveal>
 
-        <StatCard
-          label="Faculty & Instructors"
-          value={stats.totalInstructors}
-          helper={
-            stats.pendingInstructors
-              ? `${stats.pendingInstructors} in review`
-              : 'All instructor profiles reviewed'
-          }
-          icon={UserCheck}
-          trend={stats.pendingInstructors ? `${stats.pendingInstructors} pending` : 'Verified'}
-          trendUp={false}
-          tone="violet"
-        />
+        <Reveal delay={150}>
+          <StatCard
+            label="Faculty & Instructors"
+            value={stats.totalInstructors}
+            helper={
+              stats.pendingInstructors
+                ? `${stats.pendingInstructors} in review`
+                : 'All instructor profiles reviewed'
+            }
+            icon={UserCheck}
+            trend={stats.pendingInstructors ? `${stats.pendingInstructors} pending` : 'Verified'}
+            trendUp={false}
+            tone="violet"
+          />
+        </Reveal>
 
-        <StatCard
-          label="Curriculum Catalog"
-          value={stats.publishedCourses}
-          helper={`${stats.totalSections} total sections`}
-          icon={BookOpen}
-          trend={`${stats.draftCourses} drafts`}
-          trendUp={false}
-          tone="purple"
-        />
+        <Reveal delay={220}>
+          <StatCard
+            label="Curriculum Catalog"
+            value={stats.publishedCourses}
+            helper={`${stats.totalSections} total sections`}
+            icon={BookOpen}
+            trend={`${stats.draftCourses} drafts`}
+            trendUp={false}
+            tone="purple"
+          />
+        </Reveal>
 
-        <StatCard
-          label="Total Enrollments"
-          value={stats.totalEnrollments}
-          helper={`Across ${courses.length} courses`}
-          icon={GraduationCap}
-          trend="+28.4%"
-          trendUp
-          tone="green"
-        />
+        <Reveal delay={290}>
+          <StatCard
+            label="Total Enrollments"
+            value={stats.totalEnrollments}
+            helper={`Across ${courses.length} courses`}
+            icon={GraduationCap}
+            trend="+28.4%"
+            trendUp
+            tone="green"
+          />
+        </Reveal>
       </div>
 
       <div className="mb-5 grid gap-5 xl:grid-cols-[1.45fr_0.9fr]">
-        <EnrollmentChart
-          chartData={chartData}
-          maxChart={maxChart}
-          total={stats.totalEnrollments}
-          dateRange={dateRange}
-        />
+        <Reveal delay={340}>
+          <EnrollmentChart
+            chartData={chartData}
+            maxChart={maxChart}
+            total={stats.totalEnrollments}
+            dateRange={dateRange}
+          />
+        </Reveal>
 
-        <CategoryCard courses={courses} />
+        <Reveal delay={400}>
+          <CategoryCard courses={courses} />
+        </Reveal>
       </div>
 
-      <div className="mb-5 grid gap-5 xl:grid-cols-[1.35fr_1fr]">
-        <UsersPreview
-          users={recentUsers}
-          onViewAll={() => onSection('users')}
-          onUpdateUser={onUpdateUser}
-        />
+      <div className="mb-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
+        <Reveal delay={440}>
+          <UsersPreview
+            users={recentUsers}
+            onViewAll={() => onSection('users')}
+            onUpdateUser={onUpdateUser}
+          />
+        </Reveal>
 
-        <CoursesPreview
-          courses={recentCourses}
-          onViewAll={() => onSection('courses')}
-          onUpdateCourse={onUpdateCourse}
-          editingPrice={editingPrice}
-          setEditingPrice={setEditingPrice}
-          savePrice={savePrice}
-        />
+        <Reveal delay={500}>
+          <CoursesPreview
+            courses={recentCourses}
+            onViewAll={() => onSection('courses')}
+            onUpdateCourse={onUpdateCourse}
+            editingPrice={editingPrice}
+            setEditingPrice={setEditingPrice}
+            savePrice={savePrice}
+          />
+        </Reveal>
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr_0.8fr]">
-        <ActivityFeed activities={activityFeed} />
+        <Reveal delay={540}>
+          <ActivityFeed activities={activityFeed} />
+        </Reveal>
 
-        <QuickActions onSection={onSection} onRefresh={onRefresh} refreshing={refreshing} />
+        <Reveal delay={600}>
+          <QuickActions onSection={onSection} onRefresh={onRefresh} refreshing={refreshing} />
+        </Reveal>
 
-        <SystemHealth users={users} courses={courses} loading={loading} />
+        <Reveal delay={660}>
+          <SystemHealth users={users} courses={courses} loading={loading} />
+        </Reveal>
       </div>
     </>
   );
@@ -1009,7 +1144,7 @@ function UsersSection({
             <button
               type="button"
               onClick={onRefresh}
-              className="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600"
+              className="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600 transition active:scale-95"
             >
               <Clock3 size={15} />
               Refresh
@@ -1017,7 +1152,7 @@ function UsersSection({
             <button
               type="button"
               onClick={onExport}
-              className="inline-flex h-10 items-center gap-2 rounded-xl bg-violet-600 px-4 text-sm font-bold text-white shadow-lg shadow-violet-200"
+              className="inline-flex h-10 items-center gap-2 rounded-xl bg-violet-600 px-4 text-sm font-bold text-white shadow-lg shadow-violet-200 transition active:scale-95"
             >
               <Download size={15} />
               Export CSV
@@ -1026,87 +1161,89 @@ function UsersSection({
         }
       />
 
-      <div className="rounded-2xl border border-slate-100 bg-white shadow-sm">
-        <div className="flex flex-col gap-4 border-b border-slate-100 p-5 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <h2 className="text-lg font-black text-slate-900">All Users ({users.length})</h2>
-            <p className="text-xs text-slate-400">{allUsers.length} registered platform users</p>
+      <Reveal delay={80}>
+        <div className="rounded-2xl border border-slate-100 bg-white shadow-sm">
+          <div className="flex flex-col gap-4 border-b border-slate-100 p-5 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <h2 className="text-lg font-black text-slate-900">All Users ({users.length})</h2>
+              <p className="text-xs text-slate-400">{allUsers.length} registered platform users</p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {['ALL', 'STUDENT', 'INSTRUCTOR', 'ADMIN'].map(role => (
+                <button
+                  key={role}
+                  type="button"
+                  onClick={() => setRoleFilter(role)}
+                  className={`rounded-lg px-3 py-2 text-xs font-bold transition-all duration-300 active:scale-95 ${
+                    roleFilter === role
+                      ? 'bg-violet-600 text-white'
+                      : 'bg-slate-50 text-slate-500 hover:bg-violet-50 hover:text-violet-700'
+                  }`}
+                >
+                  {role === 'ALL' ? 'All' : role}
+                </button>
+              ))}
+
+              <div className="relative ml-0 sm:ml-2">
+                <Search
+                  size={15}
+                  className="absolute top-1/2 left-3 -translate-y-1/2 text-slate-400"
+                />
+                <input
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  placeholder="Search users..."
+                  className="h-9 w-[220px] rounded-lg border border-slate-200 pr-3 pl-9 text-xs transition-all outline-none focus:border-violet-300"
+                />
+              </div>
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            {['ALL', 'STUDENT', 'INSTRUCTOR', 'ADMIN'].map(role => (
-              <button
-                key={role}
-                type="button"
-                onClick={() => setRoleFilter(role)}
-                className={`rounded-lg px-3 py-2 text-xs font-bold transition ${
-                  roleFilter === role
-                    ? 'bg-violet-600 text-white'
-                    : 'bg-slate-50 text-slate-500 hover:bg-violet-50 hover:text-violet-700'
-                }`}
-              >
-                {role === 'ALL' ? 'All' : role}
-              </button>
-            ))}
+          {loading ? (
+            <LoadingState />
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[900px] text-sm">
+                <thead className="bg-slate-50 text-left text-[11px] font-bold tracking-wide text-slate-400 uppercase">
+                  <tr>
+                    <th className="px-5 py-4">User</th>
+                    <th className="px-5 py-4">Role</th>
+                    <th className="px-5 py-4">Status</th>
+                    <th className="px-5 py-4">Activity</th>
+                    <th className="px-5 py-4 text-right">Actions</th>
+                  </tr>
+                </thead>
 
-            <div className="relative ml-0 sm:ml-2">
-              <Search
-                size={15}
-                className="absolute top-1/2 left-3 -translate-y-1/2 text-slate-400"
-              />
-              <input
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="Search users..."
-                className="h-9 w-[220px] rounded-lg border border-slate-200 pr-3 pl-9 text-xs outline-none focus:border-violet-300"
-              />
+                <tbody className="divide-y divide-slate-50">
+                  {users.map((user: User, i: number) => (
+                    <UserRow key={user.id} user={user} index={i} onUpdateUser={onUpdateUser} />
+                  ))}
+                </tbody>
+              </table>
+
+              {!users.length && (
+                <div className="p-12 text-center text-sm text-slate-400">No users found.</div>
+              )}
+            </div>
+          )}
+
+          <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50 px-5 py-3 text-xs text-slate-400">
+            <span>
+              Showing {users.length} of {allUsers.length} users
+            </span>
+            <div className="flex items-center gap-1">
+              <button className="rounded-lg bg-white p-1.5 shadow-sm transition active:scale-90">
+                <ChevronLeft size={14} />
+              </button>
+              <span className="rounded-lg bg-violet-600 px-2.5 py-1.5 font-bold text-white">1</span>
+              <button className="rounded-lg bg-white p-1.5 shadow-sm transition active:scale-90">
+                <ChevronRight size={14} />
+              </button>
             </div>
           </div>
         </div>
-
-        {loading ? (
-          <LoadingState />
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[900px] text-sm">
-              <thead className="bg-slate-50 text-left text-[11px] font-bold tracking-wide text-slate-400 uppercase">
-                <tr>
-                  <th className="px-5 py-4">User</th>
-                  <th className="px-5 py-4">Role</th>
-                  <th className="px-5 py-4">Status</th>
-                  <th className="px-5 py-4">Activity</th>
-                  <th className="px-5 py-4 text-right">Actions</th>
-                </tr>
-              </thead>
-
-              <tbody className="divide-y divide-slate-50">
-                {users.map((user: User) => (
-                  <UserRow key={user.id} user={user} onUpdateUser={onUpdateUser} />
-                ))}
-              </tbody>
-            </table>
-
-            {!users.length && (
-              <div className="p-12 text-center text-sm text-slate-400">No users found.</div>
-            )}
-          </div>
-        )}
-
-        <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50 px-5 py-3 text-xs text-slate-400">
-          <span>
-            Showing {users.length} of {allUsers.length} users
-          </span>
-          <div className="flex items-center gap-1">
-            <button className="rounded-lg bg-white p-1.5 shadow-sm">
-              <ChevronLeft size={14} />
-            </button>
-            <span className="rounded-lg bg-violet-600 px-2.5 py-1.5 font-bold text-white">1</span>
-            <button className="rounded-lg bg-white p-1.5 shadow-sm">
-              <ChevronRight size={14} />
-            </button>
-          </div>
-        </div>
-      </div>
+      </Reveal>
     </section>
   );
 }
@@ -1137,14 +1274,14 @@ function CoursesSection({
             <button
               type="button"
               onClick={onRefresh}
-              className="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600"
+              className="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600 transition active:scale-95"
             >
               <Clock3 size={15} />
               Refresh
             </button>
             <button
               type="button"
-              className="inline-flex h-10 items-center gap-2 rounded-xl bg-violet-600 px-4 text-sm font-bold text-white shadow-lg shadow-violet-200"
+              className="inline-flex h-10 items-center gap-2 rounded-xl bg-violet-600 px-4 text-sm font-bold text-white shadow-lg shadow-violet-200 transition active:scale-95"
             >
               <Plus size={15} />
               Add Course
@@ -1153,61 +1290,67 @@ function CoursesSection({
         }
       />
 
-      <div className="rounded-2xl border border-slate-100 bg-white shadow-sm">
-        <div className="flex flex-col gap-3 border-b border-slate-100 p-5 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="text-lg font-black text-slate-900">All Courses ({courses.length})</h2>
-            <p className="text-xs text-slate-400">Publishing and pricing controls</p>
+      <Reveal delay={80}>
+        <div className="rounded-2xl border border-slate-100 bg-white shadow-sm">
+          <div className="flex flex-col gap-3 border-b border-slate-100 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-lg font-black text-slate-900">All Courses ({courses.length})</h2>
+              <p className="text-xs text-slate-400">Publishing and pricing controls</p>
+            </div>
+
+            <div className="relative">
+              <Search
+                size={15}
+                className="absolute top-1/2 left-3 -translate-y-1/2 text-slate-400"
+              />
+              <input
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Search courses or instructor..."
+                className="h-10 w-full rounded-xl border border-slate-200 pr-3 pl-9 text-xs transition-all outline-none focus:border-violet-300 sm:w-[280px]"
+              />
+            </div>
           </div>
 
-          <div className="relative">
-            <Search size={15} className="absolute top-1/2 left-3 -translate-y-1/2 text-slate-400" />
-            <input
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Search courses or instructor..."
-              className="h-10 w-full rounded-xl border border-slate-200 pr-3 pl-9 text-xs outline-none focus:border-violet-300 sm:w-[280px]"
-            />
-          </div>
+          {loading ? (
+            <LoadingState />
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[1050px] text-sm">
+                <thead className="bg-slate-50 text-left text-[11px] font-bold tracking-wide text-slate-400 uppercase">
+                  <tr>
+                    <th className="px-5 py-4">Course</th>
+                    <th className="px-5 py-4">Instructor</th>
+                    <th className="px-5 py-4">Price</th>
+                    <th className="px-5 py-4">Students</th>
+                    <th className="px-5 py-4">Rating</th>
+                    <th className="px-5 py-4">Status</th>
+                    <th className="px-5 py-4 text-right">Action</th>
+                  </tr>
+                </thead>
+
+                <tbody className="divide-y divide-slate-50">
+                  {courses.map((course: Course, i: number) => (
+                    <CourseRow
+                      key={course.id}
+                      course={course}
+                      index={i}
+                      onUpdateCourse={onUpdateCourse}
+                      editingPrice={editingPrice}
+                      setEditingPrice={setEditingPrice}
+                      savePrice={savePrice}
+                    />
+                  ))}
+                </tbody>
+              </table>
+
+              {!courses.length && (
+                <div className="p-12 text-center text-sm text-slate-400">No courses found.</div>
+              )}
+            </div>
+          )}
         </div>
-
-        {loading ? (
-          <LoadingState />
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[1050px] text-sm">
-              <thead className="bg-slate-50 text-left text-[11px] font-bold tracking-wide text-slate-400 uppercase">
-                <tr>
-                  <th className="px-5 py-4">Course</th>
-                  <th className="px-5 py-4">Instructor</th>
-                  <th className="px-5 py-4">Price</th>
-                  <th className="px-5 py-4">Students</th>
-                  <th className="px-5 py-4">Rating</th>
-                  <th className="px-5 py-4">Status</th>
-                  <th className="px-5 py-4 text-right">Action</th>
-                </tr>
-              </thead>
-
-              <tbody className="divide-y divide-slate-50">
-                {courses.map((course: Course) => (
-                  <CourseRow
-                    key={course.id}
-                    course={course}
-                    onUpdateCourse={onUpdateCourse}
-                    editingPrice={editingPrice}
-                    setEditingPrice={setEditingPrice}
-                    savePrice={savePrice}
-                  />
-                ))}
-              </tbody>
-            </table>
-
-            {!courses.length && (
-              <div className="p-12 text-center text-sm text-slate-400">No courses found.</div>
-            )}
-          </div>
-        )}
-      </div>
+      </Reveal>
     </section>
   );
 }
@@ -1228,14 +1371,16 @@ function PageHeader({
   actions?: React.ReactNode;
 }) {
   return (
-    <div className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-      <div>
-        <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">{title}</h1>
-        <p className="mt-1 max-w-2xl text-sm text-slate-500">{subtitle}</p>
-      </div>
+    <Reveal>
+      <div className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+        <div>
+          <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">{title}</h1>
+          <p className="mt-1 max-w-2xl text-sm text-slate-500">{subtitle}</p>
+        </div>
 
-      {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
-    </div>
+        {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
+      </div>
+    </Reveal>
   );
 }
 
@@ -1286,7 +1431,9 @@ function StatCard({ label, value, helper, icon: Icon, trend, trendUp, tone }: an
         )}
       </div>
 
-      <div className="text-3xl font-black tracking-tight text-slate-900">{value}</div>
+      <div className="text-3xl font-black tracking-tight text-slate-900 tabular-nums">
+        <AnimatedNumber value={value} />
+      </div>
 
       <div className="mt-1 text-[11px] font-bold tracking-wide text-slate-400 uppercase">
         {label}
@@ -1313,7 +1460,9 @@ function EnrollmentChart({ chartData, maxChart, total, dateRange = 'Last 15 Days
 
       <div className="mt-5 flex items-end justify-between">
         <div>
-          <div className="text-2xl font-black text-slate-900">{total}</div>
+          <div className="text-2xl font-black text-slate-900 tabular-nums">
+            <AnimatedNumber value={total} />
+          </div>
           <div className="text-xs text-slate-400">Total enrollments</div>
         </div>
         <div className="flex items-center gap-2 text-xs text-slate-400">
@@ -1337,8 +1486,8 @@ function EnrollmentChart({ chartData, maxChart, total, dateRange = 'Last 15 Days
               return (
                 <div key={index} className="group relative flex h-full flex-1 items-end">
                   <div
-                    className="w-full rounded-t-md bg-gradient-to-t from-violet-600/20 to-violet-500/70 transition group-hover:from-violet-600/30 group-hover:to-violet-600"
-                    style={{ height: `${height}%` }}
+                    className="ud-grow w-full rounded-t-md bg-gradient-to-t from-violet-600/20 to-violet-500/70 transition group-hover:from-violet-600/30 group-hover:to-violet-600"
+                    style={{ height: `${height}%`, animationDelay: `${index * 45}ms` }}
                   />
                   <div className="absolute bottom-full left-1/2 mb-2 hidden -translate-x-1/2 rounded-lg bg-slate-900 px-2 py-1 text-[9px] font-bold text-white group-hover:block">
                     {item.value}
@@ -1370,7 +1519,7 @@ function CategoryCard({ courses }: { courses: Course[] }) {
 
   const buckets = [
     {
-      label: 'Technology & Development',
+      label: 'Technology',
       value: Math.max(1, Math.round(total * 0.32)),
       dot: 'bg-violet-500',
     },
@@ -1390,7 +1539,7 @@ function CategoryCard({ courses }: { courses: Course[] }) {
       dot: 'bg-rose-400',
     },
     {
-      label: 'Health & Medical',
+      label: 'Health',
       value: Math.max(1, Math.round(total * 0.08)),
       dot: 'bg-fuchsia-400',
     },
@@ -1401,7 +1550,7 @@ function CategoryCard({ courses }: { courses: Course[] }) {
       <SectionTitle title="Course Categories" subtitle="Distribution of published courses." />
 
       <div className="mt-5 flex flex-col items-center gap-5 sm:flex-row">
-        <div className="relative grid h-44 w-44 shrink-0 place-items-center">
+        <div className="ud-pop relative grid h-44 w-44 shrink-0 place-items-center">
           <div
             className="absolute inset-0 rounded-full"
             style={{
@@ -1410,14 +1559,20 @@ function CategoryCard({ courses }: { courses: Course[] }) {
             }}
           />
           <div className="absolute inset-[27px] grid place-items-center rounded-full bg-white text-center">
-            <div className="text-2xl font-black text-slate-900">{published.length}</div>
+            <div className="text-2xl font-black text-slate-900 tabular-nums">
+              <AnimatedNumber value={published.length} />
+            </div>
             <div className="text-[10px] font-bold text-slate-400">Published</div>
           </div>
         </div>
 
         <div className="w-full space-y-3">
-          {buckets.map(item => (
-            <div key={item.label} className="flex items-center justify-between gap-3 text-xs">
+          {buckets.map((item, i) => (
+            <div
+              key={item.label}
+              style={{ animationDelay: `${500 + i * 70}ms` }}
+              className="ud-slide flex items-center justify-between gap-3 text-xs"
+            >
               <span className="flex items-center gap-2 text-slate-600">
                 <span className={`h-2.5 w-2.5 rounded-full ${item.dot}`} />
                 {item.label}
@@ -1449,7 +1604,7 @@ function UsersPreview({
         <button
           type="button"
           onClick={onViewAll}
-          className="text-xs font-bold text-violet-600 hover:text-violet-700"
+          className="text-xs font-bold text-violet-600 transition hover:text-violet-700"
         >
           View All
         </button>
@@ -1468,8 +1623,12 @@ function UsersPreview({
           </thead>
 
           <tbody className="divide-y divide-slate-50">
-            {users.map(user => (
-              <tr key={user.id} className="hover:bg-slate-50/70">
+            {users.map((user, i) => (
+              <tr
+                key={user.id}
+                className="ud-slide hover:bg-slate-50/70"
+                style={{ animationDelay: `${i * 60 + 550}ms` }}
+              >
                 <td className="px-5 py-3">
                   <div className="flex items-center gap-3">
                     <Avatar name={user.name} />
@@ -1502,7 +1661,7 @@ function UsersPreview({
                           isApproved: !user.isApproved,
                         })
                       }
-                      className="rounded-lg p-2 text-slate-400 hover:bg-violet-50 hover:text-violet-600"
+                      className="rounded-lg p-2 text-slate-400 transition hover:scale-110 hover:bg-violet-50 hover:text-violet-600"
                       title={user.isApproved ? 'Block user' : 'Approve user'}
                     >
                       {user.isApproved ? <EyeOff size={15} /> : <CheckCircle2 size={15} />}
@@ -1533,17 +1692,25 @@ function CoursesPreview({
         <button
           type="button"
           onClick={onViewAll}
-          className="text-xs font-bold text-violet-600 hover:text-violet-700"
+          className="text-xs font-bold text-violet-600 transition hover:text-violet-700"
         >
           View All
         </button>
       </div>
 
       <div className="divide-y divide-slate-50">
-        {courses.map((course: Course) => (
-          <div key={course.id} className="flex items-center gap-3 px-5 py-3.5 hover:bg-slate-50/70">
+        {courses.map((course: Course, i: number) => (
+          <div
+            key={course.id}
+            className="ud-slide flex items-center gap-3 px-5 py-3.5 hover:bg-slate-50/70"
+            style={{ animationDelay: `${i * 60 + 600}ms` }}
+          >
             <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-violet-50 text-violet-600">
-              <BookOpen size={18} />
+              <img
+                src={course.thumbnail}
+                alt={course.title}
+                className="h-10 w-full rounded-lg object-cover"
+              />
             </div>
 
             <div className="min-w-0 flex-1">
@@ -1567,14 +1734,14 @@ function CoursesPreview({
                   isPublished: !course.isPublished,
                 })
               }
-              className="rounded-lg p-2 text-slate-400 hover:bg-violet-50 hover:text-violet-600"
+              className="rounded-lg p-2 text-slate-400 transition hover:scale-110 hover:bg-violet-50 hover:text-violet-600"
               title={course.isPublished ? 'Unpublish' : 'Publish'}
             >
               {course.isPublished ? <EyeOff size={15} /> : <Eye size={15} />}
             </button>
 
             {editingPrice?.id === course.id ? (
-              <div className="flex items-center gap-1">
+              <div className="ud-in flex items-center gap-1">
                 <input
                   value={editingPrice.value}
                   onChange={e =>
@@ -1654,7 +1821,8 @@ function ActivityFeed({
             return (
               <div
                 key={`${activity.title}-${index}`}
-                className="flex items-center gap-3 rounded-xl bg-slate-50 px-3 py-3"
+                style={{ animationDelay: `${700 + index * 80}ms` }}
+                className="ud-slide flex items-center gap-3 rounded-xl bg-slate-50 px-3 py-3 transition hover:translate-x-1"
               >
                 <div
                   className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${activity.tone}`}
@@ -1734,13 +1902,18 @@ function QuickActions({
               key={action.label}
               type="button"
               onClick={action.action}
-              className="flex w-full items-center gap-3 rounded-xl border border-transparent bg-slate-50 px-3 py-3 text-left transition hover:border-violet-100 hover:bg-violet-50"
+              className="group flex w-full items-center gap-3 rounded-xl border border-transparent bg-slate-50 px-3 py-3 text-left transition-all duration-300 hover:translate-x-1 hover:border-violet-100 hover:bg-violet-50 active:scale-[0.98]"
             >
-              <span className={`grid h-9 w-9 place-items-center rounded-lg ${action.tone}`}>
+              <span
+                className={`grid h-9 w-9 place-items-center rounded-lg transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6 ${action.tone}`}
+              >
                 <Icon size={16} />
               </span>
               <span className="flex-1 text-xs font-bold text-slate-600">{action.label}</span>
-              <ChevronRight size={15} className="text-slate-400" />
+              <ChevronRight
+                size={15}
+                className="text-slate-400 transition group-hover:translate-x-1"
+              />
             </button>
           );
         })}
@@ -1749,9 +1922,9 @@ function QuickActions({
           type="button"
           onClick={onRefresh}
           disabled={refreshing}
-          className="flex w-full items-center gap-3 rounded-xl border border-violet-100 bg-violet-50 px-3 py-3 text-left text-xs font-bold text-violet-700 disabled:opacity-60"
+          className="flex w-full items-center gap-3 rounded-xl border border-violet-100 bg-violet-50 px-3 py-3 text-left text-xs font-bold text-violet-700 transition active:scale-[0.98] disabled:opacity-60"
         >
-          <Zap size={16} />
+          <Zap size={16} className={refreshing ? 'animate-pulse' : ''} />
           {refreshing ? 'Syncing platform...' : 'Sync dashboard data'}
         </button>
       </div>
@@ -1800,19 +1973,21 @@ function SystemHealth({
     <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
       <div className="flex items-center justify-between">
         <SectionTitle title="Platform Pulse" subtitle="Operational status." />
-        <span className="rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-600">
+        <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-600">
+          <span className="ud-live h-1.5 w-1.5 rounded-full bg-emerald-500" />
           Live
         </span>
       </div>
 
       <div className="mt-5 space-y-3">
-        {checks.map(check => {
+        {checks.map((check, i) => {
           const Icon = check.icon;
 
           return (
             <div
               key={check.label}
-              className="flex items-center gap-3 rounded-xl bg-slate-50 px-3 py-3"
+              style={{ animationDelay: `${760 + i * 70}ms` }}
+              className="ud-slide flex items-center gap-3 rounded-xl bg-slate-50 px-3 py-3"
             >
               <div className="grid h-8 w-8 place-items-center rounded-lg bg-white text-slate-500 shadow-sm">
                 <Icon size={15} />
@@ -1831,13 +2006,18 @@ function SystemHealth({
 
 function UserRow({
   user,
+  index,
   onUpdateUser,
 }: {
   user: User;
+  index: number;
   onUpdateUser: (id: string, data: any) => void;
 }) {
   return (
-    <tr className="transition hover:bg-slate-50/80">
+    <tr
+      className="ud-slide transition hover:bg-slate-50/80"
+      style={{ animationDelay: `${Math.min(index, 12) * 35 + 150}ms` }}
+    >
       <td className="px-5 py-4">
         <div className="flex items-center gap-3">
           <Avatar name={user.name} />
@@ -1905,7 +2085,7 @@ function UserRow({
                   isApproved: !user.isApproved,
                 })
               }
-              className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-bold ${
+              className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-bold transition active:scale-95 ${
                 user.isApproved
                   ? 'bg-red-50 text-red-600 hover:bg-red-100'
                   : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
@@ -1921,13 +2101,27 @@ function UserRow({
   );
 }
 
-function CourseRow({ course, onUpdateCourse, editingPrice, setEditingPrice, savePrice }: any) {
+function CourseRow({
+  course,
+  index,
+  onUpdateCourse,
+  editingPrice,
+  setEditingPrice,
+  savePrice,
+}: any) {
   return (
-    <tr className="transition hover:bg-slate-50/80">
+    <tr
+      className="ud-slide transition hover:bg-slate-50/80"
+      style={{ animationDelay: `${Math.min(index, 12) * 35 + 150}ms` }}
+    >
       <td className="px-5 py-4">
         <div className="flex items-center gap-3">
           <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-violet-50 text-violet-600">
-            <BookOpen size={18} />
+            <img
+              src={course.thumbnail}
+              alt={course.title}
+              className="h-10 w-full rounded-lg object-cover"
+            />
           </div>
           <div className="min-w-0">
             <p className="line-clamp-1 font-bold text-slate-700">{course.title}</p>
@@ -1943,7 +2137,7 @@ function CourseRow({ course, onUpdateCourse, editingPrice, setEditingPrice, save
 
       <td className="px-5 py-4">
         {editingPrice?.id === course.id ? (
-          <div className="flex items-center gap-1">
+          <div className="ud-in flex items-center gap-1">
             <span className="text-xs text-slate-400">₹</span>
             <input
               type="number"
@@ -1989,7 +2183,10 @@ function CourseRow({ course, onUpdateCourse, editingPrice, setEditingPrice, save
             className="group inline-flex items-center gap-1.5 font-bold text-slate-700"
           >
             {course.price === 0 ? 'Free' : `₹${course.price}`}
-            <Pencil size={13} className="text-slate-300 group-hover:text-violet-600" />
+            <Pencil
+              size={13}
+              className="text-slate-300 transition group-hover:scale-110 group-hover:text-violet-600"
+            />
           </button>
         )}
       </td>
@@ -2018,7 +2215,7 @@ function CourseRow({ course, onUpdateCourse, editingPrice, setEditingPrice, save
                 isPublished: !course.isPublished,
               })
             }
-            className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-bold ${
+            className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-bold transition active:scale-95 ${
               course.isPublished
                 ? 'bg-amber-50 text-amber-600 hover:bg-amber-100'
                 : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
@@ -2120,11 +2317,13 @@ function MetricBox({
   icon: typeof Users;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-      <div className="mb-4 grid h-10 w-10 place-items-center rounded-xl bg-violet-50 text-violet-600">
+    <div className="group rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+      <div className="mb-4 grid h-10 w-10 place-items-center rounded-xl bg-violet-50 text-violet-600 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6">
         <Icon size={18} />
       </div>
-      <div className="text-2xl font-black text-slate-900">{value}</div>
+      <div className="text-2xl font-black text-slate-900 tabular-nums">
+        <AnimatedNumber value={value} />
+      </div>
       <div className="mt-1 text-xs font-bold tracking-wide text-slate-400 uppercase">{label}</div>
     </div>
   );
@@ -2152,8 +2351,12 @@ function CourseEnrollmentTable({ courses }: { courses: Course[] }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">
-            {sorted.map(course => (
-              <tr key={course.id}>
+            {sorted.map((course, i) => (
+              <tr
+                key={course.id}
+                className="ud-slide"
+                style={{ animationDelay: `${Math.min(i, 12) * 35 + 350}ms` }}
+              >
                 <td className="px-3 py-4 font-bold text-slate-700">{course.title}</td>
                 <td className="px-3 py-4 text-slate-500">{course.instructor.name}</td>
                 <td className="px-3 py-4 font-black text-violet-600">
@@ -2186,46 +2389,48 @@ function InstructorGrid({
 }) {
   return (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-      {users.map(user => (
-        <div key={user.id} className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-          <div className="flex items-center gap-3">
-            <Avatar name={user.name} />
-            <div className="min-w-0">
-              <div className="truncate font-black text-slate-800">{user.name}</div>
-              <div className="truncate text-xs text-slate-400">{user.email}</div>
+      {users.map((user, i) => (
+        <Reveal key={user.id} delay={80 + Math.min(i, 8) * 60}>
+          <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+            <div className="flex items-center gap-3">
+              <Avatar name={user.name} />
+              <div className="min-w-0">
+                <div className="truncate font-black text-slate-800">{user.name}</div>
+                <div className="truncate text-xs text-slate-400">{user.email}</div>
+              </div>
+            </div>
+
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              <div className="rounded-xl bg-slate-50 p-3">
+                <div className="text-lg font-black text-slate-800">{user._count.courses}</div>
+                <div className="text-[10px] font-bold text-slate-400 uppercase">Courses</div>
+              </div>
+              <div className="rounded-xl bg-slate-50 p-3">
+                <div className="text-lg font-black text-slate-800">{user._count.enrollments}</div>
+                <div className="text-[10px] font-bold text-slate-400 uppercase">Enrollments</div>
+              </div>
+            </div>
+
+            <div className="mt-4 flex items-center justify-between">
+              <StatusBadge
+                label={user.isApproved ? 'Approved' : 'Pending'}
+                tone={user.isApproved ? 'green' : 'yellow'}
+              />
+
+              <button
+                type="button"
+                onClick={() =>
+                  onUpdateUser(user.id, {
+                    isApproved: !user.isApproved,
+                  })
+                }
+                className="rounded-lg bg-violet-50 px-3 py-2 text-xs font-bold text-violet-700 transition hover:bg-violet-100 active:scale-95"
+              >
+                {user.isApproved ? 'Block' : 'Approve'}
+              </button>
             </div>
           </div>
-
-          <div className="mt-5 grid grid-cols-2 gap-3">
-            <div className="rounded-xl bg-slate-50 p-3">
-              <div className="text-lg font-black text-slate-800">{user._count.courses}</div>
-              <div className="text-[10px] font-bold text-slate-400 uppercase">Courses</div>
-            </div>
-            <div className="rounded-xl bg-slate-50 p-3">
-              <div className="text-lg font-black text-slate-800">{user._count.enrollments}</div>
-              <div className="text-[10px] font-bold text-slate-400 uppercase">Enrollments</div>
-            </div>
-          </div>
-
-          <div className="mt-4 flex items-center justify-between">
-            <StatusBadge
-              label={user.isApproved ? 'Approved' : 'Pending'}
-              tone={user.isApproved ? 'green' : 'yellow'}
-            />
-
-            <button
-              type="button"
-              onClick={() =>
-                onUpdateUser(user.id, {
-                  isApproved: !user.isApproved,
-                })
-              }
-              className="rounded-lg bg-violet-50 px-3 py-2 text-xs font-bold text-violet-700 hover:bg-violet-100"
-            >
-              {user.isApproved ? 'Block' : 'Approve'}
-            </button>
-          </div>
-        </div>
+        </Reveal>
       ))}
 
       {!users.length && (
@@ -2237,7 +2442,17 @@ function InstructorGrid({
   );
 }
 
-function ProgressRow({ label, value, total }: { label: string; value: number; total: number }) {
+function ProgressRow({
+  label,
+  value,
+  total,
+  delay = 0,
+}: {
+  label: string;
+  value: number;
+  total: number;
+  delay?: number;
+}) {
   const percent = Math.min(100, Math.round((value / total) * 100));
 
   return (
@@ -2247,7 +2462,10 @@ function ProgressRow({ label, value, total }: { label: string; value: number; to
         <span className="font-bold text-slate-500">{value}</span>
       </div>
       <div className="h-2 overflow-hidden rounded-full bg-slate-100">
-        <div className="h-full rounded-full bg-violet-500" style={{ width: `${percent}%` }} />
+        <div
+          className="ud-bar h-full rounded-full bg-violet-500"
+          style={{ width: `${percent}%`, animationDelay: `${delay}ms` }}
+        />
       </div>
     </div>
   );

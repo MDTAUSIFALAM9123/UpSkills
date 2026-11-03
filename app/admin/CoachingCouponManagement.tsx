@@ -618,12 +618,7 @@ export default function CoachingCouponManagement() {
 
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <div className="flex items-center gap-2 text-sm font-bold text-violet-600">
-            <Building2 size={17} />
-            ADMIN MANAGEMENT
-          </div>
-
-          <h1 className="mt-2 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
+          <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
             Coaching & Coupons
           </h1>
 

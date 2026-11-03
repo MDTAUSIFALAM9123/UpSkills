@@ -441,12 +441,12 @@ export default function InstructorDashboard() {
               onClick={() => navigateTab('analytics')}
             />
 
-            <SidebarItem
+            {/* <SidebarItem
               active={activeTab === 'reviews'}
               icon={<MessageSquare size={18} />}
               label="Reviews & Q&A"
               onClick={() => navigateTab('reviews')}
-            />
+            /> */}
 
             <SidebarItem
               active={activeTab === 'notifications'}

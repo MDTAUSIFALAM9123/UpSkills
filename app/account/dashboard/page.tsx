@@ -22,6 +22,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  Printer,
   Search,
   Timer,
   Trophy,
@@ -35,6 +36,7 @@ import Link from 'next/link';
 import StudentNotesSection from './StudentNotes';
 import NotificationBell from '@/app/components/notifications/NotificationBell';
 import NotificationHistoryPage from './notifications';
+import { CertificateModal, CertificateView } from './CertificateView';
 
 /* =========================
    Types
@@ -63,6 +65,14 @@ interface EnrolledCourse {
   progress: number;
   completedLessons: number;
   totalLessons: number;
+
+  certificate?: {
+    id: string;
+    certificateNo: string;
+    issuedAt: string;
+    fileUrl: string | null;
+  } | null;
+
   course: {
     id: string;
     title: string;
@@ -97,7 +107,7 @@ interface ProfileData {
 }
 
 type View = 'dashboard' | 'learn';
-type ActiveTab = 'dashboard' | 'profile' | 'quizzes' | 'notes' | 'notifications';
+type ActiveTab = 'dashboard' | 'profile' | 'quizzes' | 'notes' | 'notifications' | 'certificates';
 const clamp = (value: number) => Math.max(0, Math.min(100, Number(value) || 0));
 
 const getErrorMessage = (error: unknown, fallback: string) =>
@@ -190,7 +200,7 @@ export default function StudentDashboardPage() {
       }
 
       if (!meRes.ok || !enrollmentRes.ok) {
-        throw new Error('Dashboard data load nahi ho saka.');
+        throw new Error("Dashboard data doesn't load properly.");
       }
 
       const me = await meRes.json();
@@ -207,7 +217,7 @@ export default function StudentDashboardPage() {
       setEnrollments(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Dashboard error:', error);
-      toast.error(getErrorMessage(error, 'Dashboard load nahi hua.'));
+      toast.error(getErrorMessage(error, "Dashboard data doesn't load properly."));
     } finally {
       setLoading(false);
     }
@@ -326,34 +336,6 @@ export default function StudentDashboardPage() {
     });
   }, [enrollments, search, courseFilter, courseSort]);
 
-  const learningNotifications = useMemo(() => {
-    return enrollments.slice(0, 5).map(enrollment => {
-      const progress = clamp(enrollment.progress);
-      const title = enrollment.course?.title || 'Your course';
-      return {
-        id: `course-${enrollment.course?.id || enrollment.id}`,
-        title:
-          progress >= 100
-            ? 'Course completed'
-            : progress > 0
-              ? 'Pick up where you left off'
-              : 'Your course is ready',
-        message:
-          progress >= 100
-            ? `You finished ${title}. Great work!`
-            : progress > 0
-              ? `${title} is ${progress}% complete. Continue learning when you’re ready.`
-              : `Start your first lesson in ${title}.`,
-        progress,
-        course: enrollment,
-      };
-    });
-  }, [enrollments]);
-
-  const unreadNotifications = learningNotifications.filter(
-    notification => !readNotificationIds.includes(notification.id)
-  ).length;
-
   const submitNavSearch = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSearch(navSearch);
@@ -388,6 +370,7 @@ export default function StudentDashboardPage() {
 
         if (!res.ok) {
           toast.error('Unable to load lesson.');
+          return;
         }
 
         const data = await res.json();
@@ -504,7 +487,9 @@ export default function StudentDashboardPage() {
     }
   };
 
-  /* Mark lesson complete */
+  /* =========================
+     Mark Lesson Complete
+  ========================= */
 
   const markComplete = async () => {
     if (!activeLesson || completing || lessonLoading) return;
@@ -519,47 +504,80 @@ export default function StudentDashboardPage() {
     try {
       const res = await fetch(`/api/lessons/${activeLesson.id}/progress`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         credentials: 'include',
-        body: JSON.stringify({ completed: true }),
+        body: JSON.stringify({
+          completed: true,
+        }),
       });
 
       if (!res.ok) {
-        toast.error('Unable to save lesson progress.');
+        const errorData = await res.json().catch(() => ({}));
+
+        throw new Error(errorData.message || 'Unable to save lesson progress.');
       }
+
+      const result = await res.json();
 
       const completedLessonId = activeLesson.id;
 
-      setActiveLesson(previous => (previous ? { ...previous, completed: true } : previous));
+      // Update active lesson
+      setActiveLesson(previous =>
+        previous
+          ? {
+              ...previous,
+              completed: true,
+            }
+          : previous
+      );
 
+      // Update completed lesson IDs
       setProgressIds(previous =>
         previous.includes(completedLessonId) ? previous : [...previous, completedLessonId]
       );
 
+      // Update enrollment using server response
       setEnrollments(previous =>
         previous.map(enrollment => {
           if (enrollment.course.id !== activeCourse?.id) {
             return enrollment;
           }
 
-          const currentCompleted = Number(enrollment.completedLessons) || 0;
-
-          const total = Number(enrollment.totalLessons) || 0;
-
-          const nextCompleted = Math.min(total || currentCompleted + 1, currentCompleted + 1);
-
           return {
             ...enrollment,
-            completedLessons: nextCompleted,
-            progress: total
-              ? Math.min(100, Math.round((nextCompleted / total) * 100))
-              : enrollment.progress,
+
+            completedLessons:
+              typeof result.completedLessons === 'number'
+                ? result.completedLessons
+                : enrollment.completedLessons,
+
+            totalLessons:
+              typeof result.totalLessons === 'number'
+                ? result.totalLessons
+                : enrollment.totalLessons,
+
+            progress:
+              typeof result.totalLessons === 'number' && result.totalLessons > 0
+                ? Math.round((result.completedLessons / result.totalLessons) * 100)
+                : enrollment.progress,
+
+            certificate:
+              result.isCourseCompleted && result.certificate
+                ? result.certificate
+                : (enrollment.certificate ?? null),
           };
         })
       );
 
-      toast.success('Lesson completed!');
+      if (result.isCourseCompleted && result.certificate) {
+        toast.success('Congratulations! Your certificate has been generated.');
+      } else {
+        toast.success('Lesson completed!');
+      }
 
+      // Move to next lesson
       const index = allLessons.findIndex(lesson => lesson.id === completedLessonId);
 
       const next = allLessons[index + 1];
@@ -571,6 +589,7 @@ export default function StudentDashboardPage() {
       }
     } catch (error) {
       console.error('Progress error:', error);
+
       toast.error(getErrorMessage(error, 'Unable to save lesson progress.'));
     } finally {
       setCompleting(false);
@@ -653,11 +672,9 @@ export default function StudentDashboardPage() {
               />
             </form>
 
-            {/* Right: Logo (mobile only) + Notifications + Profile */}
+            {/* Right: Notifications + Profile */}
             <div className="flex shrink-0 items-center gap-4 sm:gap-3">
-              {/* Notifications */}
               <NotificationBell />
-              {/* Profile: Last Item */}
               <button
                 type="button"
                 onClick={showProfile}
@@ -790,12 +807,18 @@ export default function StudentDashboardPage() {
                     setMobileMenuOpen(false);
                   }}
                 />
+
                 <SidebarItem
-                  icon={<UserRound size={19} />}
-                  label="My Profile"
-                  active={activeTab === 'profile'}
-                  onClick={showProfile}
+                  icon={<Award size={19} />}
+                  label="Certificates"
+                  active={activeTab === 'certificates'}
+                  onClick={() => {
+                    leaveLearning();
+                    setActiveTab('certificates');
+                    setMobileMenuOpen(false);
+                  }}
                 />
+
                 <SidebarItem
                   icon={<Bell size={19} />}
                   label="Notifications"
@@ -805,6 +828,13 @@ export default function StudentDashboardPage() {
                     setActiveTab('notifications');
                     setMobileMenuOpen(false);
                   }}
+                />
+
+                <SidebarItem
+                  icon={<UserRound size={19} />}
+                  label="My Profile"
+                  active={activeTab === 'profile'}
+                  onClick={showProfile}
                 />
               </nav>
 
@@ -873,6 +903,8 @@ export default function StudentDashboardPage() {
               <StudentNotesSection />
             ) : activeTab === 'notifications' ? (
               <NotificationHistoryPage />
+            ) : activeTab === 'certificates' ? (
+              <StudentCertificatesSection enrollments={enrollments} userName={userName} />
             ) : activeTab === 'profile' ? (
               <ProfileSection
                 key={userId}
@@ -1352,6 +1384,7 @@ function StudentQuizzesSection({ onBack }: { onBack: () => void }) {
     }, 1000);
 
     return () => window.clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeQuiz, result, remainingSeconds > 0]);
 
   // Automatically submit when the timer expires.
@@ -1359,7 +1392,6 @@ function StudentQuizzesSection({ onBack }: { onBack: () => void }) {
     if (activeQuiz && !result && remainingSeconds === 0 && activeQuiz.timeLimit && !submitting) {
       void submitQuiz();
     }
-    // submitQuiz is declared below and called when the timer expires.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [remainingSeconds, activeQuiz, result, submitting]);
 
@@ -2067,7 +2099,198 @@ function StatCard({
 }
 
 /* =========================
-   Course Card
+   Certificates Section
+========================= */
+
+type CertificateInfo = {
+  id: string;
+  certificateNo: string;
+  issuedAt: string;
+  fileUrl: string | null;
+};
+
+// Server certificate if present; otherwise generate one locally for completed courses.
+function getCertificateInfo(enrollment: EnrolledCourse): CertificateInfo {
+  return (
+    enrollment.certificate || {
+      id: `local-${enrollment.id}`,
+      certificateNo: `UPS-${String(enrollment.id).slice(-8).toUpperCase()}`,
+      issuedAt: new Date().toISOString(),
+      fileUrl: null,
+    }
+  );
+}
+
+function formatIssueDate(value?: string) {
+  if (!value) return '';
+
+  return new Date(value).toLocaleDateString('en-IN', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+}
+
+function StudentCertificatesSection({
+  enrollments,
+  userName,
+}: {
+  enrollments: EnrolledCourse[];
+  userName: string;
+}) {
+  const [selectedEnrollment, setSelectedEnrollment] = useState<EnrolledCourse | null>(null);
+
+  const completedCourses = enrollments.filter(enrollment => clamp(enrollment.progress) >= 100);
+
+  const selectedCertificate = selectedEnrollment ? getCertificateInfo(selectedEnrollment) : null;
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <section className="rounded-2xl border border-violet-100 bg-gradient-to-r from-violet-700 to-indigo-600 p-6 text-white shadow-lg">
+        <div className="flex items-center gap-3">
+          <div className="grid h-12 w-12 place-items-center rounded-xl bg-white/15">
+            <Award size={26} />
+          </div>
+
+          <div>
+            <h2 className="text-2xl font-black">My Certificates</h2>
+            <p className="mt-1 text-sm text-violet-100">Your course completion achievements</p>
+          </div>
+        </div>
+
+        <div className="mt-5">
+          <p className="text-sm text-violet-100">Certificates Earned</p>
+          <p className="text-3xl font-black">{completedCourses.length}</p>
+        </div>
+      </section>
+
+      {/* Certificates */}
+      {completedCourses.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-5 py-16 text-center">
+          <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-violet-50 text-violet-600">
+            <Award size={32} />
+          </div>
+
+          <h3 className="mt-5 text-lg font-extrabold text-slate-900">No Certificates Yet</h3>
+
+          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
+            Complete a course to earn your UpSkills certificate. Your completed course certificates
+            will appear here.
+          </p>
+        </div>
+      ) : (
+        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          {completedCourses.map(enrollment => {
+            const certificate = getCertificateInfo(enrollment);
+            const issueDate = formatIssueDate(certificate.issuedAt);
+
+            return (
+              <article
+                key={enrollment.id}
+                className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+              >
+                {/* Certificate on top */}
+                <button
+                  type="button"
+                  onClick={() => setSelectedEnrollment(enrollment)}
+                  aria-label={`View certificate for ${enrollment.course.title}`}
+                  className="block w-full border-b border-violet-100 text-left transition hover:bg-violet-50/60"
+                >
+                  <CertificateView
+                    studentName={userName}
+                    courseTitle={enrollment.course.title}
+                    instructorName={enrollment.course.instructor?.name}
+                    certificateNo={certificate.certificateNo}
+                    issuedAt={certificate.issuedAt}
+                  />
+                </button>
+
+                {/* Details below */}
+                <div className="space-y-3 p-5">
+                  <div>
+                    <p className="text-xs font-bold tracking-wider text-violet-600 uppercase">
+                      Course Completed
+                    </p>
+                    <h3 className="mt-1 line-clamp-2 font-extrabold text-slate-900">
+                      {enrollment.course.title}
+                    </h3>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="min-w-0">
+                      <p className="text-xs text-slate-400">Student Name</p>
+                      <p className="mt-1 truncate text-sm font-bold text-slate-800">{userName}</p>
+                    </div>
+
+                    <div className="min-w-0">
+                      <p className="text-xs text-slate-400">Instructor</p>
+                      <p className="mt-1 truncate text-sm font-semibold text-slate-700">
+                        {enrollment.course.instructor?.name || 'Course Instructor'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-xs text-slate-400">Certificate Number</p>
+                      <p className="mt-1 text-sm font-bold break-all text-violet-700">
+                        {certificate.certificateNo}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs text-slate-400">Issued on</p>
+                      <p className="mt-1 text-sm font-semibold text-slate-700">{issueDate}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedEnrollment(enrollment)}
+                      className="flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-3 py-3 text-sm font-bold text-white transition hover:bg-violet-700"
+                    >
+                      <FileText size={16} />
+                      View
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedEnrollment(enrollment);
+                        window.setTimeout(() => window.print(), 600);
+                      }}
+                      className="flex items-center justify-center gap-2 rounded-xl border border-violet-200 bg-white px-3 py-3 text-sm font-bold text-violet-700 transition hover:bg-violet-50"
+                    >
+                      <Printer size={16} />
+                      Print
+                    </button>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Certificate Preview Modal */}
+      {selectedEnrollment && selectedCertificate && (
+        <CertificateModal
+          open={true}
+          onClose={() => setSelectedEnrollment(null)}
+          studentName={userName}
+          courseTitle={selectedEnrollment.course.title}
+          instructorName={selectedEnrollment.course.instructor?.name}
+          certificateNo={selectedCertificate.certificateNo}
+          issuedAt={selectedCertificate.issuedAt}
+        />
+      )}
+    </div>
+  );
+}
+
+/* =========================
+   Course Card (no certificate here)
 ========================= */
 
 function CourseCard({
@@ -2089,6 +2312,8 @@ function CourseCard({
 
   return (
     <article className="group overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-violet-200 hover:shadow-xl hover:shadow-violet-100/50">
+      {/* Course Thumbnail */}
+
       <div className="relative h-44 overflow-hidden bg-slate-100">
         <img
           src={thumbnail}
@@ -2116,6 +2341,8 @@ function CourseCard({
         </div>
       </div>
 
+      {/* Course Details */}
+
       <div className="p-5">
         <h4 className="line-clamp-2 min-h-12 text-base leading-6 font-extrabold text-slate-900">
           {enrollment.course.title}
@@ -2130,6 +2357,8 @@ function CourseCard({
             {enrollment.course.instructor?.name || 'Course Instructor'}
           </p>
         </div>
+
+        {/* Progress */}
 
         <div className="mt-5 flex items-center justify-between gap-3 text-xs">
           <span className="font-semibold text-slate-500">Your progress</span>
@@ -2153,6 +2382,8 @@ function CourseCard({
           />
         </div>
 
+        {/* Lesson Count */}
+
         <div className="mt-3 flex items-center justify-between gap-2 text-xs text-slate-400">
           <span className="inline-flex items-center gap-1.5">
             <BookOpen size={14} />
@@ -2162,6 +2393,8 @@ function CourseCard({
 
           <span>{completed ? 'Well done!' : 'Keep going'}</span>
         </div>
+
+        {/* Course Button */}
 
         <button
           type="button"
@@ -2182,6 +2415,7 @@ function CourseCard({
           ) : (
             <>
               {completed ? 'Review Course' : pct > 0 ? 'Continue Learning' : 'Start Learning'}
+
               <ArrowRight size={16} />
             </>
           )}
@@ -2434,49 +2668,45 @@ function LearningRoom({
                 </div>
 
                 <div className="text-sm leading-7 whitespace-pre-wrap text-slate-600">
-                  {activeLesson.content && (
+                  {/^https?:\/\/\S+$/i.test(activeLesson.content.trim()) ? (
+                    <div className="space-y-3">
+                      <p className="font-medium text-slate-800">Document Link:</p>
+
+                      <a
+                        href={activeLesson.content.trim()}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="break-all text-violet-600 underline hover:text-violet-800"
+                      >
+                        {activeLesson.content.trim()}
+                      </a>
+                    </div>
+                  ) : (
                     <>
-                      {/^https?:\/\/\S+$/i.test(activeLesson.content.trim()) ? (
-                        <div className="space-y-3">
-                          <p className="font-medium text-slate-800">Document Link:</p>
+                      <p
+                        className={`whitespace-pre-wrap ${
+                          showFullLessonContent ? '' : 'line-clamp-10'
+                        }`}
+                      >
+                        {activeLesson.content}
+                      </p>
 
-                          <a
-                            href={activeLesson.content.trim()}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="break-all text-violet-600 underline hover:text-violet-800"
-                          >
-                            {activeLesson.content.trim()}
-                          </a>
-                        </div>
-                      ) : (
-                        <>
-                          <p
-                            className={`whitespace-pre-wrap ${
-                              showFullLessonContent ? '' : 'line-clamp-10'
-                            }`}
-                          >
-                            {activeLesson.content}
-                          </p>
-
-                          {activeLesson.content.length > 250 && (
-                            <button
-                              type="button"
-                              onClick={() => setShowFullLessonContent(prev => !prev)}
-                              className="mt-2 inline-flex items-center gap-1.5 font-semibold text-violet-700 hover:text-violet-900"
-                            >
-                              {showFullLessonContent ? (
-                                <>
-                                  Show Less <ChevronUp size={16} />
-                                </>
-                              ) : (
-                                <>
-                                  Show More <ChevronDown size={16} />
-                                </>
-                              )}
-                            </button>
+                      {activeLesson.content.length > 250 && (
+                        <button
+                          type="button"
+                          onClick={() => setShowFullLessonContent(prev => !prev)}
+                          className="mt-2 inline-flex items-center gap-1.5 font-semibold text-violet-700 hover:text-violet-900"
+                        >
+                          {showFullLessonContent ? (
+                            <>
+                              Show Less <ChevronUp size={16} />
+                            </>
+                          ) : (
+                            <>
+                              Show More <ChevronDown size={16} />
+                            </>
                           )}
-                        </>
+                        </button>
                       )}
                     </>
                   )}
@@ -2675,6 +2905,7 @@ function ProfileSection({
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
   const handleSave = async (event: React.FormEvent<HTMLFormElement>) => {

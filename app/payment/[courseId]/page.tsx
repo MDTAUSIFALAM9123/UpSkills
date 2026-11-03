@@ -541,6 +541,14 @@ export default function PaymentPage() {
     }
   };
 
+  useEffect(() => {
+    if (paid && receiptData) {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
+    }
+  }, [paid, receiptData]);
   // ==========================================
   // PAID CHECKOUT (coupon is optional)
   // ==========================================
@@ -694,8 +702,6 @@ export default function PaymentPage() {
 
             setReceiptData(receipt);
             setPaid(true);
-
-            toast.success('Payment successful! Your receipt is ready.');
           } catch (error) {
             console.error('Payment verification error:', error);
 

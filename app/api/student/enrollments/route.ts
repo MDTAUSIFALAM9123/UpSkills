@@ -21,6 +21,7 @@ export async function GET(req: NextRequest) {
             _count: { select: { sections: true } },
           },
         },
+        certificate: true,
       },
       orderBy: { createdAt: 'desc' },
     });

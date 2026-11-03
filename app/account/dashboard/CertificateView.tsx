@@ -89,23 +89,24 @@ export function CertificateView({
             visibility: visible !important;
           }
 
-          #certificate-print {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 297mm !important;
-            height: 210mm !important;
-            max-width: none !important;
-            aspect-ratio: auto !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            overflow: hidden !important;
-            border: none !important;
-            border-radius: 0 !important;
-            box-shadow: none !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-          }
+         #certificate-print {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 297mm !important;
+  height: 210mm !important;
+  max-width: none !important;
+  aspect-ratio: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  transform: none !important;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
         }
       `}</style>
 
@@ -372,9 +373,7 @@ export function CertificateModal({
               className="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-3 py-2.5 text-xs font-extrabold text-white transition hover:bg-violet-700 sm:px-4 sm:text-sm"
             >
               <Printer size={16} />
-
               <span className="hidden sm:inline">Print / Save PDF</span>
-
               <span className="sm:hidden">Print</span>
             </button>
 

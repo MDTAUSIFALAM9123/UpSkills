@@ -14,6 +14,7 @@ import {
   CheckCircle,
   ChevronLeft,
   ChevronRight,
+  Loader2,
 } from 'lucide-react';
 
 interface Lesson {
@@ -143,6 +144,7 @@ export default function CourseDetailsPage() {
   const [reviewComment, setReviewComment] = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchCourse = useCallback(async () => {
     if (!courseId) {
@@ -223,6 +225,9 @@ export default function CourseDetailsPage() {
   };
 
   const handleEnroll = async () => {
+    if (isLoading) return;
+
+    setIsLoading(true);
     if (!courseId) return;
 
     try {
@@ -248,6 +253,8 @@ export default function CourseDetailsPage() {
     } catch (error) {
       console.error('Enrollment check failed:', error);
       toast.error('Unable to verify your account. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -912,10 +919,20 @@ export default function CourseDetailsPage() {
                   <button
                     type="button"
                     onClick={handleEnroll}
-                    className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-700 to-purple-600 py-3 font-bold text-white shadow-md shadow-purple-200 transition hover:-translate-y-0.5 hover:from-violet-800 hover:to-purple-700"
+                    disabled={isLoading}
+                    className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-700 to-purple-600 py-3 font-bold text-white shadow-md shadow-purple-200 transition hover:-translate-y-0.5 hover:from-violet-800 hover:to-purple-700 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
                   >
-                    Enroll Now
-                    <ChevronRight size={18} />
+                    {isLoading ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin" />
+                        Enrolling...
+                      </>
+                    ) : (
+                      <>
+                        Enroll Now
+                        <ChevronRight size={18} />
+                      </>
+                    )}
                   </button>
                 )}
 

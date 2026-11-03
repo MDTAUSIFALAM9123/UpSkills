@@ -2191,20 +2191,14 @@ function StudentCertificatesSection({
                 className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
               >
                 {/* Certificate on top */}
-                <button
-                  type="button"
-                  onClick={() => setSelectedEnrollment(enrollment)}
-                  aria-label={`View certificate for ${enrollment.course.title}`}
-                  className="block w-full border-b border-violet-100 text-left transition hover:bg-violet-50/60"
-                >
-                  <CertificateView
-                    studentName={userName}
-                    courseTitle={enrollment.course.title}
-                    instructorName={enrollment.course.instructor?.name}
-                    certificateNo={certificate.certificateNo}
-                    issuedAt={certificate.issuedAt}
-                  />
-                </button>
+
+                <CertificateView
+                  studentName={userName}
+                  courseTitle={enrollment.course.title}
+                  instructorName={enrollment.course.instructor?.name}
+                  certificateNo={certificate.certificateNo}
+                  issuedAt={certificate.issuedAt}
+                />
 
                 {/* Details below */}
                 <div className="space-y-3 p-5">

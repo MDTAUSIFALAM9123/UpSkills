@@ -872,15 +872,29 @@ export default function CourseDetailsPage() {
                   <p className="text-sm font-medium text-slate-500">Course Price</p>
                 )}
 
-                <p
-                  className={`mt-2 text-2xl font-extrabold tracking-tight ${
-                    Number(course.price) === 0 ? 'text-green-600' : 'text-slate-900'
-                  }`}
-                >
-                  {Number(course.price) === 0
-                    ? 'Free'
-                    : `₹${Number(course.price).toLocaleString('en-IN')}`}
-                </p>
+                <div className="mt-2 flex flex-wrap items-center gap-3">
+                  <p
+                    className={`text-2xl font-extrabold tracking-tight ${
+                      Number(course.price) === 0 ? 'text-green-600' : 'text-slate-900'
+                    }`}
+                  >
+                    {Number(course.price) === 0
+                      ? 'Free'
+                      : `₹${Number(course.price).toLocaleString('en-IN')}`}
+                  </p>
+
+                  {Number(course.price) > 0 && (
+                    <>
+                      <span className="text-sm font-semibold text-slate-500 line-through">
+                        ₹{Math.round(Number(course.price) / 0.8).toLocaleString('en-IN')}
+                      </span>
+
+                      <span className="rounded-md bg-red-100 px-2 py-1 text-xs font-bold text-red-600">
+                        20% OFF
+                      </span>
+                    </>
+                  )}
+                </div>
 
                 {course.isEnrolled ? (
                   <>

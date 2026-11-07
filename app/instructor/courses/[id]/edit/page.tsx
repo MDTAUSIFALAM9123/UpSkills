@@ -963,7 +963,19 @@ export default function EditCourseView({ courseId, onBack }: EditCourseViewProps
                       </div>
 
                       <div className="min-w-0">
-                        <h3 className="truncate font-bold text-slate-900">{section.title}</h3>
+                        <h3 className="font-semibold text-slate-900">
+                          <span className="sm:hidden">
+                            {section.title.length > 20
+                              ? `${section.title.slice(0, 20)}...`
+                              : section.title}
+                          </span>
+
+                          <span className="hidden sm:inline">
+                            {section.title.length > 50
+                              ? `${section.title.slice(0, 50)}...`
+                              : section.title}
+                          </span>
+                        </h3>
                         <p className="text-xs text-slate-500">
                           {section.lessons.length}{' '}
                           {section.lessons.length === 1 ? 'lesson' : 'lessons'}
@@ -989,7 +1001,7 @@ export default function EditCourseView({ courseId, onBack }: EditCourseViewProps
                   </div>
 
                   {isOpen && (
-                    <div className="space-y-4 p-5">
+                    <div className="space-y-4 p-4 sm:p-5">
                       {/* LESSONS */}
                       {section.lessons.map((lesson, lessonIndex) => {
                         const isQuizOpen = openQuizForms.has(lesson.id);
@@ -1002,14 +1014,24 @@ export default function EditCourseView({ courseId, onBack }: EditCourseViewProps
                             className="overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:border-violet-200"
                           >
                             {/* LESSON ROW */}
-                            <div className="flex items-center gap-3 p-4">
+                            <div className="flex items-center gap-2 p-4">
                               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-sm font-bold text-slate-600">
                                 {lessonIndex + 1}
                               </div>
 
                               <div className="min-w-0 flex-1">
-                                <p className="truncate text-sm font-bold text-slate-800">
-                                  {lesson.title}
+                                <p className="truncate text-sm font-semibold text-slate-800">
+                                  <span className="sm:hidden">
+                                    {lesson.title.length > 20
+                                      ? `${lesson.title.slice(0, 20)}...`
+                                      : lesson.title}
+                                  </span>
+
+                                  <span className="hidden sm:inline">
+                                    {lesson.title.length > 50
+                                      ? `${lesson.title.slice(0, 50)}...`
+                                      : lesson.title}
+                                  </span>
                                 </p>
 
                                 <div className="mt-1.5 flex flex-wrap items-center gap-2">
@@ -1099,7 +1121,7 @@ export default function EditCourseView({ courseId, onBack }: EditCourseViewProps
                                       className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-100"
                                     >
                                       <option value="VIDEO">Video</option>
-                                      <option value="ARTICLE">Article / Text / PDF Link</option>
+                                      <option value="ARTICLE">Article / PDF Link</option>
                                       <option value="QUIZ">Quiz</option>
                                     </select>
                                   </div>
@@ -1462,7 +1484,7 @@ export default function EditCourseView({ courseId, onBack }: EditCourseViewProps
                             className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-100"
                           >
                             <option value="VIDEO">Video</option>
-                            <option value="ARTICLE">Article / Text / PDF Link</option>
+                            <option value="ARTICLE">Article / PDF Link</option>
                             <option value="QUIZ">Quiz</option>
                           </select>
 

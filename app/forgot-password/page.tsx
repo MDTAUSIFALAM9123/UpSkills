@@ -20,7 +20,7 @@ import {
 type Step = 1 | 2 | 3;
 
 const inputClass =
-  'w-full rounded-xl border border-gray-200 bg-gray-50/80 px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-purple-500 focus:bg-white focus:ring-4 focus:ring-purple-500/10 disabled:cursor-not-allowed disabled:opacity-60';
+  'w-full rounded-xl border border-gray-200 bg-gray-50/80 px-4 py-3 text-md text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-purple-500 focus:bg-white focus:ring-4 focus:ring-purple-500/10 disabled:cursor-not-allowed disabled:opacity-60';
 
 const labelClass = 'mb-2 block text-sm font-semibold text-gray-700';
 
@@ -438,7 +438,7 @@ export default function ForgotPassword() {
                     value={otp}
                     onChange={event => setOtp(event.target.value.replace(/\D/g, '').slice(0, 6))}
                     placeholder="Enter 6-digit OTP"
-                    className={`${inputClass} text-center text-xl font-bold tracking-[0.4em]`}
+                    className={`${inputClass} text-center font-bold tracking-[0.4em]`}
                     disabled={loading}
                   />
 

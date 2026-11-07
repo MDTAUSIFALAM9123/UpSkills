@@ -884,7 +884,7 @@ export default function StudentDashboardPage() {
                       console.error('Logout failed:', error);
                     }
                   }}
-                  className="rounded-lg p-2 text-slate-400 transition hover:bg-white hover:text-violet-700"
+                  className="rounded-lg p-2 text-red-500 transition hover:bg-white hover:text-red-600"
                 >
                   <LogOut size={17} />
                 </button>

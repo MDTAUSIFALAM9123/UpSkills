@@ -459,7 +459,7 @@ export default function InstructorDashboard() {
 
         {/* Profile - Always at Bottom */}
         <div className="shrink-0 border-t border-slate-100 bg-white p-4">
-          <div className="rounded-2xl bg-slate-900 p-3.5 text-white shadow-lg">
+          <div className="rounded-2xl border border-slate-100 bg-white p-3.5 text-white shadow-md">
             <div className="flex items-center gap-3">
               {/* Avatar */}
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-100 to-fuchsia-100 text-sm font-black text-violet-700">
@@ -468,7 +468,7 @@ export default function InstructorDashboard() {
 
               {/* User Info */}
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-bold text-white">{instructorName}</p>
+                <p className="truncate text-sm font-bold text-slate-800">{instructorName}</p>
 
                 <p className="mt-0.5 truncate text-[11px] text-slate-400">
                   {account?.email || 'Instructor account'}
@@ -491,7 +491,7 @@ export default function InstructorDashboard() {
                   }
                 }}
                 title="Logout"
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-slate-400 transition-all duration-200 hover:bg-red-500/10 hover:text-red-400"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-500/10 text-red-400 transition-all duration-200"
               >
                 <LogOut size={16} />
               </button>

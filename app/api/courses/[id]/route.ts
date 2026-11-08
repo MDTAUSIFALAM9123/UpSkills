@@ -20,7 +20,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
           include: {
             lessons: {
               orderBy: { order: 'asc' },
-              select: { id: true, title: true, type: true, order: true },
+              select: { id: true, title: true, type: true, order: true, content: true },
             },
           },
         },

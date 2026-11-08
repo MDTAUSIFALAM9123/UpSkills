@@ -20,6 +20,7 @@ import {
 interface Lesson {
   id: string;
   title: string;
+  content: string;
   type: string;
   order: number;
 }
@@ -78,6 +79,7 @@ function normalizeCourse(raw: CourseApiResponse): Course {
                   id: String(lesson?.id ?? ''),
                   title: String(lesson?.title ?? 'Untitled lesson'),
                   type: String(lesson?.type ?? 'LESSON'),
+                  content: String(lesson?.content ?? ''),
                   order: toNumber(lesson?.order),
                 }))
                 .filter(lesson => lesson.id.length > 0)
@@ -657,7 +659,9 @@ export default function CourseDetailsPage() {
                                           {lesson.title}
                                         </span>
                                         <span className="mt-1 block text-xs text-slate-400 capitalize">
-                                          {lessonType.toLowerCase()}
+                                          {/^https?:\/\//i.test(lesson.content.trim() || '')
+                                            ? 'PDF LINK'
+                                            : lessonType.toLowerCase()}
                                         </span>
                                       </span>
 

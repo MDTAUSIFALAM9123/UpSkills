@@ -240,14 +240,6 @@ export default function Header() {
                       ) : isInstructor ? (
                         <>
                           <Link
-                            href={`/account/profile/${user?.id}`}
-                            onClick={() => setShowDropdown(false)}
-                            className="px-4 py-2.5 transition hover:bg-slate-50"
-                          >
-                            My Profile
-                          </Link>
-
-                          <Link
                             href="/instructor"
                             onClick={() => setShowDropdown(false)}
                             className="px-4 py-2.5 transition hover:bg-slate-50"
@@ -326,14 +318,6 @@ export default function Header() {
 
             {isInstructor && (
               <>
-                <Link
-                  href={`/account/profile/${user?.id}`}
-                  onClick={closeMobileMenu}
-                  className="rounded-lg px-3 py-3 text-slate-700 transition hover:bg-purple-50 hover:text-purple-700"
-                >
-                  My Profile
-                </Link>
-
                 <Link
                   href="/instructor"
                   onClick={closeMobileMenu}

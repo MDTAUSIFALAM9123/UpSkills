@@ -116,47 +116,65 @@ export default function ReviewsSection() {
           ))}
         </div>
       </div>
+
       <div className="hidden w-full sm:block">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-violet-800 via-violet-700 to-purple-600 p-8 text-white shadow-2xl sm:p-12 lg:p-16">
             {/* Glow */}
             <div className="pointer-events-none absolute -top-20 -right-20 h-80 w-80 rounded-full bg-teal-400/30 blur-3xl" />
-
             <div className="pointer-events-none absolute -bottom-20 -left-20 h-80 w-80 rounded-full bg-purple-300/20 blur-3xl" />
 
-            <div className="relative z-10 max-w-3xl">
-              <span className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-[11px] font-bold tracking-wider uppercase backdrop-blur">
-                Accelerate Today
-              </span>
+            <div className="relative z-10 grid items-center gap-10 lg:grid-cols-2">
+              {/* Left Content */}
+              <div className="max-w-2xl">
+                <span className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-[11px] font-bold tracking-wider uppercase backdrop-blur">
+                  Accelerate Today
+                </span>
 
-              <h2 className="mb-4 text-3xl font-extrabold tracking-tight sm:text-4xl">
-                Ready to start your learning journey?
-              </h2>
+                <h2 className="mb-4 text-3xl font-extrabold tracking-tight sm:text-4xl">
+                  Ready to start your learning journey?
+                </h2>
 
-              <p className="mb-8 max-w-2xl text-lg leading-7 text-white/90 sm:items-center">
-                Join thousands of professionals accelerating their careers with Upskills. Gain
-                verified credentials, build production-ready projects, and unlock new career
-                horizons.
-              </p>
+                <p className="mb-8 max-w-2xl text-lg leading-7 text-white/90">
+                  Join thousands of professionals accelerating their careers with Upskills. Gain
+                  verified credentials, build production-ready projects, and unlock new career
+                  horizons.
+                </p>
 
-              <div className="flex flex-wrap items-center gap-4">
-                <a
-                  href="#"
-                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-8 py-3.5 text-sm font-bold text-violet-700 shadow-md transition hover:bg-slate-100"
-                >
-                  Get Started Now
-                  <span className="material-symbols-outlined">
+                <div className="flex flex-wrap items-center gap-4">
+                  <a
+                    href="/courses"
+                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-8 py-3.5 text-sm font-bold text-violet-700 shadow-md transition hover:bg-slate-100"
+                  >
+                    Get Started Now
                     <ArrowRight size={20} />
-                  </span>
-                </a>
+                  </a>
 
-                <a
-                  href="#"
-                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-white/15 px-8 py-3.5 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/25"
-                >
-                  Talk to an Advisor
-                  <span className="material-symbols-outlined text-[18px]"></span>
-                </a>
+                  <a
+                    href="/about"
+                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-white/15 px-8 py-3.5 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/25"
+                  >
+                    Talk to an Advisor
+                    <ArrowRight size={18} />
+                  </a>
+                </div>
+              </div>
+
+              {/* Right Image */}
+              <div className="relative hidden lg:block">
+                <div className="absolute -inset-4 rounded-3xl bg-purple-300/20 blur-2xl" />
+
+                <img
+                  src="/Learning.jpg"
+                  alt="Students learning"
+                  className="relative h-[320px] w-full rounded-2xl border border-white/20 object-cover shadow-2xl"
+                />
+
+                {/* Floating Badge */}
+                <div className="absolute -bottom-6 -left-8 rounded-xl border border-white/20 bg-white px-4 py-3 text-slate-900 shadow-xl">
+                  <p className="text-sm font-bold">Keep Learning!</p>
+                  <p className="text-xs text-slate-500">Build skills. Shape your future.</p>
+                </div>
               </div>
             </div>
           </div>

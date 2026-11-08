@@ -221,7 +221,11 @@ export function CertificateView({
               fontFamily: "'Great Vibes', 'Brush Script MT', cursive",
             }}
           >
-            {studentName || 'Student Name'}
+            {(studentName || 'Student Name')
+              .toLowerCase()
+              .split(' ')
+              .map(name => name.charAt(0).toUpperCase() + name.slice(1))
+              .join(' ')}
           </p>
         </div>
 
@@ -240,11 +244,13 @@ export function CertificateView({
         {/* Signatures and Achievement Badge */}
 
         <div className="absolute inset-x-0 bottom-[10cqw] flex items-end justify-center gap-[5cqw]">
-          <SignatureBlock
-            name={instructorName || 'Course Instructor'}
-            role="Course Instructor"
-            variant={1}
-          />
+          <div className="w-[20cqw] min-w-0 text-center">
+            <img src="/Tausifsign.png" alt="Instructor Sign" className="mx-auto" />
+
+            <div className="my-[0.5cqw] border-t-[0.12cqw] border-[#1e1b4b]" />
+
+            <p className="m-0 text-[1.5cqw] font-medium text-slate-600">Course Instructor</p>
+          </div>
 
           {/* Achievement Badge */}
 
@@ -263,7 +269,13 @@ export function CertificateView({
             />
           </svg>
 
-          <SignatureBlock name="UpSkills Team" role="Program Director" variant={2} />
+          <div className="w-[20cqw] min-w-0 text-center">
+            <img src="/Saifsign.png" alt="Director Sign" className="mx-auto w-32" />
+
+            <div className="my-[0.5cqw] border-t-[0.12cqw] border-[#1e1b4b]" />
+
+            <p className="m-0 text-[1.5cqw] font-medium text-slate-600">Program Director</p>
+          </div>
         </div>
 
         {/* Certificate Number */}
@@ -272,24 +284,6 @@ export function CertificateView({
           Certificate No: {certificateNo || 'Not Available'}
         </p>
       </div>
-    </div>
-  );
-}
-
-/* =========================
-   Signature Block
-========================= */
-
-function SignatureBlock({ name, role, variant }: { name: string; role: string; variant: 1 | 2 }) {
-  return (
-    <div className="w-[20cqw] min-w-0 text-center">
-      <p className="m-0 text-[2.2cqw] font-semibold [overflow-wrap:anywhere] break-words text-[#1e1b4b]">
-        {name}
-      </p>
-
-      <div className="my-[0.5cqw] border-t-[0.12cqw] border-[#1e1b4b]" />
-
-      <p className="m-0 text-[1.5cqw] font-medium text-slate-600">{role}</p>
     </div>
   );
 }

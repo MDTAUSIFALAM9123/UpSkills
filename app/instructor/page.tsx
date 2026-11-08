@@ -435,6 +435,13 @@ export default function InstructorDashboard() {
             />
 
             <SidebarItem
+              active={activeTab === 'notifications'}
+              icon={<Bell size={18} />}
+              label="Notifications"
+              onClick={() => navigateTab('notifications')}
+            />
+
+            <SidebarItem
               active={activeTab === 'analytics'}
               icon={<BarChart3 size={18} />}
               label="Analytics & Earnings"
@@ -447,13 +454,6 @@ export default function InstructorDashboard() {
               label="Reviews & Q&A"
               onClick={() => navigateTab('reviews')}
             /> */}
-
-            <SidebarItem
-              active={activeTab === 'notifications'}
-              icon={<Bell size={18} />}
-              label="Notifications"
-              onClick={() => navigateTab('notifications')}
-            />
           </nav>
         </div>
 

@@ -1036,7 +1036,9 @@ export default function EditCourseView({ courseId, onBack }: EditCourseViewProps
 
                                 <div className="mt-1.5 flex flex-wrap items-center gap-2">
                                   <span className="inline-flex rounded-md bg-violet-50 px-2 py-1 text-[10px] font-bold tracking-wide text-violet-700 uppercase">
-                                    {lesson.type}
+                                    {/^https?:\/\//i.test(lesson.content?.trim() || '')
+                                      ? 'PDF LINK'
+                                      : lesson.type}
                                   </span>
                                 </div>
                               </div>
@@ -1142,7 +1144,7 @@ export default function EditCourseView({ courseId, onBack }: EditCourseViewProps
                                   )}
                                   <div className="sm:col-span-2">
                                     <label className="mb-1.5 block text-sm font-semibold text-slate-700">
-                                      Lesson Content / Notes
+                                      Lesson Content
                                     </label>
                                     <textarea
                                       value={editingLessons[lesson.id].content}

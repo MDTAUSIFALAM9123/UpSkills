@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 import { Karla } from 'next/font/google';
 import './globals.css';
-
 import { FooterWrapper, HeaderWrapper } from './components/HeaderWrapper';
 import ToastProvider from './components/ToastProvider';
+import GlobalLoader from './components/GlobalLoader';
 
 const karla = Karla({
   weight: '400',
@@ -44,6 +44,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${karla.className} antialiased`}>
+        <GlobalLoader />
         <ToastProvider />
         <HeaderWrapper />
         <main>{children}</main>

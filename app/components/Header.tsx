@@ -118,7 +118,7 @@ export default function Header() {
           </div>
 
           {/* DESKTOP NAVIGATION: unchanged */}
-          <div className="ml-auto hidden items-center gap-8 lg:flex lg:gap-10">
+          <div className="ml-auto hidden items-center gap-8 md:flex lg:gap-10">
             <nav className="flex items-center gap-10 font-semibold lg:gap-8">
               <Link
                 href="/"
@@ -143,7 +143,10 @@ export default function Header() {
             </nav>
 
             {/* Desktop Search */}
-            <form className="w-72 lg:w-80 xl:w-96" onSubmit={e => e.preventDefault()}>
+            <form
+              className="hidden w-72 lg:block lg:w-80 xl:w-92"
+              onSubmit={e => e.preventDefault()}
+            >
               <div className="flex h-10 items-center rounded-lg border border-slate-200 bg-white shadow-xs transition focus-within:border-purple-400 focus-within:ring-2 focus-within:ring-purple-100">
                 <Search className="ml-3 h-[18px] w-[18px] shrink-0 text-slate-400" />
 
@@ -170,7 +173,7 @@ export default function Header() {
             ref={dropdownRef}
           >
             {/* Mobile right side */}
-            <div className="flex items-center gap-2 lg:hidden">
+            <div className="flex items-center gap-2 md:hidden">
               {/* Bell visible before and after login */}
               <NotificationBell />
 
@@ -187,7 +190,7 @@ export default function Header() {
 
             {/* DESKTOP AUTH: unchanged */}
             {!isLoggedIn ? (
-              <div className="hidden items-center gap-4 lg:flex">
+              <div className="hidden items-center gap-4 md:flex">
                 <Link
                   href="/login"
                   className="rounded-lg border border-purple-600 px-4 py-2 text-sm font-semibold text-purple-600 transition hover:bg-purple-600 hover:text-white"
@@ -203,7 +206,7 @@ export default function Header() {
                 </Link>
               </div>
             ) : (
-              <div className="relative hidden lg:block">
+              <div className="relative hidden md:block">
                 <button
                   type="button"
                   onClick={() => setShowDropdown(prev => !prev)}

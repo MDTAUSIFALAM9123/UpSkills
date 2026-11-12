@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { ChevronDown, Shield, Menu, X, SlidersHorizontal, Search } from 'lucide-react';
 import NotificationBell from './notifications/NotificationBell';
 
@@ -24,6 +24,12 @@ export default function Header() {
 
   const lastFetchRef = useRef(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
+
+  const isActive = (href: string) => {
+    if (href === '/') return pathname === '/';
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
 
   // Check login status
   const checkLoginStatus = useCallback(async () => {
@@ -103,7 +109,7 @@ export default function Header() {
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(prev => !prev)}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-slate-700 transition hover:bg-slate-100 lg:hidden"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-slate-700 transition hover:bg-slate-100 md:hidden"
                 aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
                 aria-expanded={mobileMenuOpen}
               >
@@ -120,26 +126,27 @@ export default function Header() {
           {/* DESKTOP NAVIGATION: unchanged */}
           <div className="ml-auto hidden items-center gap-8 md:flex lg:gap-10">
             <nav className="flex items-center gap-10 font-semibold lg:gap-8">
-              <Link
-                href="/"
-                className="whitespace-nowrap text-slate-700 transition-colors hover:text-purple-600"
-              >
-                Home
-              </Link>
+              {[
+                { name: 'Home', href: '/' },
+                { name: 'Courses', href: '/courses' },
+                { name: 'About', href: '/about' },
+              ].map(link => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`group relative py-1 whitespace-nowrap transition-colors duration-300 ${
+                    isActive(link.href) ? 'text-purple-700' : 'text-slate-700'
+                  }`}
+                >
+                  {link.name}
 
-              <Link
-                href="/courses"
-                className="whitespace-nowrap text-slate-700 transition-colors hover:text-purple-600"
-              >
-                Courses
-              </Link>
-
-              <Link
-                href="/about"
-                className="whitespace-nowrap text-slate-700 transition-colors hover:text-purple-600"
-              >
-                About
-              </Link>
+                  <span
+                    className={`absolute bottom-0 left-0 h-[2px] w-full origin-left rounded-full bg-purple-600 transition-transform duration-300 ease-out ${
+                      isActive(link.href) ? 'scale-x-100' : 'scale-x-0'
+                    }`}
+                  />
+                </Link>
+              ))}
             </nav>
 
             {/* Desktop Search */}

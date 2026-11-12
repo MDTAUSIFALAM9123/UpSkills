@@ -3,16 +3,16 @@
 import { useState } from 'react';
 import { useCourses } from '@/hooks/useCourse';
 import Navroute from '../components/Navroute';
-import { IoChevronDown } from 'react-icons/io5';
 import CourseCard from '../components/CourseCard';
 
 const categories = [
-  'Technology & Development',
-  'Data & Analytics',
-  'Academic & Competitive',
-  'Business & Management',
-  'Design & Creative',
-  'Medical & Healthcare',
+  'Web Development',
+  'Data Science & Analytics',
+  'AI & Machine Learning',
+  'Cybersecurity & Networking',
+  'UI/UX & Graphic Design',
+  'Digital Marketing',
+  'Computer Fundamentals',
   'Career & Professional Skills',
 ];
 

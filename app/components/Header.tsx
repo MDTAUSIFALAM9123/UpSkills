@@ -119,7 +119,9 @@ export default function Header() {
 
             {/* Logo: same position on desktop */}
             <Link href="/" onClick={closeMobileMenu} className="shrink-0">
-              <img src="/Logo.png" alt="Logo" className="w-28 cursor-pointer sm:w-32 lg:w-32" />
+              <div className="logo-shine relative inline-block overflow-hidden">
+                <img src="/Logo.png" alt="Logo" className="w-28 cursor-pointer sm:w-32 lg:w-32" />
+              </div>
             </Link>
           </div>
 

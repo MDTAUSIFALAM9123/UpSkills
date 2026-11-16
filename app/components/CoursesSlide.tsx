@@ -2,7 +2,8 @@
 
 import Image from 'next/image';
 import { useCourses } from '@/hooks/useCourse';
-import { ArrowRight, Star, UserRound, Zap } from 'lucide-react';
+import { ArrowRight, Star, UserRound, Zap, Loader2 } from 'lucide-react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 function toNumber(value: unknown, fallback = 0): number {
@@ -12,7 +13,7 @@ function toNumber(value: unknown, fallback = 0): number {
 
 export default function CoursesSlide() {
   const router = useRouter();
-
+  const [loadingCourseId, setLoadingCourseId] = useState<string | null>(null);
   const { courses, loading, error } = useCourses({
     limit: 10,
   });
@@ -22,6 +23,9 @@ export default function CoursesSlide() {
   };
 
   const handleCourseById = (courseId: string) => {
+    if (loadingCourseId) return;
+
+    setLoadingCourseId(courseId);
     router.push(`/courses/${courseId}`);
   };
 
@@ -159,10 +163,20 @@ export default function CoursesSlide() {
                       <button
                         type="button"
                         onClick={() => handleCourseById(course.id)}
-                        className="bg-background1 flex shrink-0 items-center gap-1.5 rounded-xl px-5 py-3 text-sm font-semibold text-white shadow-sm transition active:scale-95"
+                        disabled={loadingCourseId === course.id}
+                        className="bg-background1 flex shrink-0 items-center justify-center gap-1.5 rounded-xl px-5 py-3 text-sm font-semibold text-white shadow-sm transition active:scale-95 disabled:cursor-not-allowed disabled:opacity-70"
                       >
-                        Get Enroll
-                        <Zap className="h-4 w-4 fill-current" />
+                        {loadingCourseId === course.id ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Loading...
+                          </>
+                        ) : (
+                          <>
+                            Get Enroll
+                            <Zap className="h-4 w-4 fill-current" />
+                          </>
+                        )}
                       </button>
                     </div>
                   </div>
@@ -177,15 +191,15 @@ export default function CoursesSlide() {
               {courses.map(course => (
                 <article
                   key={course.id}
-                  className="w-[226px] min-w-[226px] shrink-0 overflow-hidden rounded-xl border border-gray-300 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+                  className="w-[276px] min-w-[276px] shrink-0 overflow-hidden rounded-xl border border-gray-300 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
                 >
                   {/* Image */}
-                  <div className="relative h-48 w-full overflow-hidden">
+                  <div className="relative h-44 w-full overflow-hidden">
                     <Image
                       src={course.thumbnail || '/Normal.png'}
                       alt={course.title}
                       fill
-                      sizes="226px"
+                      sizes="276px"
                       className="object-cover transition duration-300 hover:scale-105"
                     />
                   </div>
@@ -235,10 +249,20 @@ export default function CoursesSlide() {
                       <button
                         type="button"
                         onClick={() => handleCourseById(course.id)}
-                        className="bg-background1 flex items-center justify-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-white transition hover:opacity-90"
+                        disabled={loadingCourseId === course.id}
+                        className="bg-background1 flex items-center justify-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
                       >
-                        Get Enroll
-                        <Zap className="h-3 w-3 fill-current" />
+                        {loadingCourseId === course.id ? (
+                          <>
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            Loading...
+                          </>
+                        ) : (
+                          <>
+                            Get Enroll
+                            <Zap className="h-3 w-3 fill-current" />
+                          </>
+                        )}
                       </button>
                     </div>
                   </div>

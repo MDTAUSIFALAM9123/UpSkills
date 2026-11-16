@@ -1,8 +1,9 @@
 'use client';
 
-import { Star, UserRound, Zap } from 'lucide-react';
+import { Star, UserRound, Zap, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 interface CourseCardProps {
   course: {
@@ -21,12 +22,15 @@ interface CourseCardProps {
 
 export default function CourseCard({ course }: CourseCardProps) {
   const router = useRouter();
-
+  const [loading, setLoading] = useState(false);
   const price = Number(course.price) || 0;
   const rating = Number(course.avgRating) || 0;
   const totalRatings = course.totalRatings ?? 0;
 
   const handleCourse = () => {
+    if (loading) return;
+
+    setLoading(true);
     router.push(`/courses/${course.id}`);
   };
 
@@ -82,10 +86,20 @@ export default function CourseCard({ course }: CourseCardProps) {
           <button
             type="button"
             onClick={handleCourse}
-            className="bg-background1 flex items-center justify-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-white transition hover:opacity-90"
+            disabled={loading}
+            className="bg-background1 flex min-w-[105px] items-center justify-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-80"
           >
-            Get Enroll
-            <Zap className="h-3 w-3 fill-current" />
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Loading
+              </>
+            ) : (
+              <>
+                Get Enroll
+                <Zap className="h-3 w-3 fill-current" />
+              </>
+            )}
           </button>
         </div>
       </div>

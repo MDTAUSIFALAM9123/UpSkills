@@ -10,7 +10,7 @@ import {
   SlidersHorizontal,
   Star,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const stats = [
   {
@@ -45,6 +45,56 @@ const stats = [
 export default function Introduction() {
   const [currentText, setCurrentText] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
+
+  const [counts, setCounts] = useState([0, 0, 0, 0]);
+  const [isActive, setIsActive] = useState(false);
+  const statsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsActive(true);
+          observer.disconnect();
+        }
+      },
+      {
+        threshold: 0.3,
+      }
+    );
+
+    if (statsRef.current) {
+      observer.observe(statsRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isActive) return;
+
+    const targets = [200, 50, 100, 4.9];
+    const duration = 2000;
+    const startTime = performance.now();
+
+    let animationFrame: number;
+
+    const animate = (currentTime: number) => {
+      const progress = Math.min((currentTime - startTime) / duration, 1);
+
+      const eased = 1 - Math.pow(1 - progress, 3);
+
+      setCounts(targets.map(target => target * eased));
+
+      if (progress < 1) {
+        animationFrame = requestAnimationFrame(animate);
+      }
+    };
+
+    animationFrame = requestAnimationFrame(animate);
+
+    return () => cancelAnimationFrame(animationFrame);
+  }, [isActive]);
 
   const texts = [
     'Data Science',
@@ -299,9 +349,12 @@ export default function Introduction() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:gap-6">
-            {stats.map(stat => {
+          <div ref={statsRef} className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:gap-6">
+            {stats.map((stat, index) => {
               const Icon = stat.icon;
+
+              const value =
+                index === 3 ? `${counts[index].toFixed(1)}/5` : `${Math.floor(counts[index])}+`;
 
               return (
                 <div
@@ -315,7 +368,7 @@ export default function Introduction() {
                   </div>
 
                   <p className="text-3xl leading-tight font-extrabold text-slate-900 sm:text-4xl">
-                    {stat.value}
+                    {value}
                   </p>
 
                   <p className="mt-1 text-sm font-semibold text-slate-600">{stat.title}</p>

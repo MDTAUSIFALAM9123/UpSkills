@@ -77,10 +77,13 @@ export default function Footer() {
             <h3 className="text-1g font-semibold text-gray-800">Get in Touch</h3>
             <p className="mt-4 text-gray-600"> 339 McDermott Points Hettingerhaven, NV 15283</p>
             <p className="mt-2 text-gray-600">
-              Emai: <Link href="mailto:upskill854@gmail.com"> upskill854@gmail.com</Link>
+              Email: <Link href="mailto:upskill854@gmail.com"> upskill854@gmail.com</Link>
             </p>
             <p className="mt-2 text-gray-600">
-              Phone: <strong>(+91) 8340593996</strong>
+              Phone:{' '}
+              <Link href="tel:+918340593996" className="font-medium">
+                +91 8340593996
+              </Link>
             </p>
           </div>
         </div>

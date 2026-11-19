@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useCourses } from '@/hooks/useCourse';
-import { ArrowRight, Star, UserRound, Zap, Loader2 } from 'lucide-react';
+import { ArrowRight, Star, UserRound, Zap, Loader2, GraduationCap } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -32,6 +32,13 @@ export default function CoursesSlide() {
   return (
     <section className="bg-white py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-10">
+        <div className="mb-6 flex items-center justify-center gap-2">
+          <span className="inline-flex items-center gap-2 rounded-full bg-purple-100 px-4 py-1.5 text-[11px] font-bold tracking-wide text-purple-700">
+            <GraduationCap size={14} />
+            EXPLORE OUR COURSES
+          </span>
+        </div>
+
         {/* ================= HEADING ================= */}
         <h2 className="mb-4 text-center text-3xl font-semibold text-gray-900 sm:text-4xl">
           Most Popular Courses

@@ -4,6 +4,7 @@ import './globals.css';
 import { FooterWrapper, HeaderWrapper } from './components/HeaderWrapper';
 import ToastProvider from './components/ToastProvider';
 import GlobalLoader from './components/GlobalLoader';
+import FloatingContactWrapper from './components/FloatingContactWrapper';
 
 const karla = Karla({
   weight: '400',
@@ -47,7 +48,10 @@ export default function RootLayout({
         <GlobalLoader />
         <ToastProvider />
         <HeaderWrapper />
-        <main>{children}</main>
+        <main>
+          {children}
+          <FloatingContactWrapper />
+        </main>
         <FooterWrapper />
       </body>
     </html>

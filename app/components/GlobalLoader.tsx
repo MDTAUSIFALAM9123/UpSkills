@@ -8,7 +8,7 @@ export default function GlobalLoader() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 2500);
+    }, 2200);
 
     return () => clearTimeout(timer);
   }, []);

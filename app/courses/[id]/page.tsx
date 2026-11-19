@@ -746,7 +746,7 @@ export default function CourseDetailsPage() {
                   </p>
                 </div>
 
-                {course.isEnrolled && (
+                {course.isEnrolled && !course.userReview && (
                   <div className="mb-6 rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50 to-purple-50 p-4 sm:p-5">
                     <h3 className="font-bold text-slate-900">Leave a Review</h3>
                     <p className="mt-1 text-sm text-slate-500">Share your learning experience.</p>

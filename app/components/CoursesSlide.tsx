@@ -32,21 +32,27 @@ export default function CoursesSlide() {
   return (
     <section className="bg-white py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-10">
-        <div className="mb-6 flex items-center justify-center gap-2">
-          <span className="inline-flex items-center gap-2 rounded-full bg-purple-100 px-4 py-1.5 text-[11px] font-bold tracking-wide text-purple-700">
-            <GraduationCap size={14} />
-            EXPLORE OUR COURSES
-          </span>
+        {/* ================= SECTION HEADING ================= */}
+        <div className="category-heading mb-10 text-center sm:mb-14">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#7209E8]/15 bg-white px-4 py-2 shadow-sm">
+            <GraduationCap size={14} className="text-[#7209E8]" />
+            <span className="text-xs font-bold tracking-[0.13em] text-[#7209E8]">
+              EXPLORE OUR COURSES
+            </span>
+          </div>
+
+          <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl lg:text-5xl">
+            Discover Our{' '}
+            <span className="bg-gradient-to-r from-[#7209E8] to-[#A78BFA] bg-clip-text text-transparent">
+              Popular Courses
+            </span>
+          </h2>
+
+          <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-gray-600 sm:text-base">
+            Learn from expertly designed courses, build practical skills, and prepare yourself for
+            exciting opportunities in the digital world.
+          </p>
         </div>
-
-        {/* ================= HEADING ================= */}
-        <h2 className="mb-4 text-center text-3xl font-semibold text-gray-900 sm:text-4xl">
-          Most Popular Courses
-        </h2>
-
-        <p className="mb-12 text-center text-lg text-gray-600">
-          These are the most popular courses among Upskills learners worldwide.
-        </p>
 
         {/* ================= LOADING ================= */}
         {loading ? (
@@ -234,7 +240,7 @@ export default function CoursesSlide() {
 
                     {/* Title */}
                     <h3 className="line-clamp-2 font-semibold text-gray-900">
-                      {course.title.length > 20 ? `${course.title.slice(0, 20)}...` : course.title}
+                      {course.title.length > 25 ? `${course.title.slice(0, 25)}...` : course.title}
                     </h3>
 
                     {/* Description */}

@@ -66,7 +66,7 @@ export default function Login() {
       const data = await res.json();
 
       if (data.success) {
-        router.push('/');
+        router.back();
       } else {
         setErrorMessage(data.message || 'Invalid credentials');
       }

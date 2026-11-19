@@ -23,7 +23,7 @@ export async function POST(req: Request) {
         {
           success: false,
           error: true,
-          message: 'Invalid email. Try again.',
+          message: 'Invalid email or Password. Try again.',
         },
         { status: 401 }
       );
@@ -33,7 +33,7 @@ export async function POST(req: Request) {
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return NextResponse.json(
-        { success: false, error: true, message: 'Invalid password. Try again.' },
+        { success: false, error: true, message: 'Invalid email or Password. Try again.' },
         { status: 401 }
       );
     }

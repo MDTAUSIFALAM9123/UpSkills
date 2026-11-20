@@ -29,6 +29,8 @@ interface PaymentRecord {
   paidAt: string | null;
   createdAt: string;
   updatedAt: string;
+  originalAmount: number | null;
+  discountAmount: number;
   user: {
     id: string;
     name: string;
@@ -38,6 +40,15 @@ interface PaymentRecord {
     id: string;
     title: string;
   };
+  coupon: {
+    id: string;
+    code: string;
+  } | null;
+  coaching: {
+    id: string;
+    name: string;
+    code: string;
+  } | null;
 }
 
 const statusStyles: Record<PaymentStatus, string> = {
@@ -135,6 +146,9 @@ export default function PaymentHistory() {
           payment.user.name,
           payment.user.email,
           payment.course.title,
+          payment.coupon?.code || '',
+          payment.coaching?.name || '',
+          payment.coaching?.code || '',
           payment.provider || '',
           payment.providerOrderId || '',
           payment.providerPaymentId || '',
@@ -155,8 +169,13 @@ export default function PaymentHistory() {
       'Student',
       'Email',
       'Course',
+      'Original Amount',
+      'Discount Amount',
       'Amount',
       'Currency',
+      'Coupon Code',
+      'Coaching Name',
+      'Coaching Code',
       'Status',
       'Provider',
       'Order ID',
@@ -172,8 +191,13 @@ export default function PaymentHistory() {
       p.user.name,
       p.user.email,
       p.course.title,
+      p.originalAmount ?? '',
+      p.discountAmount || 0,
       p.amount,
       p.currency,
+      p.coupon?.code || '',
+      p.coaching?.name || '',
+      p.coaching?.code || '',
       p.status,
       p.provider || '',
       p.providerOrderId || '',
@@ -238,7 +262,7 @@ export default function PaymentHistory() {
     <section className="space-y-5">
       <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
         <div>
-          <h2 className="text-xl font-black text-slate-900">Payment History</h2>
+          <h2 className="text-2xl font-black text-slate-900 sm:text-3xl">Payment History</h2>
           <p className="mt-1 text-sm text-slate-500">
             Actual transactions recorded in the payment database.
           </p>
@@ -302,7 +326,7 @@ export default function PaymentHistory() {
             <h3 className="font-black text-slate-900">
               All Transactions ({filteredPayments.length})
             </h3>
-            <p className="mt-1 text-xs text-slate-400">{stats.total} total database records</p>
+            <p className="mt-1 text-xs text-slate-500">{stats.total} total database records</p>
           </div>
 
           <div className="flex flex-col gap-2 sm:flex-row">
@@ -314,8 +338,8 @@ export default function PaymentHistory() {
               <input
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                placeholder="Search student, course, ID..."
-                className="h-10 w-full rounded-xl border border-slate-200 pr-3 pl-9 text-sm outline-none focus:border-violet-300 sm:w-64"
+                placeholder="Search student, course, coupon, coaching..."
+                className="h-10 w-full rounded-xl border border-slate-200 pr-3 pl-9 text-sm outline-none focus:border-violet-300 sm:w-72"
               />
             </div>
 
@@ -343,12 +367,13 @@ export default function PaymentHistory() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[1150px] text-left text-sm">
+            <table className="w-full min-w-[1300px] text-left text-sm">
               <thead className="bg-slate-50 text-[11px] font-bold tracking-wide text-slate-400 uppercase">
                 <tr>
                   <th className="px-5 py-4">Student</th>
                   <th className="px-5 py-4">Course</th>
                   <th className="px-5 py-4">Amount</th>
+                  <th className="px-5 py-4">Coupon / Coaching</th>
                   <th className="px-5 py-4">Transaction</th>
                   <th className="px-5 py-4">Status</th>
                   <th className="px-5 py-4">Payment Date</th>
@@ -360,18 +385,59 @@ export default function PaymentHistory() {
                   <tr key={payment.id} className="hover:bg-slate-50/70">
                     <td className="px-5 py-4">
                       <p className="font-bold text-slate-800">{payment.user.name}</p>
-                      <p className="mt-1 text-xs text-slate-400">{payment.user.email}</p>
+                      <p className="mt-1 text-xs text-slate-500">{payment.user.email}</p>
                     </td>
 
                     <td className="max-w-[230px] px-5 py-4">
-                      <p className="font-semibold text-slate-700">{payment.course.title}</p>
-                      <p className="mt-1 text-xs text-slate-400">
+                      <p className="font-semibold text-slate-700">
+                        {payment.course.title.length > 30
+                          ? `${payment.course.title.slice(0, 30)}...`
+                          : payment.course.title}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-500">
                         {payment.provider || 'Provider not recorded'}
                       </p>
                     </td>
 
-                    <td className="px-5 py-4 font-black text-slate-900">
-                      {formatAmount(payment.amount, payment.currency)}
+                    <td className="px-5 py-4">
+                      <p className="font-black text-slate-900">
+                        {formatAmount(payment.amount, payment.currency)}
+                      </p>
+                      {payment.coupon &&
+                        payment.originalAmount != null &&
+                        payment.originalAmount > payment.amount && (
+                          <p className="mt-1 text-xs text-slate-500 line-through">
+                            {formatAmount(payment.originalAmount, payment.currency)}
+                          </p>
+                        )}
+                    </td>
+
+                    <td className="px-5 py-4">
+                      {payment.coupon ? (
+                        <div className="space-y-1.5">
+                          <div className="flex items-center justify-between">
+                            <span className="inline-flex rounded-md bg-violet-50 px-2 py-1 font-mono text-[11px] font-bold text-violet-700">
+                              {payment.coupon.code}
+                            </span>
+
+                            {payment.discountAmount > 0 && (
+                              <p className="text-xs font-semibold text-emerald-600">
+                                − {formatAmount(payment.discountAmount, payment.currency)} off
+                              </p>
+                            )}
+                          </div>
+
+                          {payment.coaching ? (
+                            <p className="text-xs font-semibold text-slate-600">
+                              {payment.coaching.name}
+                            </p>
+                          ) : (
+                            <p className="text-xs text-slate-500">Coaching not recorded</p>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-slate-500">No coupon</span>
+                      )}
                     </td>
 
                     <td className="px-5 py-4">

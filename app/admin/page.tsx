@@ -10,12 +10,14 @@ import {
   BookOpen,
   Building2,
   CalendarDays,
+  ChartNoAxesCombined,
   Check,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
   CircleDollarSign,
   Clock3,
+  CreditCard,
   Download,
   Eye,
   EyeOff,
@@ -81,7 +83,8 @@ type DashboardSection =
   | 'notifications'
   | 'payments'
   | 'coaching-coupons'
-  | 'reports';
+  | 'reports'
+  | 'financials';
 // | 'settings';
 
 const navItems: {
@@ -95,9 +98,11 @@ const navItems: {
   { id: 'coaching-coupons', label: 'Coaching & Coupons', icon: Building2 },
   { id: 'courses', label: 'Courses & Curriculum', icon: BookOpen },
   { id: 'enrollments', label: 'Enrollments', icon: GraduationCap },
-  { id: 'instructors', label: 'Instructors', icon: UserCheck },
+  //{ id: 'instructors', label: 'Instructors', icon: UserCheck },
   { id: 'notifications', label: 'Notifications', icon: Bell },
-  { id: 'payments', label: 'Financials & Payments', icon: CircleDollarSign },
+  { id: 'payments', label: 'Payments', icon: CreditCard },
+  { id: 'financials', label: 'Financials', icon: CircleDollarSign },
+
   { id: 'reports', label: 'Reports & Analytics', icon: Activity },
   // { id: 'settings', label: 'Platform Settings', icon: Settings },
 ];
@@ -416,7 +421,7 @@ export default function AdminDashboard() {
       });
     });
 
-    return activities.slice(0, 6);
+    return activities.slice(0, 5);
   }, [recentUsers, recentCourses]);
 
   const [chartData, setChartData] = useState<{ label: string; value: number }[]>([]);
@@ -749,7 +754,7 @@ export default function AdminDashboard() {
             </SimpleSection>
           )}
 
-          {activeSection === 'instructors' && (
+          {/* {activeSection === 'instructors' && (
             <SimpleSection
               title="Instructor Management"
               subtitle="Review instructor accounts, approval status and course activity."
@@ -760,17 +765,21 @@ export default function AdminDashboard() {
                 onUpdateUser={updateUser}
               />
             </SimpleSection>
-          )}
+          )} */}
           {activeSection === 'coaching-coupons' && (
             <Reveal delay={340} className="mt-6">
               <CoachingCouponManagement />{' '}
             </Reveal>
           )}
           {activeSection === 'notifications' && <NotificationComposer role="ADMIN" />}
-
           {activeSection === 'payments' && (
+            <Reveal delay={340}>
+              <PaymentHistory />
+            </Reveal>
+          )}
+          {activeSection === 'financials' && (
             <SimpleSection
-              title="Financials & Payments"
+              title="Financials"
               subtitle="Financial overview based on the course catalog currently available."
               icon={CircleDollarSign}
             >
@@ -841,10 +850,6 @@ export default function AdminDashboard() {
                   </div>
                 </div>
               </Reveal>
-
-              <Reveal delay={340} className="mt-6">
-                <PaymentHistory />
-              </Reveal>
             </SimpleSection>
           )}
 
@@ -862,47 +867,8 @@ export default function AdminDashboard() {
                     total={stats.totalEnrollments}
                   />
                 </Reveal>
-
                 <Reveal delay={140}>
-                  <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-                    <SectionTitle
-                      title="Platform distribution"
-                      subtitle="Current account and course mix."
-                    />
-
-                    <div className="mt-5 space-y-4">
-                      <ProgressRow
-                        label="Students"
-                        value={stats.totalStudents}
-                        total={Math.max(users.length, 1)}
-                        delay={200}
-                      />
-                      <ProgressRow
-                        label="Instructors"
-                        value={stats.totalInstructors}
-                        total={Math.max(users.length, 1)}
-                        delay={280}
-                      />
-                      <ProgressRow
-                        label="Admins"
-                        value={stats.totalAdmins}
-                        total={Math.max(users.length, 1)}
-                        delay={360}
-                      />
-                      <ProgressRow
-                        label="Published courses"
-                        value={stats.publishedCourses}
-                        total={Math.max(courses.length, 1)}
-                        delay={440}
-                      />
-                      <ProgressRow
-                        label="Draft courses"
-                        value={stats.draftCourses}
-                        total={Math.max(courses.length, 1)}
-                        delay={520}
-                      />
-                    </div>
-                  </div>
+                  <PlatformDistribution users={users} courses={courses} stats={stats} />
                 </Reveal>
               </div>
             </SimpleSection>
@@ -993,18 +959,10 @@ function Overview({
             <button
               type="button"
               onClick={onExport}
-              className="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600 transition hover:border-violet-200 hover:text-violet-700 active:scale-95"
+              className="inline-flex h-10 items-center gap-2 rounded-xl bg-violet-600 px-4 text-sm font-bold text-white shadow-lg shadow-violet-200 transition hover:bg-violet-700 active:scale-95"
             >
               <Download size={15} />
               Export CSV
-            </button>
-            <button
-              type="button"
-              onClick={() => onSection('users')}
-              className="inline-flex h-10 items-center gap-2 rounded-xl bg-violet-600 px-4 text-sm font-bold text-white shadow-lg shadow-violet-200 transition hover:bg-violet-700 active:scale-95"
-            >
-              <UserPlus size={15} />
-              Add New User
             </button>
           </div>
         </div>
@@ -1064,7 +1022,7 @@ function Overview({
         </Reveal>
       </div>
 
-      <div className="mb-5 grid gap-5 xl:grid-cols-[1.45fr_0.9fr]">
+      <div className="mb-5 grid gap-5 xl:grid-cols-[1.25fr_0.9fr]">
         <Reveal delay={340}>
           <EnrollmentChart
             chartData={chartData}
@@ -1074,8 +1032,8 @@ function Overview({
           />
         </Reveal>
 
-        <Reveal delay={400}>
-          <CategoryCard courses={courses} />
+        <Reveal delay={140}>
+          <PlatformDistribution users={users} courses={courses} stats={stats} />
         </Reveal>
       </div>
 
@@ -1100,7 +1058,7 @@ function Overview({
         </Reveal>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr_0.8fr]">
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1.2fr_0.8fr_0.8fr]">
         <Reveal delay={540}>
           <ActivityFeed activities={activityFeed} />
         </Reveal>
@@ -2442,30 +2400,194 @@ function InstructorGrid({
   );
 }
 
-function ProgressRow({
-  label,
-  value,
-  total,
-  delay = 0,
+function PlatformDistribution({
+  users,
+  courses,
+  stats,
 }: {
-  label: string;
-  value: number;
-  total: number;
-  delay?: number;
+  users: User[];
+  courses: Course[];
+  stats: {
+    totalStudents: number;
+    totalInstructors: number;
+    totalAdmins: number;
+    publishedCourses: number;
+    draftCourses: number;
+  };
 }) {
-  const percent = Math.min(100, Math.round((value / total) * 100));
+  const totalUsers = users.length;
+
+  const roles = [
+    {
+      label: 'Students',
+      value: stats.totalStudents,
+      color: '#7409E9',
+      dot: 'bg-[#7409E9]',
+    },
+    {
+      label: 'Instructors',
+      value: stats.totalInstructors,
+      color: '#9333EA',
+      dot: 'bg-[#9333EA]',
+    },
+    {
+      label: 'Admins',
+      value: stats.totalAdmins,
+      color: '#C084FC',
+      dot: 'bg-[#C084FC]',
+    },
+  ];
+
+  const published = stats.publishedCourses;
+  const drafts = stats.draftCourses;
+  const totalCourses = published + drafts;
+
+  const getPercentage = (value: number, total: number) =>
+    total > 0 ? Math.round((value / total) * 100) : 0;
+
+  let currentAngle = 0;
+
+  const segments = roles.map(item => {
+    const start = currentAngle;
+    currentAngle += (item.value / Math.max(totalUsers, 1)) * 360;
+
+    return `${item.color} ${start}deg ${currentAngle}deg`;
+  });
+
+  const gradient = totalUsers
+    ? `conic-gradient(${segments.join(', ')})`
+    : 'conic-gradient(#e2e8f0 0deg 360deg)';
 
   return (
-    <div>
-      <div className="mb-2 flex items-center justify-between text-xs">
-        <span className="font-semibold text-slate-600">{label}</span>
-        <span className="font-bold text-slate-500">{value}</span>
-      </div>
-      <div className="h-2 overflow-hidden rounded-full bg-slate-100">
-        <div
-          className="ud-bar h-full rounded-full bg-violet-500"
-          style={{ width: `${percent}%`, animationDelay: `${delay}ms` }}
+    <div className="relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:p-5">
+      {/* Header */}
+      <div className="flex items-start justify-between">
+        <SectionTitle
+          title="Platform Distribution"
+          subtitle="Overview of your platform ecosystem."
         />
+
+        <div className="rounded-xl bg-violet-50 p-2.5 text-violet-600">
+          <ChartNoAxesCombined size={20} />
+        </div>
+      </div>
+
+      {/* User Distribution */}
+      <div className="mt-4 flex flex-col items-center gap-6 sm:flex-row">
+        {/* Donut Chart */}
+        <div className="ud-pop relative grid h-36 w-36 shrink-0 place-items-center">
+          {/* Outer Glow */}
+          <div className="absolute inset-2 rounded-full bg-violet-500/10 blur-xl" />
+
+          {/* Donut Ring */}
+          <div
+            className="absolute inset-0 rounded-full shadow-md shadow-violet-200/40"
+            style={{ background: gradient }}
+          />
+
+          {/* Inner Circle */}
+          <div className="absolute inset-[17px] grid place-items-center rounded-full bg-white">
+            <div className="flex h-full w-full flex-col items-center justify-center rounded-full bg-gradient-to-br from-violet-50 via-white to-purple-50 text-center">
+              <span className="mb-0.5 text-[8px] font-extrabold tracking-[0.16em] text-violet-500 uppercase">
+                UpSkills
+              </span>
+
+              <div className="text-2xl font-black tracking-tight text-slate-900 tabular-nums">
+                <AnimatedNumber value={totalUsers} />
+              </div>
+
+              <div className="mt-0.5 text-[9px] font-bold tracking-wider text-slate-400 uppercase">
+                Total Users
+              </div>
+
+              <div className="mt-1.5 h-1 w-7 rounded-full bg-gradient-to-r from-[#7409E9] to-[#C084FC]" />
+            </div>
+          </div>
+        </div>
+
+        {/* User Legend */}
+        <div className="w-full space-y-3">
+          {roles.map((item, i) => (
+            <div
+              key={item.label}
+              style={{ animationDelay: `${300 + i * 80}ms` }}
+              className="ud-slide"
+            >
+              <div className="flex items-center justify-between gap-3 text-xs">
+                <span className="flex items-center gap-2 font-semibold text-slate-600">
+                  <span className={`h-2 w-2 rounded-full ${item.dot}`} />
+                  {item.label}
+                </span>
+
+                <span className="font-bold text-slate-800 tabular-nums">
+                  {item.value.toLocaleString('en-IN')}
+                </span>
+              </div>
+
+              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-100">
+                <div
+                  className="h-full rounded-full transition-all duration-1000"
+                  style={{
+                    width: `${getPercentage(item.value, totalUsers)}%`,
+                    backgroundColor: item.color,
+                  }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Course Distribution */}
+      <div className="mt-4 rounded-2xl bg-slate-50 p-3.5">
+        {/* Header */}
+        <div className="mb-3 flex items-center justify-between">
+          <div>
+            <h4 className="text-sm font-extrabold text-slate-800">Course Distribution</h4>
+            <p className="mt-0.5 text-[10px] text-slate-400">Published vs Draft</p>
+          </div>
+
+          <div className="rounded-lg bg-white px-2.5 py-1 shadow-sm">
+            <span className="text-md font-black text-slate-800">{totalCourses}</span>
+            <span className="ml-1 text-[12px] font-bold text-slate-400">Total</span>
+          </div>
+        </div>
+
+        {/* Segmented Progress */}
+        <div className="flex h-2 overflow-hidden rounded-full bg-slate-200">
+          {totalCourses > 0 && (
+            <>
+              <div
+                className="rounded-l-full bg-[#7409E9] transition-all duration-1000"
+                style={{
+                  width: `${(published / totalCourses) * 100}%`,
+                }}
+              />
+
+              <div
+                className="rounded-r-full bg-amber-400 transition-all duration-1000"
+                style={{
+                  width: `${(drafts / totalCourses) * 100}%`,
+                }}
+              />
+            </>
+          )}
+        </div>
+
+        {/* Single Line Stats */}
+        <div className="mt-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-[#7409E9]" />
+            <span className="text-xs font-semibold text-slate-500">Published</span>
+            <span className="text-sm font-black text-slate-800">{published}</span>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-amber-400" />
+            <span className="text-xs font-semibold text-slate-500">Draft</span>
+            <span className="text-sm font-black text-slate-800">{drafts}</span>
+          </div>
+        </div>
       </div>
     </div>
   );

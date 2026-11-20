@@ -34,6 +34,8 @@ export async function GET(req: NextRequest) {
         paidAt: true,
         createdAt: true,
         updatedAt: true,
+        originalAmount: true,
+        discountAmount: true,
 
         user: {
           select: {
@@ -47,6 +49,21 @@ export async function GET(req: NextRequest) {
           select: {
             id: true,
             title: true,
+          },
+        },
+
+        coupon: {
+          select: {
+            id: true,
+            code: true,
+          },
+        },
+
+        coaching: {
+          select: {
+            id: true,
+            name: true,
+            code: true,
           },
         },
       },

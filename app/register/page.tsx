@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import {
   ArrowLeft,
@@ -28,6 +28,7 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const searchParams = useSearchParams();
 
   const [signUpData, setSignUpData] = useState({
     name: '',
@@ -82,7 +83,13 @@ export default function Register() {
 
       if (data.success) {
         toast.success(data.message || 'Registered successfully!');
-        router.push('/login');
+        const callbackUrl = searchParams.get('callbackUrl');
+
+        const loginUrl = callbackUrl
+          ? `/login?callbackUrl=${encodeURIComponent(callbackUrl)}`
+          : '/login';
+
+        router.replace(loginUrl);
       } else {
         setErrorMessage(data.message || 'Registration failed');
       }

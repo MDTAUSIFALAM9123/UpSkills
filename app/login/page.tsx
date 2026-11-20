@@ -19,10 +19,11 @@ import {
   Sparkles,
   Users,
 } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 
 export default function Login() {
   const router = useRouter();
-
+  const searchParams = useSearchParams();
   const [errorMessage, setErrorMessage] = useState('');
   const [loginData, setLoginData] = useState({
     email: '',
@@ -66,7 +67,12 @@ export default function Login() {
       const data = await res.json();
 
       if (data.success) {
-        router.back();
+        const callbackUrl = searchParams.get('callbackUrl');
+
+        const safeUrl =
+          callbackUrl?.startsWith('/') && !callbackUrl.startsWith('//') ? callbackUrl : '/';
+
+        router.replace(safeUrl);
       } else {
         setErrorMessage(data.message || 'Invalid credentials');
       }
@@ -304,7 +310,14 @@ export default function Login() {
 
               <p className="mt-4 text-center text-sm text-gray-500">
                 Don&apos;t have an account?{' '}
-                <Link href="/register" className="font-bold text-purple-700 hover:underline">
+                <Link
+                  href={`/register${
+                    searchParams.get('callbackUrl')
+                      ? `?callbackUrl=${encodeURIComponent(searchParams.get('callbackUrl')!)}`
+                      : ''
+                  }`}
+                  className="font-bold text-purple-700 hover:underline"
+                >
                   Sign Up
                 </Link>
               </p>

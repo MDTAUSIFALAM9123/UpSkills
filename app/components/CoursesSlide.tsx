@@ -60,8 +60,8 @@ export default function CoursesSlide() {
             {/* Desktop Loading */}
             <div className="hidden gap-4 overflow-x-auto px-1 pb-6 sm:flex sm:[&::-webkit-scrollbar]:hidden">
               {[...Array(5)].map((_, index) => (
-                <div key={index} className="w-[226px] min-w-[226px] shrink-0 animate-pulse">
-                  <div className="h-48 rounded-xl bg-gray-200" />
+                <div key={index} className="w-[276px] min-w-[276px] shrink-0 animate-pulse">
+                  <div className="h-54 rounded-xl bg-gray-200" />
 
                   <div className="mt-3 h-4 w-3/4 rounded bg-gray-200" />
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, usePathname, useRouter } from 'next/navigation';
 import Navroute from '@/app/components/Navroute';
 import toast from 'react-hot-toast';
 import {
@@ -137,7 +137,7 @@ export default function CourseDetailsPage() {
   const params = useParams<{ id: string }>();
   const courseId = Array.isArray(params?.id) ? params.id[0] : params?.id;
   const router = useRouter();
-
+  const pathname = usePathname();
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'content' | 'description' | 'reviews'>('content');
@@ -239,8 +239,8 @@ export default function CourseDetailsPage() {
       });
 
       if (!response.ok) {
-        toast.error('Please log in to enroll.');
-        router.push('/login');
+        toast.error('Please login to enroll.');
+        router.replace(`/login?callbackUrl=${encodeURIComponent(pathname)}`);
         return;
       }
 

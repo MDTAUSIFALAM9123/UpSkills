@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import {
   ArrowLeft,
@@ -28,7 +28,6 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const searchParams = useSearchParams();
 
   const [signUpData, setSignUpData] = useState({
     name: '',
@@ -44,6 +43,14 @@ export default function Register() {
       ...prev,
       [name]: value,
     }));
+  };
+  const getCallbackUrl = () => {
+    if (typeof window === 'undefined') return null;
+
+    const params = new URLSearchParams(window.location.search);
+    const callbackUrl = params.get('callbackUrl');
+
+    return callbackUrl?.startsWith('/') && !callbackUrl.startsWith('//') ? callbackUrl : null;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -83,7 +90,8 @@ export default function Register() {
 
       if (data.success) {
         toast.success(data.message || 'Registered successfully!');
-        const callbackUrl = searchParams.get('callbackUrl');
+
+        const callbackUrl = getCallbackUrl();
 
         const loginUrl = callbackUrl
           ? `/login?callbackUrl=${encodeURIComponent(callbackUrl)}`
@@ -236,7 +244,14 @@ export default function Register() {
 
                 <p className="text-sm text-gray-500">
                   Already have an account?{' '}
-                  <Link href="/login" className="font-semibold text-purple-700 hover:underline">
+                  <Link
+                    href={`/login${
+                      getCallbackUrl()
+                        ? `?callbackUrl=${encodeURIComponent(getCallbackUrl()!)}`
+                        : ''
+                    }`}
+                    className="font-semibold text-purple-700 hover:underline"
+                  >
                     Sign In
                   </Link>
                 </p>

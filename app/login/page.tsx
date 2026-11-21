@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
 import {
   ArrowLeft,
   ArrowRight,
@@ -19,11 +18,10 @@ import {
   Sparkles,
   Users,
 } from 'lucide-react';
-import { useSearchParams } from 'next/navigation';
 
 export default function Login() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+
   const [errorMessage, setErrorMessage] = useState('');
   const [loginData, setLoginData] = useState({
     email: '',
@@ -39,6 +37,15 @@ export default function Login() {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const getCallbackUrl = () => {
+    if (typeof window === 'undefined') return '/';
+
+    const params = new URLSearchParams(window.location.search);
+    const callbackUrl = params.get('callbackUrl');
+
+    return callbackUrl?.startsWith('/') && !callbackUrl.startsWith('//') ? callbackUrl : '/';
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -67,12 +74,7 @@ export default function Login() {
       const data = await res.json();
 
       if (data.success) {
-        const callbackUrl = searchParams.get('callbackUrl');
-
-        const safeUrl =
-          callbackUrl?.startsWith('/') && !callbackUrl.startsWith('//') ? callbackUrl : '/';
-
-        router.replace(safeUrl);
+        router.replace(getCallbackUrl());
       } else {
         setErrorMessage(data.message || 'Invalid credentials');
       }
@@ -312,8 +314,8 @@ export default function Login() {
                 Don&apos;t have an account?{' '}
                 <Link
                   href={`/register${
-                    searchParams.get('callbackUrl')
-                      ? `?callbackUrl=${encodeURIComponent(searchParams.get('callbackUrl')!)}`
+                    getCallbackUrl() !== '/'
+                      ? `?callbackUrl=${encodeURIComponent(getCallbackUrl())}`
                       : ''
                   }`}
                   className="font-bold text-purple-700 hover:underline"

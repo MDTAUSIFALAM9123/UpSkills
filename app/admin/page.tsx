@@ -1439,7 +1439,7 @@ function EnrollmentChart({ chartData, maxChart, total, dateRange = 'Last 15 Days
 
           <div className="absolute inset-x-0 top-2 bottom-0 flex items-end gap-1 px-1 sm:gap-2">
             {chartData.map((item: any, index: number) => {
-              const height = Math.max(10, (item.value / maxChart) * 92);
+              const height = Math.max(5, (item.value / maxChart) * 92);
 
               return (
                 <div key={index} className="group relative flex h-full flex-1 items-end">
@@ -1460,7 +1460,7 @@ function EnrollmentChart({ chartData, maxChart, total, dateRange = 'Last 15 Days
           {chartData.map((item: any, index: number) => (
             <span key={index} className={index % 2 ? 'hidden sm:block' : ''}>
               {new Date(`${item.label}T12:00:00`).toLocaleDateString('en-IN', {
-                day: 'numeric',
+                day: '2-digit',
                 month: 'short',
               })}
             </span>

@@ -370,7 +370,7 @@ export default function Register() {
                       pattern="[0-9]{10}"
                       inputMode="numeric"
                       maxLength={10}
-                      placeholder="98765 43210"
+                      placeholder="e.g. 9876543210"
                       className="text-md h-11 w-full rounded-xl border border-transparent bg-gray-100 pr-4 pl-10 text-gray-800 transition outline-none placeholder:text-gray-400 focus:border-purple-400 focus:bg-white focus:ring-4 focus:ring-purple-100"
                       required
                     />

@@ -754,7 +754,7 @@ export default function CoachingCouponManagement() {
                 <FormField
                   label="Phone"
                   value={coachingForm.phone}
-                  placeholder="9876543210"
+                  placeholder="e.g. 9876543210"
                   onChange={value =>
                     setCoachingForm(prev => ({
                       ...prev,

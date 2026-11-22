@@ -1397,7 +1397,7 @@ function StatCard({ label, value, helper, icon: Icon, trend, trendUp, tone }: an
         {label}
       </div>
 
-      <div className="mt-3 text-xs text-slate-400">{helper}</div>
+      <div className="mt-2 text-xs text-slate-400">{helper}</div>
     </div>
   );
 }

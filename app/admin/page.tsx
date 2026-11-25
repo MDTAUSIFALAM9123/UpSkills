@@ -210,6 +210,7 @@ export default function AdminDashboard() {
 
   const [dateRange, setDateRange] = useState('Last 15 Days');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [exportingDatabase, setExportingDatabase] = useState(false);
 
   useEffect(() => {
     const init = async () => {
@@ -500,6 +501,53 @@ export default function AdminDashboard() {
     setActiveSection(section);
     setSidebarOpen(false);
   };
+  const handleDatabaseExport = async () => {
+    if (exportingDatabase) return;
+
+    try {
+      setExportingDatabase(true);
+
+      const res = await fetch('/api/admin/database-export', {
+        method: 'GET',
+        credentials: 'include',
+        cache: 'no-store',
+      });
+
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({}));
+        throw new Error(error.message || 'Database backup failed');
+      }
+
+      const blob = await res.blob();
+
+      // Get filename from API response
+      const disposition = res.headers.get('Content-Disposition');
+      const match = disposition?.match(/filename="?([^"]+)"?/i);
+
+      const fileName = match?.[1] || 'upskills-database-backup.json';
+
+      // Download JSON file
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+
+      link.href = url;
+      link.download = fileName;
+
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      URL.revokeObjectURL(url);
+
+      toast.success('Full database backup downloaded!');
+    } catch (error) {
+      console.error(error);
+
+      toast.error(error instanceof Error ? error.message : 'Database backup failed');
+    } finally {
+      setExportingDatabase(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#f7f8fc] text-slate-900">
@@ -686,6 +734,8 @@ export default function AdminDashboard() {
               editingPrice={editingPrice}
               setEditingPrice={setEditingPrice}
               savePrice={savePrice}
+              onDatabaseExport={handleDatabaseExport}
+              exportingDatabase={exportingDatabase}
             />
           )}
 
@@ -939,6 +989,8 @@ function Overview({
   editingPrice,
   setEditingPrice,
   savePrice,
+  onDatabaseExport,
+  exportingDatabase,
 }: any) {
   return (
     <>
@@ -956,6 +1008,16 @@ function Overview({
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={onDatabaseExport}
+              disabled={exportingDatabase}
+              className="inline-flex h-10 items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 text-sm font-bold text-emerald-700 shadow-sm transition hover:bg-emerald-100 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <Download size={16} className={exportingDatabase ? 'animate-bounce' : ''} />
+
+              {exportingDatabase ? 'Creating Backup...' : 'Full Database JSON'}
+            </button>
             <button
               type="button"
               onClick={onExport}

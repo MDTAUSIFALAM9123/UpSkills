@@ -79,7 +79,7 @@ export default function FloatingContact() {
         onClick={() => setIsOpen(!isOpen)}
         aria-label={isOpen ? 'Close contact options' : 'Open contact options'}
         aria-expanded={isOpen}
-        className="group flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#8B5CF6] to-[#6D28D9] text-white shadow-lg shadow-purple-600/40 transition-all duration-300 hover:scale-110 hover:shadow-purple-600/60 active:scale-95"
+        className="group flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-violet-700 to-purple-600 text-white shadow-lg shadow-purple-600/40 transition-all duration-300 hover:scale-110 hover:shadow-purple-600/60 active:scale-95"
       >
         {isOpen ? (
           <X size={28} className="transition-transform duration-300" />

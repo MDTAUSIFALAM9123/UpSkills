@@ -425,11 +425,17 @@ export default function Register() {
 
                 <span className="text-sm leading-5 text-gray-500">
                   I agree to the{' '}
-                  <Link href="#" className="font-medium text-purple-700 hover:underline">
+                  <Link
+                    href="/terms-and-conditions"
+                    className="font-medium text-purple-700 hover:underline"
+                  >
                     Terms of Service
                   </Link>{' '}
                   and{' '}
-                  <Link href="#" className="font-medium text-purple-700 hover:underline">
+                  <Link
+                    href="/privacy-policy?"
+                    className="font-medium text-purple-700 hover:underline"
+                  >
                     Privacy Policy
                   </Link>
                   .
@@ -469,7 +475,7 @@ export default function Register() {
                   <Linkedin size={17} />
                 </SocialButton>
 
-                <SocialButton href="https://www.instagram.com/">
+                <SocialButton href="https://www.instagram.com/upskills854?utm_source=ig_web_button_share_sheet&bqrl=ZDNlZDc0MzIxNw==">
                   <Instagram size={17} />
                 </SocialButton>
 

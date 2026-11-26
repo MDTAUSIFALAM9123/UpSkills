@@ -1,4 +1,5 @@
 import { Rocket, ArrowRight } from 'lucide-react';
+import FAQSection from './FAQSection';
 
 const testimonials = [
   {
@@ -53,7 +54,7 @@ export default function ReviewsSection() {
 
               <span className="text-sm font-bold text-slate-900">4.5/5.0</span>
 
-              <span className="text-sm text-slate-400">(Based on 3265 ratings)</span>
+              <span className="text-sm text-slate-400">(Based on 50 ratings)</span>
             </div>
 
             <h2 className="text-3xl font-bold tracking-tight text-slate-900">
@@ -117,8 +118,10 @@ export default function ReviewsSection() {
         </div>
       </div>
 
+      <FAQSection />
+
       <div className="hidden w-full sm:block">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 lg:pt-12">
           <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-violet-800 via-violet-700 to-purple-600 p-8 text-white shadow-2xl sm:p-12 lg:p-16">
             {/* Glow */}
             <div className="pointer-events-none absolute -top-20 -right-20 h-80 w-80 rounded-full bg-teal-400/30 blur-3xl" />
@@ -181,7 +184,7 @@ export default function ReviewsSection() {
         </div>
       </div>
 
-      <div className="block px-4 py-0 sm:hidden sm:py-10">
+      <div className="block px-4 py-0 pt-4 sm:hidden sm:py-10">
         <div className="mx-auto w-full overflow-hidden rounded-2xl bg-gradient-to-br from-violet-700 to-purple-800 px-5 py-5 text-center shadow-lg">
           {/* Rocket Icon */}
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-purple-600/70">

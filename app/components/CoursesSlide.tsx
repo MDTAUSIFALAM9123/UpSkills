@@ -30,7 +30,7 @@ export default function CoursesSlide() {
   };
 
   return (
-    <section className="bg-white py-16">
+    <section id="courses" className="bg-white py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-10">
         {/* ================= SECTION HEADING ================= */}
         <div className="category-heading mb-10 text-center sm:mb-14">

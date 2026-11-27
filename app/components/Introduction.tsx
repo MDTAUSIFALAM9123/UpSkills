@@ -9,46 +9,78 @@ import {
   Search,
   SlidersHorizontal,
   Star,
+  Sparkles,
+  Play,
+  BookOpen,
+  TrendingUp,
+  CheckCircle2,
 } from 'lucide-react';
+
 import { useEffect, useRef, useState } from 'react';
 
 const stats = [
   {
-    value: '200+',
+    value: 200,
+    suffix: '+',
     title: 'Students',
     subtitle: 'Learning with us',
     icon: Users,
-    iconClass: 'bg-blue-100 text-blue-600',
+    color: 'from-blue-500 to-cyan-500',
+    bg: 'bg-blue-50',
+    iconColor: 'text-blue-600',
   },
   {
-    value: '50+',
+    value: 50,
+    suffix: '+',
     title: 'Courses',
     subtitle: 'Industry focused',
     icon: GraduationCap,
-    iconClass: 'bg-purple-100 text-purple-600',
+    color: 'from-purple-500 to-violet-500',
+    bg: 'bg-purple-50',
+    iconColor: 'text-purple-600',
   },
   {
-    value: '100+',
-    title: 'Online videos',
-    subtitle: 'HANDS-ON LEARNING',
+    value: 100,
+    suffix: '+',
+    title: 'Online Videos',
+    subtitle: 'Hands-on learning',
     icon: Briefcase,
-    iconClass: 'bg-green-100 text-green-600',
+    color: 'from-emerald-500 to-teal-500',
+    bg: 'bg-emerald-50',
+    iconColor: 'text-emerald-600',
   },
   {
-    value: '4.9/5',
+    value: 4.9,
+    suffix: '/5',
     title: 'Student Rating',
     subtitle: 'Trusted by learners',
     icon: Award,
-    iconClass: 'bg-orange-100 text-orange-600',
+    color: 'from-orange-500 to-amber-500',
+    bg: 'bg-orange-50',
+    iconColor: 'text-orange-600',
   },
 ];
+
+const texts = [
+  'Data Science',
+  'Programming',
+  'Web Development',
+  'UI / UX Design',
+  'Business',
+  'Cloud Computing',
+  'Cyber Security',
+  'AI',
+];
+
 export default function Introduction() {
   const [currentText, setCurrentText] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
-
   const [counts, setCounts] = useState([0, 0, 0, 0]);
   const [isActive, setIsActive] = useState(false);
+
   const statsRef = useRef<HTMLDivElement>(null);
+
+  // ================= STATS OBSERVER =================
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -58,9 +90,7 @@ export default function Introduction() {
           observer.disconnect();
         }
       },
-      {
-        threshold: 0.3,
-      }
+      { threshold: 0.2 }
     );
 
     if (statsRef.current) {
@@ -70,6 +100,8 @@ export default function Introduction() {
     return () => observer.disconnect();
   }, []);
 
+  // ================= COUNTER ANIMATION =================
+
   useEffect(() => {
     if (!isActive) return;
 
@@ -77,7 +109,7 @@ export default function Introduction() {
     const duration = 2000;
     const startTime = performance.now();
 
-    let animationFrame: number;
+    let animationFrame = 0;
 
     const animate = (currentTime: number) => {
       const progress = Math.min((currentTime - startTime) / duration, 1);
@@ -96,32 +128,43 @@ export default function Introduction() {
     return () => cancelAnimationFrame(animationFrame);
   }, [isActive]);
 
-  const texts = [
-    'Data Science',
-    'Programming',
-    'Web Development',
-    'UI / UX Design',
-    'Business',
-    'Cloud Computing',
-    'Cyber Security',
-    'AI',
-  ];
+  // ================= TEXT ROTATION =================
 
   useEffect(() => {
     const interval = setInterval(() => {
       setIsVisible(false);
 
-      setTimeout(() => {
+      const timeout = setTimeout(() => {
         setCurrentText(prev => (prev + 1) % texts.length);
         setIsVisible(true);
       }, 300);
-    }, 2500);
+
+      return () => clearTimeout(timeout);
+    }, 2600);
 
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <section>
+    <section className="relative overflow-hidden bg-[#faf9ff]">
+      
+      {/* ================= BACKGROUND DECORATION ================= */}
+      <div className="pointer-events-none absolute inset-0 hidden overflow-hidden sm:block">
+        <div className="absolute -top-40 left-[-10%] h-[400px] w-[400px] rounded-full bg-purple-300/20 blur-[100px]" />
+
+        <div className="absolute top-20 right-[-10%] h-[450px] w-[450px] rounded-full bg-violet-300/20 blur-[110px]" />
+
+        <div className="absolute bottom-0 left-1/2 h-[300px] w-[600px] -translate-x-1/2 rounded-full bg-indigo-200/20 blur-[100px]" />
+
+        <div
+          className="absolute inset-0 opacity-[0.025]"
+          style={{
+            backgroundImage: 'radial-gradient(#6d28d9 1px, transparent 1px)',
+            backgroundSize: '28px 28px',
+          }}
+        />
+      </div>
+
       {/* ================= MOBILE HERO ================= */}
       <div className="block bg-gradient-to-tr from-purple-200/50 via-violet-100/40 to-teal-100/30 px-4 pt-2 pb-2 sm:hidden">
         <div className="py-4">
@@ -221,7 +264,7 @@ export default function Introduction() {
           {/* Buttons */}
           <div className="grid grid-cols-2 gap-2">
             <a
-              href="#"
+              href="/register"
               className="flex items-center justify-center gap-1 rounded-lg bg-white px-3 py-3 text-xs font-bold text-violet-700 shadow-sm"
             >
               Start for Free
@@ -238,144 +281,279 @@ export default function Introduction() {
           </div>
         </div>
       </div>
-      {/* ================= DESKTOP HERO ================= */}
-      <div className="min-h-xl hidden bg-gradient-to-tr from-purple-200/50 via-violet-100/40 to-teal-100/30 py-2 sm:block">
-        <div className="flex flex-col items-center justify-center lg:flex-row">
-          {/* Left */}
-          <div className="mt-12 max-w-3xl flex-1 px-4 sm:px-16">
-            <div className="mb-4">
-              <div className="mb-6 flex flex-wrap items-center gap-3">
-                <span className="inline-flex items-center gap-2 rounded-full bg-amber-500/15 px-4 py-2 text-[11px] font-bold tracking-wider text-orange-700 uppercase">
-                  <span className="h-2 w-2 animate-pulse rounded-full bg-amber-500" />
-                  Top 1% Cohort Mentorship
+
+      {/* ================= HERO SECTION ================= */}
+      <div className="relative mx-auto hidden max-w-7xl px-8 py-12 sm:block sm:px-10 lg:py-14">
+        <div className="grid items-center gap-14 lg:grid-cols-2 lg:gap-10">
+
+          {/* ================= LEFT CONTENT ================= */}
+          <div className="relative z-10">
+            {/* Top Badge */}
+            <div className="mb-6 flex flex-wrap items-center gap-3">
+              <div className="inline-flex items-center gap-2 rounded-full border border-purple-200/70 bg-white/80 px-4 py-2 shadow-sm backdrop-blur-md">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-500 opacity-50" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-purple-600" />
                 </span>
 
-                <div className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-4 py-1 text-xs text-slate-600 shadow-sm">
-                  <span className="text-base text-amber-500">★</span>
-                  <span className="font-bold text-slate-900">4.9/5</span>
-                  <span className="text-slate-400">from 1,200+ reviews</span>
-                </div>
+                <span className="text-[11px] font-bold tracking-wide text-purple-700 sm:text-xs">
+                  TOP 1% COHORT MENTORSHIP
+                </span>
+
+                <Sparkles size={14} className="text-purple-500" />
               </div>
 
-              <h1 className="text-2xl font-bold text-gray-800 md:text-3xl">
-                <span className="block">Advance Your Career with</span>
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-orange-100 bg-white/80 px-3 py-2 shadow-sm backdrop-blur-md">
+                <Star size={15} fill="currentColor" className="text-amber-400" />
+                <span className="text-xs font-bold text-slate-800">4.9/5</span>
+                <span className="hidden text-[11px] text-slate-400 sm:inline">Student Rating</span>
+              </div>
+            </div>
 
-                <span
-                  className={`mt-2 block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text font-bold text-transparent transition-all duration-300 ${
-                    isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-                  }`}
-                >
-                  {texts[currentText]}
+            {/* Main Heading */}
+
+            <div className="mb-5">
+              <h1 className="text-4xl leading-[1.15] font-extrabold tracking-[-1.5px] text-slate-900 sm:leading-[1.13]">
+                Advance Your Career
+                <span className="mt-1 block text-slate-900">
+                  with
+                  <span
+                    className={`ml-2 inline-block bg-gradient-to-r from-violet-700 via-purple-600 to-indigo-600 bg-clip-text text-transparent transition-all duration-300 ${
+                      isVisible ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'
+                    }`}
+                  >
+                    {texts[currentText]}
+                  </span>
                 </span>
               </h1>
+
+              <div className="mt-5 flex items-center gap-2">
+                <div className="h-1.5 w-12 rounded-full bg-purple-700" />
+                <div className="h-1.5 w-5 rounded-full bg-purple-300" />
+                <div className="h-1.5 w-2 rounded-full bg-purple-200" />
+              </div>
             </div>
 
-            <div className="mb-4">
-              <h2 className="mb-2 text-xl font-semibold text-gray-800 md:text-2xl">
-                Join the{' '}
-                <span className="rounded-full bg-orange-100 px-3 py-1 text-lg text-orange-600">
-                  Top 1%
-                </span>{' '}
-                Today
-              </h2>
+            {/* Description */}
 
-              <p className="max-w-xl text-base leading-7 text-slate-600 sm:text-lg">
-                Master coding skills with curated resources and expert guidance — Learn the skills
-                that set you apart and join the Top 1% of coding achievers!
-              </p>
+            <p className="mb-6 max-w-xl text-sm leading-7 text-slate-600 sm:text-base sm:leading-8">
+              Learn in-demand skills with curated courses, practical projects and expert mentorship.
+              Build your knowledge, unlock new opportunities and take the next step in your career.
+            </p>
+
+            {/* Feature Points */}
+
+            <div className="mb-8 grid grid-cols-2 gap-x-4 gap-y-3 sm:flex sm:flex-wrap sm:gap-x-6">
+              {[
+                'Career Development',
+                'Project-Based Learning',
+                'Latest Technologies',
+                'Professional Skills',
+              ].map(item => (
+                <div
+                  key={item}
+                  className="flex items-center gap-2 text-xs font-semibold text-slate-700 sm:text-sm"
+                >
+                  <CheckCircle2 size={17} className="shrink-0 text-purple-600" />
+                  {item}
+                </div>
+              ))}
             </div>
 
-            <div className="mb-12 flex flex-col gap-4 sm:flex-row">
+            {/* CTA Buttons */}
+
+            <div className="flex flex-col gap-3 sm:flex-row">
               <a
                 href="/register"
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-violet-700 to-purple-600 px-8 py-3.5 text-sm font-semibold text-white shadow-md transition hover:shadow-lg"
+                className="group inline-flex items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-violet-700 to-purple-600 px-7 py-3.5 text-sm font-bold text-white shadow-[0_8px_25px_rgba(109,40,217,0.25)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(109,40,217,0.35)]"
               >
                 Start for Free
-                <ArrowRight size={20} />
+                <ArrowRight
+                  size={19}
+                  className="transition-transform duration-300 group-hover:translate-x-1"
+                />
               </a>
 
               <a
-                href="#"
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-8 py-3.5 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50"
+                href="#courses"
+                className="group inline-flex items-center justify-center gap-3 rounded-xl border border-purple-100 bg-white px-7 py-3.5 text-sm font-bold text-slate-800 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-purple-300 hover:bg-purple-50 hover:text-purple-700"
               >
-                Explore Plus
-                <Award size={20} className="text-gray-500" />
+                <BookOpen size={19} />
+                Explore Courses
               </a>
             </div>
           </div>
 
-          {/* Right Image */}
-          <div className="relative flex justify-center lg:justify-end">
-            {/* Decorative Line */}
-            <div className="animate-float-slow absolute top-5 left-4 z-10 text-3xl text-cyan-300">
-              ⎯
+          {/* ================= RIGHT IMAGE ================= */}
+
+          <div className="relative mx-auto w-full max-w-[800px]">
+            {/* Image Background */}
+
+            <div className="absolute inset-8 rounded-full bg-gradient-to-br from-purple-400/50 via-violet-400/40 to-indigo-400/40 blur-[65px]" />
+
+            {/* Main Image Container */}
+
+            <div className="relative overflow-hidden rounded-3xl border border-white/80 bg-gradient-to-br from-[#eee8ff] via-[#f4efff] to-[#e8e9ff] p-3 shadow-[0_25px_70px_rgba(76,29,149,0.12)] sm:rounded-[40px] sm:p-5">
+              {/* Decorative Elements */}
+
+              <div className="absolute right-10 bottom-20 h-4 w-4 rounded-full bg-pink-400" />
+
+              <div className="absolute bottom-10 left-10 h-16 w-16 rounded-full bg-purple-300/20 blur-xl" />
+
+              {/* Image */}
+
+              <div className="relative z-10">
+                <img
+                  src="/image.png"
+                  alt="Learn new skills with UpSkills"
+                  className="mx-auto w-full rounded-3xl object-contain object-bottom"
+                />
+              </div>
+
+              {/* Bottom Image Label */}
+
+              <div className="absolute right-5 bottom-4 left-5 z-20 flex items-center justify-between rounded-xl border border-white/70 bg-white/80 px-4 py-2.5 shadow-lg backdrop-blur-xl sm:right-8 sm:bottom-7 sm:left-8">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-100 text-purple-700">
+                    <GraduationCap size={22} />
+                  </div>
+
+                  <div>
+                    <p className="text-xs font-bold text-slate-900 sm:text-sm">
+                      Learn Without Limits
+                    </p>
+
+                    <p className="text-[10px] text-slate-500 sm:text-xs">
+                      Build skills for your future
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-purple-600 text-white shadow-md">
+                  <ArrowRight size={17} />
+                </div>
+              </div>
             </div>
 
-            {/* Pink Circle */}
-            <div className="animate-float absolute top-4 right-4 z-10 h-10 w-10 rounded-full bg-pink-300 opacity-90" />
+            {/* Floating Live Mentorship Card */}
 
-            {/* Image */}
-            <div className="w-full max-w-lg px-4 sm:px-0">
-              <img
-                src="/image.png"
-                alt="Learning illustration"
-                className="h-auto w-full rounded-2xl object-cover"
-              />
+            <div className="animate-float-slow absolute -top-4 left-2 z-30 flex items-center gap-3 rounded-xl border border-white bg-white px-3 py-2 shadow-[0_10px_30px_rgba(15,23,42,0.10)] sm:-left-7 sm:px-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                <Users size={21} />
+              </div>
+
+              <div>
+                <p className="text-xs font-bold text-slate-800">Live Mentorship</p>
+
+                <div className="mt-1 flex items-center gap-1.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+
+                  <span className="text-[10px] font-medium text-slate-500">Learn with experts</span>
+                </div>
+              </div>
             </div>
 
-            {/* Live Mentorship Badge */}
-            <div className="animate-float-slow text-md absolute top-3 left-3 z-20 inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1 font-semibold text-gray-700 shadow-md">
-              <span className="h-3 w-3 rounded-full bg-emerald-400" />
-              Live Mentorship
+            {/* Floating Progress Card */}
+
+            <div className="animate-float absolute right-10 -bottom-5 z-30 flex items-center gap-3 rounded-xl border border-white bg-white px-4 py-2 shadow-[0_10px_30px_rgba(15,23,42,0.10)] sm:-right-7 sm:bottom-[-30]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
+                <TrendingUp size={22} />
+              </div>
+
+              <div>
+                <p className="text-sm font-extrabold text-slate-900">Keep Growing</p>
+
+                <p className="text-[10px] font-medium text-slate-500">Your journey starts here</p>
+              </div>
             </div>
 
-            {/* Transition Rate Badge */}
-            <div className="animate-float-slow text-md absolute right-3 bottom-3 z-20 flex items-center gap-1 rounded-md bg-white px-2.5 py-1.5 font-semibold text-gray-700 shadow-md">
-              <span className="text-emerald-500">↗</span>
-              98% Transition Rate
+            {/* Small Floating Badge */}
+
+            <div className="animate-float-slow absolute top-[40%] -right-2 z-20 hidden h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 text-white shadow-xl sm:flex">
+              <Sparkles size={23} />
             </div>
           </div>
         </div>
       </div>
 
-      {/* ================= STATS ================= */}
-      <div className="w-full bg-white py-10 shadow-[0_1px_4px_rgba(0,0,0,0.03)]">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-6 text-center">
-            <h2 className="text-2xl font-bold text-slate-900">Our Journey in Numbers</h2>
+      {/* ================= STATS SECTION ================= */}
 
-            <p className="mt-1 text-sm text-slate-400">
-              Accelerating careers across high-growth technology industries
+      <div className="relative z-10 border-t border-purple-100/70 bg-white py-10 sm:py-14">
+        <div className="mx-auto max-w-7xl px-6 sm:px-8">
+          {/* Stats Heading */}
+
+          <div className="mb-8 text-center sm:mb-10">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-purple-50 px-4 py-1.5 text-[10px] font-bold tracking-wider text-purple-700 sm:text-xs">
+              <Sparkles size={13} />
+              OUR ACHIEVEMENTS
+            </div>
+
+            <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
+              Our Journey in{' '}
+              <span className="bg-gradient-to-r from-violet-700 to-purple-500 bg-clip-text text-transparent">
+                Numbers
+              </span>
+            </h2>
+
+            <p className="mx-auto mt-2 max-w-lg text-xs leading-6 text-slate-500 sm:text-sm">
+              Accelerating careers through quality education, practical learning and
+              industry-focused skills.
             </p>
           </div>
+
+          {/* Stats Cards */}
 
           <div ref={statsRef} className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:gap-6">
             {stats.map((stat, index) => {
               const Icon = stat.icon;
 
-              const value =
-                index === 3 ? `${counts[index].toFixed(1)}/5` : `${Math.floor(counts[index])}+`;
+              const value = index === 3 ? counts[index].toFixed(1) : Math.floor(counts[index]);
 
               return (
                 <div
                   key={stat.title}
-                  className="flex flex-col items-center rounded-xl bg-[#faf8ff] p-4 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+                  className="group relative overflow-hidden rounded-2xl border border-slate-100 bg-gradient-to-br from-white to-[#faf8ff] p-4 text-center shadow-[0_4px_20px_rgba(15,23,42,0.04)] transition-all duration-300 hover:-translate-y-2 hover:border-purple-200 hover:shadow-[0_15px_35px_rgba(109,40,217,0.10)] sm:p-6"
                 >
+                  {/* Decorative Circle */}
+
+                  <div className="absolute -top-8 -right-8 h-24 w-24 rounded-full bg-purple-100/40 transition-transform duration-500 group-hover:scale-150" />
+
+                  {/* Icon */}
+
                   <div
-                    className={`mb-2 flex h-11 w-11 items-center justify-center rounded-full ${stat.iconClass}`}
+                    className={`relative mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl ${stat.bg} transition-transform duration-300 group-hover:scale-110 sm:h-14 sm:w-14`}
                   >
-                    <Icon size={22} strokeWidth={2} />
+                    <Icon size={25} strokeWidth={1.8} className={stat.iconColor} />
                   </div>
 
-                  <p className="text-3xl leading-tight font-extrabold text-slate-900 sm:text-4xl">
+                  {/* Number */}
+
+                  <div className="relative text-3xl leading-none font-extrabold tracking-tight text-slate-900 sm:text-4xl">
                     {value}
+                    <span
+                      className={`bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}
+                    >
+                      {stat.suffix}
+                    </span>
+                  </div>
+
+                  {/* Title */}
+
+                  <h3 className="relative mt-3 text-sm font-bold text-slate-800 sm:text-base">
+                    {stat.title}
+                  </h3>
+
+                  {/* Subtitle */}
+
+                  <p className="relative mt-1 text-[10px] font-medium tracking-wide text-slate-400 sm:text-xs">
+                    {stat.subtitle}
                   </p>
 
-                  <p className="mt-1 text-sm font-semibold text-slate-600">{stat.title}</p>
+                  {/* Bottom Accent */}
 
-                  <span className="mt-1 text-[11px] font-bold tracking-wider text-slate-400 uppercase">
-                    {stat.subtitle}
-                  </span>
+                  <div
+                    className={`mx-auto mt-4 h-1 w-8 rounded-full bg-gradient-to-r ${stat.color} transition-all duration-300 group-hover:w-16`}
+                  />
                 </div>
               );
             })}
